@@ -11,7 +11,6 @@ function CUST0020() {
   const [modalMessage, setModalMessage] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
-  const [searchContent, setSearchContent] = useState('');
   const [gridData, setGridData] = useState([]);
   
   // 페이지네이션 상태
@@ -39,7 +38,6 @@ function CUST0020() {
   // 검색 초기화
   const handleReset = () => {
     setItemName('');
-    setSearchContent('');
     setCurrentPage(1); // 페이지도 초기화
   };
 
@@ -76,7 +74,7 @@ function CUST0020() {
     } finally {
       setIsLoading(false);
     }
-  }, [itemName, searchContent]);
+  }, [itemName]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
