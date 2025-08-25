@@ -48,7 +48,7 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
       if (!globalState.G_USER_ID || !activeTopMenuCd) return;
       
       try {
-        const response = await fetch('http://localhost:3001/api/leftmenu', {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/leftmenu`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
