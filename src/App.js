@@ -51,7 +51,6 @@ const DynamicRouteComponent = () => {
 function App() {
   return (
     <AuthProvider>
-      <CommonCodeProvider>
         <MenuProvider>
           <BrowserRouter>
             <Routes>
@@ -83,7 +82,6 @@ function App() {
             />
           </BrowserRouter>
         </MenuProvider>
-      </CommonCodeProvider>
     </AuthProvider>
   );
 }
