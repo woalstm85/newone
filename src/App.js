@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { CommonCodeProvider } from './context/CommonCodeContext';
 import { MenuProvider } from './context/MenuContext';
 import Layout from './components/layout/Layout';
 import Login from './components/login/Login';

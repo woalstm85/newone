@@ -20,6 +20,8 @@ function CUST0020() {
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
 
+  
+
   // 페이지네이션 계산
   const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
     const startIdx = (currentPage - 1) * itemsPerPage;
