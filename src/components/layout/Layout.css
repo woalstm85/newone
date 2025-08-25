@@ -1,0 +1,133 @@
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 75px);  /* top-bar 높이만큼 뺌 */
+  margin-top: 75px;  /* top-bar 높이만큼 여백 */
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 240px;  /* left-menu-container 너비만큼 */
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 75px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  margin-left: 15px; /* 햄버거 메뉴 공간 확보 */
+ }
+
+.logo-section img {
+  height: 32px;
+}
+
+.logo-section span {
+  font-size: 16px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.menu-trigger {
+  display: none;
+  cursor: pointer;
+}
+
+.logout-btn {
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 8px;  /* 패딩 추가하여 호버 영역 확장 */
+  border-radius: 50%;  /* 원형 효과 */
+  transition: all 0.2s ease-in-out;  /* 부드러운 전환 효과 */
+}
+
+/* 호버 효과 */
+.logout-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);  /* 배경색 변경 */
+  transform: scale(1.1);  /* 살짝 확대 효과 */
+}
+
+.logout-btn:active {
+  transform: scale(0.95);  /* 클릭시 살짝 축소 효과 */
+}
+
+.logout-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.left-menu-container {
+  position: fixed;
+  left: 0;
+  top: 123px; /* top-bar + top-menu 높이 */
+  bottom: 0;
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  z-index: 91;
+}
+
+@media (max-width: 768px) {
+  .menu-trigger {
+    display: block;
+  }
+
+  .left-menu-container {
+    transform: translateX(-100%);
+    width: 80%;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    top: 123px; /* top-bar + top-menu 높이 */
+  }
+
+  .left-menu-container.active {
+    transform: translateX(0);
+  }
+
+  .menu-overlay.active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 89;
+  }
+
+  /*top 로고 정렬 */
+  .logo-section {
+    position: absolute;
+    left: 35%;
+    transform: translateX(-35%);
+  }  
+}

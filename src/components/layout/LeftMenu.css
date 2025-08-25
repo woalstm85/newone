@@ -1,0 +1,85 @@
+.user-info {
+display: flex;
+align-items: center;
+padding: 15px;
+border-bottom: 1px solid #e5e7eb;
+background-color: #f8fafc;
+}
+
+.user-info .user-icon {
+width: 24px;
+height: 24px;
+margin-right: 10px;
+}
+
+.user-info .welcome-text {
+font-size: 14px;
+color: #1f2937;
+}
+
+.menu-container {
+padding: 12px 8px;
+}
+
+.menu-category {
+  margin-bottom: 4px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.menu-item.expanded {
+  background-color: #ebf5ff;
+  color: #2563eb;
+}
+
+.menu-item .icon-wrapper {
+  display: flex;
+  align-items: center;
+  width: 24px;
+}
+
+.menu-item .menu-text {
+  flex: 1;
+  font-size: 14px;
+}
+
+.submenu-container {
+  margin-top: 4px;
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  margin-left: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.submenu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.submenu-item.active {
+  background-color: #ebf5ff;
+  color: #2563eb;
+}
+
+.submenu-item .icon-wrapper {
+  display: flex;
+  align-items: center;
+  width: 20px;
+}

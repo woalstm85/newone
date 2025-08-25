@@ -1,0 +1,110 @@
+.search-date-range-container {
+  width: 100%;
+}
+
+.search-date-range-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.search-date-range-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 320px;
+}
+
+.search-date-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.search-date-range-group label {
+  white-space: nowrap;
+  min-width: 70px;
+  font-weight: bold;
+}
+
+.search-date-range-group input[type="date"] {
+  padding: 4px 8px;
+  border: 1px solid #BFBFBF;
+  border-radius: 4px;
+  width: 120px;
+}
+
+.search-date-range-separator {
+  margin: 0 4px;
+  white-space: nowrap;
+}
+
+.search-date-range-quick-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.search-date-range-quick-buttons button {
+  padding: 4px 12px;
+  border: 1px solid #BFBFBF;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.search-date-range-quick-buttons button:hover {
+  background: #f0f0f0;
+}
+
+.search-date-range-children {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .search-date-range-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .search-date-range-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: unset;
+  }
+
+  .search-date-range-inputs {
+    width: 100%;
+  }
+
+  .search-date-range-group input[type="date"] {
+    flex: 1;
+  }
+
+  .search-date-range-quick-buttons {
+    display: grid;  /* flex에서 grid로 변경 */
+    grid-template-columns: repeat(4, 1fr);  /* 4개의 동일한 크기 칼럼 */
+    gap: 4px;  /* 간격 줄임 */
+    width: 100%;
+  }
+
+  .search-date-range-quick-buttons button {
+    width: 100%;  /* 버튼 너비 100% */
+    min-width: 0;  /* 최소 너비 제거 */
+    padding: 4px 0;  /* 좌우 패딩 제거 */
+    text-align: center;
+    white-space: nowrap;
+  }  
+
+  .search-date-range-children {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
