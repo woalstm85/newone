@@ -11,6 +11,7 @@ function CUST0020() {
   const [modalMessage, setModalMessage] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
+  const [searchContent, setSearchContent] = useState('');
   const [gridData, setGridData] = useState([]);
   
   // 페이지네이션 상태
@@ -19,8 +20,6 @@ function CUST0020() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
-
-  
 
   // 페이지네이션 계산
   const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
@@ -40,6 +39,7 @@ function CUST0020() {
   // 검색 초기화
   const handleReset = () => {
     setItemName('');
+    setSearchContent('');
     setCurrentPage(1); // 페이지도 초기화
   };
 
@@ -47,13 +47,15 @@ function CUST0020() {
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/CUST0020`, {
+
+      const response = await fetch('http://localhost:3001/api/CUST0020', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          p_itemNm: itemName
+          p_itemNm: itemName,
+          p_searchContent: searchContent
         })
       });
 
@@ -75,7 +77,7 @@ function CUST0020() {
     } finally {
       setIsLoading(false);
     }
-  }, [itemName]);
+  }, [itemName, searchContent]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
@@ -85,7 +87,7 @@ function CUST0020() {
   // 컴포넌트 마운트 시 초기 데이터 로드
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // 뷰 모드 변경
   const handleViewModeChange = (mode) => {
@@ -134,7 +136,8 @@ function CUST0020() {
         <table>
           <thead>
             <tr>
-              <th>제품코드</th>
+              <th style={{ width: '80px', textAlign: 'center' }}>이미지</th>
+              <th style={{ width: '150px' }}>제품코드</th>
               <th>제품명</th>
               <th>스펙</th>
             </tr>
@@ -142,6 +145,53 @@ function CUST0020() {
           <tbody>
             {currentItems.map((row, index) => (
               <tr key={row.itemCd || index} onClick={() => handleRowClick(row)}>
+                <td className="cust0020-center-column">
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    margin: '0 auto',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: '#f8f9fa',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    {row.filePath ? (
+                      <img 
+                        src={row.filePath} 
+                        alt={row.itemNm || '제품 이미지'}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          // 이미지 로드 실패 시 기본 아이콘으로 대체
+                          e.target.style.display = 'none';
+                          const iconDiv = e.target.parentElement.querySelector('.fallback-icon');
+                          if (iconDiv) iconDiv.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    
+                    <div 
+                      className="fallback-icon"
+                      style={{ 
+                        display: row.filePath ? 'none' : 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                        color: '#9ca3af'
+                      }}
+                    >
+                      <Package size={24} />
+                    </div>
+                  </div>
+                </td>
                 <td className="cust0020-center-column cust0020-item-code">
                   {row.itemCd}
                 </td>
@@ -215,7 +265,8 @@ function CUST0020() {
             
             <div className="cust0020-card-content">
               <h3>{row.itemNm}</h3>
-              {row.spec && <div className="item-eng-name">[{row.spec}]</div>}
+              <div className="item-code">{row.itemCd}</div>
+              {row.spec && <div className="item-eng-name">{row.spec}</div>}
             </div>
           </div>
         ))}
@@ -261,6 +312,17 @@ function CUST0020() {
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
               placeholder="제품명 입력"
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+
+          <div className="cust0020-search-field">
+            <label>검색내용</label>
+            <input
+              type="text"
+              value={searchContent}
+              onChange={(e) => setSearchContent(e.target.value)}
+              placeholder="검색내용 입력"
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
