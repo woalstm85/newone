@@ -48,7 +48,7 @@ function CUST0020() {
       setIsLoading(true);
 
       // GET 방식으로 URL에 쿼리 파라미터를 사용하여 요청합니다.
-      const response = await fetch(`/Comm/CUST0020?p_itemNm=${itemName}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/CUST0020?p_itemNm=${itemName}`);
 
       if (!response.ok) {
         const errorText = await response.text();

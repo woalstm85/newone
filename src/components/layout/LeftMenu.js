@@ -46,7 +46,7 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
       if (!globalState.G_USER_ID || !activeTopMenuCd) return;
       
       try {
-        const response = await fetch(`/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=${activeTopMenuCd}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=${activeTopMenuCd}`);
         
         const data = await response.json();
         

@@ -13,7 +13,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
     const fetchTopMenu = async () => {
       try {
         // 1. API URL을 쿼리 파라미터를 포함한 새 주소로 변경합니다.
-        const response = await fetch(`/Comm/topmenu?upMenuCd=*`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/topmenu?upMenuCd=*`);
         const data = await response.json();
 
         // 1. 고정 DASHBOARD 메뉴 객체 생성

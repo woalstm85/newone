@@ -117,7 +117,7 @@ const DASHBOARD = ({ onProductClick }) => {
       try {
         const fetchItems = async (itemCds) => {
           const promises = itemCds.map(itemCd =>
-            fetch(`/Comm/CUST0020?p_itemNm=${itemCd}`)
+            fetch(`${process.env.REACT_APP_API_URL}/Comm/CUST0020?p_itemNm=${itemCd}`)
               .then(res => {
                 if (!res.ok) throw new Error(`Failed to fetch ${itemCd}`);
                 return res.json();
