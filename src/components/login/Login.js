@@ -44,7 +44,7 @@ const handleLogin = async (e) => {
   try {
     // 1. API 엔드포인트 URL을 새 형식에 맞게 변경합니다.
     // 아이디와 비밀번호가 URL 경로에 포함됩니다.
-      const response = await fetch(`/Comm/login/${id.trim()}/${password}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/login/${id.trim()}/${password}`, {
 
       method: 'POST',
       headers: {
