@@ -140,7 +140,7 @@ function CUST0020() {
                   <div className="cust0020-list-image-wrapper">
                     {row.filePath ? (
                       <img 
-                        src={row.filePath} 
+                        src={row.filePath || row.thFilePath} 
                         alt={row.itemNm || '제품 이미지'}
                         className="cust0020-list-image"
                         onError={(e) => {
@@ -192,7 +192,7 @@ function CUST0020() {
             <div className="cust0020-image-placeholder">
               {row.filePath ? (
                 <img 
-                  src={row.filePath} 
+                  src={row.filePath || row.thFilePath} 
                   alt={row.itemNm || '제품 이미지'}
                   className="cust0020-card-image"
                   onError={(e) => {

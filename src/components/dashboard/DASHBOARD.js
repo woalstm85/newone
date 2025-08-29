@@ -49,7 +49,7 @@ const ProductCard = ({ product, onProductClick }) => {
       </div>
       <div className="dash-product-image-wrapper">
         <img
-          src={product.filePath}
+          src={product.filePath || product.thFilePath}
           alt={product.itemNm}
           className="dash-product-image"
           onError={(e) => { e.target.onerror = null; e.target.src="https://via.placeholder.com/200?text=No+Image" }}
