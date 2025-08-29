@@ -2,7 +2,7 @@
   "name": "newone",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://api.newonetotal.co.kr", 
+  "proxy": "https://api.newonetotal.co.kr", 
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
