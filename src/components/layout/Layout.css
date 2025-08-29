@@ -18,6 +18,12 @@
   overflow-y: auto;
 }
 
+/* ✨ 대시보드 선택 시 컨텐츠 영역을 전체 너비로 설정 */
+.main-content.full-width {
+  width: 100%;
+  margin-left: 0;
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
@@ -38,6 +44,40 @@
   padding: 0 20px;
   z-index: 100;
 }
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 사용자 정보와 로그아웃 버튼 사이 간격 */
+}
+
+/* ✨ 아래 구분선 스타일 추가 */
+.separator {
+  width: 1px;
+  height: 16px; /* 구분선 높이 */
+  background-color: rgba(255, 255, 255, 0.5); /* 흰색 배경에 50% 투명도 */
+  margin: 0 16px; /* 구분선 좌우에 16px 마진 */
+}
+
+.user-info {
+display: flex;
+align-items: center;
+padding: 15px;
+font-weight: bold;
+}
+
+.user-info .user-icon {
+width: 24px;
+height: 24px;
+margin-right: 10px;
+color: #1f2937;
+}
+
+.user-info .welcome-text {
+font-size: 14px;
+color: #1f2937;
+}
+
 
 .logo-section {
   display: flex;
@@ -66,6 +106,7 @@
   cursor: pointer;
   background: none;
   border: none;
+
   padding: 8px;  /* 패딩 추가하여 호버 영역 확장 */
   border-radius: 50%;  /* 원형 효과 */
   transition: all 0.2s ease-in-out;  /* 부드러운 전환 효과 */
@@ -82,8 +123,8 @@
 }
 
 .logout-btn img {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
 }
 
 .left-menu-container {

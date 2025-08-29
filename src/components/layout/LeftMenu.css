@@ -1,21 +1,4 @@
-.user-info {
-display: flex;
-align-items: center;
-padding: 15px;
-border-bottom: 1px solid #e5e7eb;
-background-color: #f8fafc;
-}
 
-.user-info .user-icon {
-width: 24px;
-height: 24px;
-margin-right: 10px;
-}
-
-.user-info .welcome-text {
-font-size: 14px;
-color: #1f2937;
-}
 
 .menu-container {
 padding: 12px 8px;

@@ -3,6 +3,7 @@ import { Package, List, Grid3X3, Search, RotateCcw, ChevronLeft, ChevronRight } 
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
 import './CUST0020.css';
+import MySpinner from '../common/MySpinner'; 
 
 function CUST0020() {
   // 상태 관리
@@ -11,7 +12,6 @@ function CUST0020() {
   const [modalMessage, setModalMessage] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
-  const [searchContent, setSearchContent] = useState('');
   const [gridData, setGridData] = useState([]);
   
   // 페이지네이션 상태
@@ -39,25 +39,16 @@ function CUST0020() {
   // 검색 초기화
   const handleReset = () => {
     setItemName('');
-    setSearchContent('');
     setCurrentPage(1); // 페이지도 초기화
   };
 
-  // 데이터 조회
+  // ✨ fetchData 함수를 새 API 규격에 맞게 수정합니다.
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      const response = await fetch('http://localhost:3001/api/CUST0020', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          p_itemNm: itemName,
-          p_searchContent: searchContent
-        })
-      });
+      // GET 방식으로 URL에 쿼리 파라미터를 사용하여 요청합니다.
+      const response = await fetch(`/Comm/CUST0020?p_itemNm=${itemName}`);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -77,7 +68,7 @@ function CUST0020() {
     } finally {
       setIsLoading(false);
     }
-  }, [itemName, searchContent]);
+  }, [itemName]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
@@ -132,7 +123,7 @@ function CUST0020() {
   // 리스트 뷰 렌더링
   const renderListView = () => (
     <div className="cust0020-grid-container">
-      <div className="cust0020-grid-wrapper">        
+      <div className="cust0020-grid-wrapper">          
         <table>
           <thead>
             <tr>
@@ -146,47 +137,26 @@ function CUST0020() {
             {currentItems.map((row, index) => (
               <tr key={row.itemCd || index} onClick={() => handleRowClick(row)}>
                 <td className="cust0020-center-column">
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    margin: '0 auto',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    border: '1px solid #e5e7eb',
-                    backgroundColor: '#f8f9fa',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
+                  <div className="cust0020-list-image-wrapper">
                     {row.filePath ? (
                       <img 
                         src={row.filePath} 
                         alt={row.itemNm || '제품 이미지'}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }}
+                        className="cust0020-list-image"
                         onError={(e) => {
-                          // 이미지 로드 실패 시 기본 아이콘으로 대체
-                          e.target.style.display = 'none';
-                          const iconDiv = e.target.parentElement.querySelector('.fallback-icon');
-                          if (iconDiv) iconDiv.style.display = 'flex';
+                          const parent = e.target.parentElement;
+                          if (parent) {
+                            e.target.style.display = 'none';
+                            const fallback = parent.querySelector('.fallback-icon');
+                            if (fallback) fallback.style.display = 'flex';
+                          }
                         }}
                       />
                     ) : null}
                     
                     <div 
                       className="fallback-icon"
-                      style={{ 
-                        display: row.filePath ? 'none' : 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '100%',
-                        color: '#9ca3af'
-                      }}
+                      style={{ display: row.filePath ? 'none' : 'flex' }}
                     >
                       <Package size={24} />
                     </div>
@@ -224,41 +194,28 @@ function CUST0020() {
                 <img 
                   src={row.filePath} 
                   alt={row.itemNm || '제품 이미지'}
-                  style={{
-                    width: '100%',
-                    height: '200px',
-                    objectFit: 'contain',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '4px'
-                  }}
+                  className="cust0020-card-image"
                   onError={(e) => {
-                    // 이미지 로드 실패 시 기본 아이콘으로 대체
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                  onLoad={(e) => {
-                    // 이미지 로드 성공 시 placeholder 숨김
-                    if (e.target.nextSibling) {
-                      e.target.nextSibling.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    if(parent) {
+                      e.target.style.display = 'none';
+                      const fallback = parent.querySelector('.fallback-icon');
+                      if (fallback) fallback.style.display = 'flex';
                     }
                   }}
                 />
               ) : null}
               
-              {/* 이미지가 없거나 로드 실패 시 표시할 기본 컨텐츠 */}
               <div 
+                className="fallback-icon"
                 style={{ 
                   display: row.filePath ? 'none' : 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '200px',
                   flexDirection: 'column'
                 }}
               >
                 <Package size={48} color="#ccc" />
                 <span style={{ marginTop: '8px', fontSize: '0.9rem', color: '#666' }}>
-                  {row.filePath ? '이미지 로드 실패' : '이미지 없음'}
+                  이미지 없음
                 </span>
               </div>
             </div>
@@ -315,18 +272,7 @@ function CUST0020() {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-
-          <div className="cust0020-search-field">
-            <label>검색내용</label>
-            <input
-              type="text"
-              value={searchContent}
-              onChange={(e) => setSearchContent(e.target.value)}
-              placeholder="검색내용 입력"
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-
+          
           <div className="cust0020-search-buttons">
             <button className="cust0020-search-btn" onClick={handleSearch}>
               <Search size={16} />
@@ -397,14 +343,7 @@ function CUST0020() {
       )}
 
       {/* 로딩 표시 */}
-      {isLoading && (
-        <div className="cust0020-loading-overlay">
-          <div className="cust0020-loading-spinner">
-            <div className="cust0020-spinner"></div>
-            로딩중...
-          </div>
-        </div>
-      )}
+      {isLoading && <MySpinner fullScreen={false} />}
 
       {/* 모달 */}
       <Modal

@@ -223,9 +223,9 @@
 }
 
 /* 리스트 뷰 이미지 스타일 */
-.cust0020-list-image-container {
-  width: 50px;
-  height: 50px;
+.cust0020-list-image-wrapper {
+  width: 60px;
+  height: 60px;
   margin: 0 auto;
   border-radius: 6px;
   overflow: hidden;
@@ -236,26 +236,27 @@
   justify-content: center;
   transition: all 0.2s ease;
   cursor: pointer;
+  position: relative;
 }
 
-.cust0020-list-image-container:hover {
+.cust0020-list-image-wrapper:hover {
   border-color: #007bff;
   box-shadow: 0 2px 8px rgba(0,123,255,0.15);
   transform: scale(1.05);
 }
 
-.cust0020-list-image-container img {
+.cust0020-list-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.2s ease;
 }
 
-.cust0020-list-image-container:hover img {
+.cust0020-list-image-wrapper:hover .cust0020-list-image {
   transform: scale(1.1);
 }
 
-.cust0020-fallback-icon {
+.fallback-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,10 +264,26 @@
   height: 100%;
   color: #9ca3af;
   transition: color 0.2s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-.cust0020-list-image-container:hover .cust0020-fallback-icon {
+.cust0020-list-image-wrapper:hover .fallback-icon {
   color: #007bff;
+}
+
+/* 이미지 카드 이미지 스타일 */
+.cust0020-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.cust0020-image-card:hover .cust0020-card-image {
+  transform: scale(1.05);
 }
 
 /* ===== 7. 이미지 뷰 ===== */
@@ -492,7 +509,7 @@
   }
   
   /* 리스트 이미지 크기 조정 */
-  .cust0020-list-image-container {
+  .cust0020-list-image-wrapper {
     width: 45px;
     height: 45px;
   }
@@ -539,7 +556,7 @@
   }
   
   /* 리스트 이미지 */
-  .cust0020-list-image-container {
+  .cust0020-list-image-wrapper {
     width: 40px;
     height: 40px;
   }
@@ -566,7 +583,7 @@
   }
 
   /* 리스트 이미지 최소 크기 */
-  .cust0020-list-image-container {
+  .cust0020-list-image-wrapper {
     width: 35px;
     height: 35px;
   }
@@ -576,7 +593,7 @@
     font-size: 0.75rem;
   }
   
-  .cust0020-fallback-icon svg {
+  .fallback-icon svg {
     width: 18px;
     height: 18px;
   }

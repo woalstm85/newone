@@ -5,11 +5,9 @@ import { useMenu } from '../../context/MenuContext';
 import { ChevronRight, ChevronDown, FolderIcon } from 'lucide-react';
 import Modal from '../common/Modal';
 import './LeftMenu.css';
-import UserInfo from './UserInfo';
+//import UserInfo from './UserInfo';
 
 // 개발 환경에서만 로그 출력
-
-
 function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
   const [menuItems, setMenuItems] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -31,7 +29,7 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
         // urlstr이 존재하고 현재 경로와 일치하는 경우만
         if (menu.urlstr && menu.urlstr === currentPath) {
           setCurrentMenu(menu.pgNm, menu.pgId);
-          setExpandedCategory(category.MENUID);
+          setExpandedCategory(category.MENU_ID);
           foundActive = true;
         }
       });
@@ -48,16 +46,7 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
       if (!globalState.G_USER_ID || !activeTopMenuCd) return;
       
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/leftmenu`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: globalState.G_USER_ID,
-            upMenuCd: activeTopMenuCd
-          })
-        });
+        const response = await fetch(`/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=${activeTopMenuCd}`);
         
         const data = await response.json();
         
@@ -67,9 +56,9 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
         const structuredMenu = categories.map(category => ({
           ...category,
           children: programs
-            .filter(program => program.UPP_MENUID === category.MENUID)
+            .filter(program => program.UPP_MENU_ID === category.MENU_ID)
             .map(program => ({
-              pgId: program.MENUID || '',
+              pgId: program.MENU_ID || '',
               pgNm: program.MENU_NM || '',
               urlstr: program.MENU_PATH || '',
               menuType: program.MENU_TYPE || ''
@@ -80,7 +69,7 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
         
         // 첫 번째 카테고리를 기본으로 펼친 상태로 설정
         if (structuredMenu.length > 0) {
-          setExpandedCategory(structuredMenu[0].MENUID);
+          setExpandedCategory(structuredMenu[0].MENU_ID);
         }
       } catch (error) {
         console.error('Left menu fetch error:', error);
@@ -129,25 +118,25 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
   
   return (
     <div>
-      <UserInfo />
+      {/*<UserInfo />*/}
       <div className="menu-container">
         {menuItems.map((category) => (
-          <div key={category.MENUID} className="menu-category">
+          <div key={category.MENU_ID} className="menu-category">
             <div
-              className={`menu-item ${expandedCategory === category.MENUID ? 'expanded' : ''}`}
-              onClick={() => handleCategoryClick(category.MENUID)}
+              className={`menu-item ${expandedCategory === category.MENU_ID ? 'expanded' : ''}`}
+              onClick={() => handleCategoryClick(category.MENU_ID)}
             >
               <div className="icon-wrapper">
                 <FolderIcon size={18} />
               </div>
               <span className="menu-text">{category.MENU_NM}</span>
-              {expandedCategory === category.MENUID 
+              {expandedCategory === category.MENU_ID 
                 ? <ChevronDown size={16} />
                 : <ChevronRight size={16} />
               }
             </div>
             
-            {expandedCategory === category.MENUID && (
+            {expandedCategory === category.MENU_ID && (
               <div className="submenu-container">
                 {category.children.map((menu) => {
                   // pgId가 빈 문자열인 경우 URL 기반으로 활성 상태 판단

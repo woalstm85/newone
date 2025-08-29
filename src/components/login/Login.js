@@ -33,38 +33,40 @@ function Login() {
   };
 
 // Login.js
+// Login.js
 const handleLogin = async (e) => {
   e.preventDefault();
-  
+
   if (!validateForm()) {
     return;
   }
 
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/login`, {      
+    // 1. API 엔드포인트 URL을 새 형식에 맞게 변경합니다.
+    // 아이디와 비밀번호가 URL 경로에 포함됩니다.
+      const response = await fetch(`/Comm/login/${id.trim()}/${password}`, {
+
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        // 'Content-Type'은 더 이상 필요 없지만, 어떤 응답을 원하는지 명시하는 'Accept' 헤더를 추가할 수 있습니다.
+        'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        id: id.trim(),
-        password: password
-      })
+      // 2. 요청 본문(body)은 새 API에서 사용하지 않으므로 제거합니다.
     });
 
     const data = await response.json();
-    
-    if (response.ok) {
-      // 전역 상태 업데이트
+
+    if (response.ok && data.logResult === 'S') { // 로그인 성공 여부도 확인하는 것이 좋습니다.
+      // 3. 전역 상태 업데이트 시, 새 API의 응답 본문 키(key)에 맞춰 수정합니다.
       updateGlobalState({
-        G_USER_ID: id.trim(),  // 로그인 ID 저장
-        G_CUST_NM: data.CUST_NM,
-        G_CUST_S_NM: data.CUST_S_NM,
-        G_COMPID: data.COMPID,
+        G_USER_ID: data.userId,      // data.userId로 변경
+        G_CUST_NM: data.custNm,      // data.custNm으로 변경
+        G_CUST_S_NM: data.custSNm,   // data.custSNm으로 변경
+        G_COMPID: data.compId,       // data.compId로 변경
       });
-      
-      navigate('/'); // 바로 메인 화면으로
-      
+
+      navigate('/'); // 메인 화면으로 이동
+
     } else {
       setErrors({
         id: '아이디 또는 비밀번호가 올바르지 않습니다.',
