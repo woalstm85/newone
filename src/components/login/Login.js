@@ -1,7 +1,7 @@
-// src/components/login/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useAuthApi } from '../../hooks'; // 커스텀 훅 사용
 import './Login.css';
 
 function Login() {
@@ -13,6 +13,7 @@ function Login() {
   });
   const navigate = useNavigate();
   const { updateGlobalState } = useAuth();
+  const { login, loading, error } = useAuthApi(); // 커스텀 훅 사용
 
   const validateForm = () => {
     const newErrors = {
@@ -32,52 +33,48 @@ function Login() {
     return !newErrors.id && !newErrors.password;
   };
 
-// Login.js
-// Login.js
-const handleLogin = async (e) => {
-  e.preventDefault();
+  // 커스텀 훅을 사용한 로그인 처리
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  if (!validateForm()) {
-    return;
-  }
+    if (!validateForm()) {
+      return;
+    }
 
-  try {
-    // 1. API 엔드포인트 URL을 새 형식에 맞게 변경합니다.
-    // 아이디와 비밀번호가 URL 경로에 포함됩니다.
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/login/${id.trim()}/${password}`, {
+    try {
+      // 커스텀 훅의 login 함수 사용
+      const data = await login(id, password);
 
-      method: 'POST',
-      headers: {
-        // 'Content-Type'은 더 이상 필요 없지만, 어떤 응답을 원하는지 명시하는 'Accept' 헤더를 추가할 수 있습니다.
-        'Accept': 'application/json',
-      },
-      // 2. 요청 본문(body)은 새 API에서 사용하지 않으므로 제거합니다.
-    });
+      if (data.logResult === 'S') {
+        // 로그인 성공
+        updateGlobalState({
+          G_USER_ID: data.userId,
+          G_CUST_NM: data.custNm,
+          G_CUST_S_NM: data.custSNm,
+          G_COMPID: data.compId,
+        });
 
-    const data = await response.json();
+        // 인증 토큰 저장 (API에서 토큰을 제공하는 경우)
+        if (data.token) {
+          localStorage.setItem('authToken', data.token);
+        }
 
-    if (response.ok && data.logResult === 'S') { // 로그인 성공 여부도 확인하는 것이 좋습니다.
-      // 3. 전역 상태 업데이트 시, 새 API의 응답 본문 키(key)에 맞춰 수정합니다.
-      updateGlobalState({
-        G_USER_ID: data.userId,      // data.userId로 변경
-        G_CUST_NM: data.custNm,      // data.custNm으로 변경
-        G_CUST_S_NM: data.custSNm,   // data.custSNm으로 변경
-        G_COMPID: data.compId,       // data.compId로 변경
-      });
-
-      navigate('/'); // 메인 화면으로 이동
-
-    } else {
+        navigate('/'); // 메인 화면으로 이동
+      } else {
+        setErrors({
+          id: '아이디 또는 비밀번호가 올바르지 않습니다.',
+          password: ' '
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setErrors({
-        id: '아이디 또는 비밀번호가 올바르지 않습니다.',
+        id: '로그인 처리 중 오류가 발생했습니다.',
         password: ' '
       });
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    alert('로그인 처리 중 오류가 발생했습니다.');
-  }
-};
+  };
+
   // 입력 필드 변경시 해당 필드의 에러 메시지 초기화
   const handleInputChange = (e, setter) => {
     setter(e.target.value);
@@ -107,6 +104,7 @@ const handleLogin = async (e) => {
                   placeholder="ID"
                   value={id}
                   onChange={(e) => handleInputChange(e, setId)}
+                  disabled={loading}
                 />
                 {errors.id && <span className="error-message">{errors.id}</span>}
               </div>
@@ -117,11 +115,12 @@ const handleLogin = async (e) => {
                   placeholder="PASSWORD"
                   value={password}
                   onChange={(e) => handleInputChange(e, setPassword)}
+                  disabled={loading}
                 />
                 {errors.password && <span className="error-message">{errors.password}</span>}
               </div>
-              <button type="submit" className="login-button">
-                LOGIN <span>→</span>
+              <button type="submit" className="login-button" disabled={loading}>
+                {loading ? 'LOGIN 중...' : 'LOGIN'} <span>→</span>
               </button>
             </form>
             

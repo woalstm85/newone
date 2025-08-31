@@ -93,16 +93,26 @@ function LeftMenu({ closeMenuOverlay, activeTopMenuCd }) {
         const navigationPath = `/${urlString}`;
         
         if (location.pathname !== navigationPath) {
+          // 컴포넌트 import 시도 (여러 경로 시도)
           try {
+            // 먼저 원본 경로로 시도
             await import(
               /* webpackChunkName: "[request]" */
               `../../components/${urlString}`
             );
           } catch (firstError) {
-            await import(
-              /* webpackChunkName: "[request]" */
-              `../../components/${urlString.toLowerCase()}`
-            );
+            try {
+              // 소문자로 시도
+              await import(
+                /* webpackChunkName: "[request]" */
+                `../../components/${urlString.toLowerCase()}`
+              );
+            } catch (secondError) {
+              // CUST 폴더 내 컴포넌트인 경우 처리하지 않음 (App.js에서 처리)
+              if (!urlString.includes('CUST/')) {
+                throw secondError;
+              }
+            }
           }
           
           navigate(navigationPath, { replace: true, state: { preventFlash: true } });

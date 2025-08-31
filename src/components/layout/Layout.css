@@ -1,8 +1,8 @@
 .layout-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 75px);  /* top-bar 높이만큼 뺌 */
-  margin-top: 75px;  /* top-bar 높이만큼 여백 */
+  height: calc(100vh - 75px);   /* top-bar 높이만큼 뺌 */
+  margin-top: 75px;   /* top-bar 높이만큼 여백 */
 }
 
 .main-container {
@@ -14,7 +14,7 @@
 .main-content {
   flex: 1;
   padding: 20px;
-  margin-left: 240px;  /* left-menu-container 너비만큼 */
+  margin-left: 240px;   /* left-menu-container 너비만큼 */
   overflow-y: auto;
 }
 
@@ -22,12 +22,6 @@
 .main-content.full-width {
   width: 100%;
   margin-left: 0;
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
 }
 
 .top-bar {
@@ -51,31 +45,30 @@
   gap: 16px; /* 사용자 정보와 로그아웃 버튼 사이 간격 */
 }
 
-/* ✨ 아래 구분선 스타일 추가 */
 .separator {
   width: 1px;
   height: 16px; /* 구분선 높이 */
-  background-color: rgba(255, 255, 255, 0.5); /* 흰색 배경에 50% 투명도 */
+  background-color: rgba(0, 0, 0, 0.1); /* 투명도 조절하여 더 잘 보이게 수정 */
   margin: 0 16px; /* 구분선 좌우에 16px 마진 */
 }
 
 .user-info {
-display: flex;
-align-items: center;
-padding: 15px;
-font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  font-weight: bold;
 }
 
 .user-info .user-icon {
-width: 24px;
-height: 24px;
-margin-right: 10px;
-color: #1f2937;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  color: #1f2937;
 }
 
 .user-info .welcome-text {
-font-size: 14px;
-color: #1f2937;
+  font-size: 14px;
+  color: #1f2937;
 }
 
 
@@ -83,7 +76,7 @@ color: #1f2937;
   display: flex;
   align-items: center;
   margin-left: 15px; /* 햄버거 메뉴 공간 확보 */
- }
+}
 
 .logo-section img {
   height: 32px;
@@ -106,20 +99,18 @@ color: #1f2937;
   cursor: pointer;
   background: none;
   border: none;
-
-  padding: 8px;  /* 패딩 추가하여 호버 영역 확장 */
-  border-radius: 50%;  /* 원형 효과 */
-  transition: all 0.2s ease-in-out;  /* 부드러운 전환 효과 */
+  padding: 8px;   /* 패딩 추가하여 호버 영역 확장 */
+  border-radius: 50%;   /* 원형 효과 */
+  transition: all 0.2s ease-in-out;   /* 부드러운 전환 효과 */
 }
 
-/* 호버 효과 */
 .logout-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);  /* 배경색 변경 */
-  transform: scale(1.1);  /* 살짝 확대 효과 */
+  background-color: rgba(0, 0, 0, 0.1);   /* 배경색 변경 */
+  transform: scale(1.1);   /* 살짝 확대 효과 */
 }
 
 .logout-btn:active {
-  transform: scale(0.95);  /* 클릭시 살짝 축소 효과 */
+  transform: scale(0.95);   /* 클릭시 살짝 축소 효과 */
 }
 
 .logout-btn img {
@@ -139,7 +130,16 @@ color: #1f2937;
   z-index: 91;
 }
 
+/* --- 태블릿 반응형 (기존 코드 유지) --- */
 @media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+    .user-info {
+    display: none;
+  }
+
   .menu-trigger {
     display: block;
   }
@@ -168,7 +168,17 @@ color: #1f2937;
   /*top 로고 정렬 */
   .logo-section {
     position: absolute;
-    left: 35%;
-    transform: translateX(-35%);
-  }  
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* --- 모바일 반응형 (요청하신 부분만 새로 추가) --- */
+@media (max-width: 480px) {
+
+  /* 로고 섹션이 햄버거 메뉴와 겹치지 않도록 조정 */
+  .logo-section {
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }

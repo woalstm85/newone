@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Package, List, Grid3X3, Search, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
+import { useCustomerApi, useErrorHandler } from '../../hooks'; // 커스텀 훅 사용
 import './CUST0020.css';
 import MySpinner from '../common/MySpinner'; 
 

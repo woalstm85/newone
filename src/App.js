@@ -31,20 +31,54 @@ const DynamicRouteComponent = () => {
         const path = location.pathname.slice(1);
         let module;
 
-        // ✨ 'dashboard' 경로를 특별 처리
+        console.log('최습 Loading component for path:', path);
+
+        // ✨ 경로별 특별 처리 - 상세 매핑
         if (path === 'dashboard') {
           module = await import('./components/dashboard/DASHBOARD');
+        } else if (path === 'CUST0010' || path === 'CUST/CUST0010') {
+          module = await import('./components/CUST/CUST0010');
+        } else if (path === 'CUST0020' || path === 'CUST/CUST0020') {
+          module = await import('./components/CUST/CUST0020');
         } else {
-          // 기존 동적 임포트 로직
-          module = await import(
-            /* webpackChunkName: "[request]" */
-            `./components/${path}`
-          );
+          // 기존 동적 임포트 로직 - 여러 방식 시도
+          try {
+            // 첫 번째 시도: 정확한 경로
+            module = await import(
+              /* webpackChunkName: "[request]" */
+              `./components/${path}`
+            );
+          } catch (firstError) {
+            try {
+              // 두 번째 시도: 소문자로 변환
+              module = await import(
+                /* webpackChunkName: "[request]" */
+                `./components/${path.toLowerCase()}`
+              );
+            } catch (secondError) {
+              // 세 번째 시도: CUST 폴더 내 컴포넌트인지 확인
+              if (path.includes('/')) {
+                const [folder, component] = path.split('/');
+                if (folder === 'CUST') {
+                  module = await import(`./components/CUST/${component}`);
+                } else {
+                  throw secondError;
+                }
+              } else {
+                throw secondError;
+              }
+            }
+          }
         }
-        setComponent(() => module.default);
+        
+        if (module && module.default) {
+          setComponent(() => module.default);
+        } else {
+          throw new Error('Component not found or invalid export');
+        }
       } catch (err) {
-        console.error("Component load error:", err);
-        // 준비 중인 페이지가 아닐 경우에만 모달 표시 (예: 404)
+        console.error('🔴 Component load error for path:', location.pathname, err);
+        // 준비 중인 페이지가 아닐 경우에만 모달 표시
         setShowModal(true);
       }
     };

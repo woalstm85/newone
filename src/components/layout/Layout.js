@@ -76,16 +76,7 @@ function Layout() {
         if (!globalState.G_USER_ID || !menuCd || menuCd === 'DASHBOARD') return;
         
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/leftmenu`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: globalState.G_USER_ID,
-                    upMenuCd: menuCd
-                })
-            });
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=${menuCd}`);
             
             const data = await response.json();
             

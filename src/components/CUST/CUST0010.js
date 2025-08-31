@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Package2, Archive, Hash, Search, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
+import { useInventoryApi } from '../../hooks'; // 커스텀 훅 사용
 import './CUST0010.css';
 import MySpinner from '../common/MySpinner'; 
 
 function CUST0010() {
   // 상태 관리
-  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [activeTab, setActiveTab] = useState('normal'); // 'normal', 'option', 'serial'
@@ -20,9 +20,19 @@ function CUST0010() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
+  
+  // API 커스텀 훅 사용
+  const { 
+    loading, 
+    error, 
+    getNormalInventory, 
+    getOptionInventory, 
+    getSerialInventory,
+    clearError 
+  } = useInventoryApi();
 
-  // 샘플 데이터 - 실제로는 API에서 가져옴
-  const sampleData = {
+  // 샘플 데이터 - 실제로는 API에서 가져옴 (useMemo로 최적화)
+  const sampleData = useMemo(() => ({
     normal: [
       {
         itemCd: "000001",
@@ -148,7 +158,8 @@ function CUST0010() {
         locationInfo: "창고A/2층/001"
       }
     ]
-  };
+
+}),[]);
 
 // 제품코드별 그룹화 함수
 const getGroupedData = useMemo(() => {
@@ -208,26 +219,51 @@ const getGroupedData = useMemo(() => {
     setCurrentPage(1);
   };
 
-  // 데이터 조회 (실제로는 API 호출)
+  // 커스텀 훅을 사용한 데이터 조회
   const fetchData = useCallback(async () => {
     try {
-      setIsLoading(true);
-      // 실제 API 호출 로직
-      // const response = await fetch(`/api/CUST0010/${activeTab}`, { ... });
+      // 검색 파라미터 설정
+      const searchParams = {
+        itemName: itemName.trim(),
+        page: currentPage,
+        pageSize: itemsPerPage
+      };
       
-      // 현재는 샘플 데이터 사용
-      await new Promise(resolve => setTimeout(resolve, 500)); // 로딩 시뮬레이션
-      setGridData(sampleData[activeTab] || []);
-      setCurrentPage(1);
+      let response;
+      // 탭에 따른 적절한 API 호출
+      switch (activeTab) {
+        case 'normal':
+          response = await getNormalInventory(searchParams);
+          break;
+        case 'option':
+          response = await getOptionInventory(searchParams);
+          break;
+        case 'serial':
+          response = await getSerialInventory(searchParams);
+          break;
+        default:
+          response = await getNormalInventory(searchParams);
+      }
+      
+      // API 응답 처리
+      if (response && response.data) {
+        setGridData(response.data);
+      } else {
+        // API 응답이 비어있으면 기존 샘플 데이터 사용
+        setGridData(sampleData[activeTab] || []);
+      }
 
     } catch (error) {
       console.error('데이터 조회 실패:', error);
-      setIsModalOpen(true);
-      setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      
+      // API 에러 발생 시 기존 샘플 데이터를 fallback으로 사용
+      setGridData(sampleData[activeTab] || []);
+      
+      // 에러 메시지 표시 (원하는 경우 주석 해제)
+      // setIsModalOpen(true);
+      // setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
     }
-  }, [activeTab, itemName]);
+  }, [activeTab, itemName, currentPage, itemsPerPage, getNormalInventory, getOptionInventory, getSerialInventory, sampleData]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
@@ -642,7 +678,7 @@ const renderSerialInventory = () => {
       )}
 
       {/* 로딩 표시 */}
-      {isLoading && <MySpinner />}
+      {loading && <MySpinner />}
 
       {/* 모달 */}
       <Modal
