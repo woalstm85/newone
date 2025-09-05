@@ -1,0 +1,626 @@
+{
+  "quotes": [
+    {
+      "quoteId": "QT-2024-001",
+      "quoteNumber": "견적서-20240905-001",
+      "status": "대기중",
+      "statusColor": "#ffc107",
+      "requestDate": "2024-09-05T09:30:00Z",
+      "responseDate": null,
+      "validUntil": "2024-09-19T23:59:59Z",
+      "product": {
+        "itemCd": "001846",
+        "itemNm": "프리미엄 스테인리스 볼트",
+        "filePath": "/images/products/001846.jpg",
+        "unitPrice": 28500,
+        "currency": "KRW"
+      },
+      "quantity": 800,
+      "totalAmount": 25080000,
+      "customerInfo": {
+        "companyName": "㈜대한건설",
+        "contactPerson": "김철수",
+        "phone": "010-1234-5678",
+        "email": "kimcs@daehan.co.kr",
+        "address": "서울시 강남구 테헤란로 123",
+        "requestDate": "2024-09-20",
+        "notes": "긴급 주문입니다. 품질 검사서 포함해서 보내주세요."
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 28500,
+        "quantity": 800,
+        "subtotal": 22800000,
+        "discountRate": 5,
+        "discountAmount": 1140000,
+        "taxRate": 10,
+        "taxAmount": 2166000,
+        "shippingCost": 250000,
+        "totalAmount": 24076000,
+        "paymentTerms": "선불 50%, 납품 후 50%",
+        "deliveryTerms": "주문 후 7일",
+        "warranty": "제품 보증 1년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-09-05T09:30:00Z",
+          "user": "김철수",
+          "comment": "신규 견적 요청"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-002",
+      "quoteNumber": "견적서-20240904-002",
+      "status": "승인됨",
+      "statusColor": "#28a745",
+      "requestDate": "2024-09-04T14:20:00Z",
+      "responseDate": "2024-09-04T16:45:00Z",
+      "validUntil": "2024-09-18T23:59:59Z",
+      "product": {
+        "itemCd": "001828",
+        "itemNm": "산업용 알루미늄 프로파일",
+        "filePath": "/images/products/001828.jpg",
+        "unitPrice": 185000,
+        "currency": "KRW"
+      },
+      "quantity": 350,
+      "totalAmount": 71225000,
+      "customerInfo": {
+        "companyName": "㈜삼성전자",
+        "contactPerson": "이미영",
+        "phone": "010-9876-5432",
+        "email": "lmy@samsung.com",
+        "address": "경기도 수원시 영통구 삼성로 129",
+        "requestDate": "2024-09-10",
+        "notes": "정확한 치수로 제작 부탁드립니다."
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 185000,
+        "quantity": 350,
+        "subtotal": 64750000,
+        "discountRate": 3,
+        "discountAmount": 1942500,
+        "taxRate": 10,
+        "taxAmount": 6280750,
+        "shippingCost": 320000,
+        "totalAmount": 69408250,
+        "paymentTerms": "월말 정산",
+        "deliveryTerms": "주문 후 5일",
+        "warranty": "제품 보증 2년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-09-04T14:20:00Z",
+          "user": "이미영",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-09-04T15:10:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        },
+        {
+          "action": "견적 승인",
+          "date": "2024-09-04T16:45:00Z",
+          "user": "박영희",
+          "comment": "견적이 승인되었습니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-003",
+      "quoteNumber": "견적서-20240903-003",
+      "status": "거절됨",
+      "statusColor": "#dc3545",
+      "requestDate": "2024-09-03T11:15:00Z",
+      "responseDate": "2024-09-03T17:30:00Z",
+      "validUntil": "2024-09-17T23:59:59Z",
+      "product": {
+        "itemCd": "001210",
+        "itemNm": "특수강 가공품",
+        "filePath": "/images/products/001210.jpg",
+        "unitPrice": 920000,
+        "currency": "KRW"
+      },
+      "quantity": 120,
+      "totalAmount": 121440000,
+      "customerInfo": {
+        "companyName": "㈜현대중공업",
+        "contactPerson": "정대수",
+        "phone": "010-5555-7777",
+        "email": "jds@hhi.co.kr",
+        "address": "울산광역시 동구 방어진순환도로 1000",
+        "requestDate": "2024-09-15",
+        "notes": "도면에 맞는 정밀 가공 필요합니다."
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 920000,
+        "quantity": 120,
+        "subtotal": 110400000,
+        "discountRate": 0,
+        "discountAmount": 0,
+        "taxRate": 10,
+        "taxAmount": 11040000,
+        "shippingCost": 0,
+        "totalAmount": 121440000,
+        "paymentTerms": "현금",
+        "deliveryTerms": "주문 후 14일",
+        "warranty": "제품 보증 6개월"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-09-03T11:15:00Z",
+          "user": "정대수",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-09-03T14:20:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        },
+        {
+          "action": "견적 거절",
+          "date": "2024-09-03T17:30:00Z",
+          "user": "박영희",
+          "comment": "조건이 맞지 않아 견적을 거절합니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-004",
+      "quoteNumber": "견적서-20240902-004",
+      "status": "검토중",
+      "statusColor": "#17a2b8",
+      "requestDate": "2024-09-02T08:45:00Z",
+      "responseDate": null,
+      "validUntil": "2024-09-16T23:59:59Z",
+      "product": {
+        "itemCd": "000633",
+        "itemNm": "고강도 카본 파이버",
+        "filePath": "/images/products/000633.jpg",
+        "unitPrice": 1350000,
+        "currency": "KRW"
+      },
+      "quantity": 85,
+      "totalAmount": 126225000,
+      "customerInfo": {
+        "companyName": "㈜LG화학",
+        "contactPerson": "최윤정",
+        "phone": "010-3333-9999",
+        "email": "cyj@lgchem.com",
+        "address": "서울시 영등포구 여의도동 20",
+        "requestDate": "2024-09-25",
+        "notes": "품질 인증서와 시험성적서 첨부 요청"
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 1350000,
+        "quantity": 85,
+        "subtotal": 114750000,
+        "discountRate": 2,
+        "discountAmount": 2295000,
+        "taxRate": 10,
+        "taxAmount": 11245500,
+        "shippingCost": 480000,
+        "totalAmount": 124180500,
+        "paymentTerms": "선불 30%, 납품 후 70%",
+        "deliveryTerms": "주문 후 21일",
+        "warranty": "제품 보증 3년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-09-02T08:45:00Z",
+          "user": "최윤정",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-09-02T10:30:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-005",
+      "quoteNumber": "견적서-20240901-005",
+      "status": "승인됨",
+      "statusColor": "#28a745",
+      "requestDate": "2024-09-01T16:20:00Z",
+      "responseDate": "2024-09-02T09:15:00Z",
+      "validUntil": "2024-09-15T23:59:59Z",
+      "product": {
+        "itemCd": "000592",
+        "itemNm": "정밀 베어링 세트",
+        "filePath": "/images/products/000592.jpg",
+        "unitPrice": 485000,
+        "currency": "KRW"
+      },
+      "quantity": 240,
+      "totalAmount": 128040000,
+      "customerInfo": {
+        "companyName": "㈜포스코",
+        "contactPerson": "박민호",
+        "phone": "010-7777-1111",
+        "email": "pmh@posco.co.kr",
+        "address": "경북 포항시 남구 동해안로 6267",
+        "requestDate": "2024-09-12",
+        "notes": ""
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 485000,
+        "quantity": 240,
+        "subtotal": 116400000,
+        "discountRate": 4,
+        "discountAmount": 4656000,
+        "taxRate": 10,
+        "taxAmount": 11174400,
+        "shippingCost": 650000,
+        "totalAmount": 123568400,
+        "paymentTerms": "월말 정산",
+        "deliveryTerms": "주문 후 10일",
+        "warranty": "제품 보증 1년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-09-01T16:20:00Z",
+          "user": "박민호",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-09-02T08:00:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        },
+        {
+          "action": "견적 승인",
+          "date": "2024-09-02T09:15:00Z",
+          "user": "박영희",
+          "comment": "견적이 승인되었습니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-006",
+      "quoteNumber": "견적서-20240831-006",
+      "status": "대기중",
+      "statusColor": "#ffc107",
+      "requestDate": "2024-08-31T13:45:00Z",
+      "responseDate": null,
+      "validUntil": "2024-09-14T23:59:59Z",
+      "product": {
+        "itemCd": "001838",
+        "itemNm": "산업용 센서 모듈",
+        "filePath": "/images/products/001838.jpg",
+        "unitPrice": 325000,
+        "currency": "KRW"
+      },
+      "quantity": 650,
+      "totalAmount": 232375000,
+      "customerInfo": {
+        "companyName": "㈜SK하이닉스",
+        "contactPerson": "장수연",
+        "phone": "010-4444-5555",
+        "email": "jsy@skhynix.com",
+        "address": "경기도 이천시 부발읍 경충대로 2091",
+        "requestDate": "2024-09-18",
+        "notes": "긴급 주문입니다."
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 325000,
+        "quantity": 650,
+        "subtotal": 211250000,
+        "discountRate": 6,
+        "discountAmount": 12675000,
+        "taxRate": 10,
+        "taxAmount": 19857500,
+        "shippingCost": 420000,
+        "totalAmount": 218852500,
+        "paymentTerms": "선불 50%, 납품 후 50%",
+        "deliveryTerms": "주문 후 8일",
+        "warranty": "제품 보증 2년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-08-31T13:45:00Z",
+          "user": "장수연",
+          "comment": "신규 견적 요청"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-007",
+      "quoteNumber": "견적서-20240830-007",
+      "status": "거절됨",
+      "statusColor": "#dc3545",
+      "requestDate": "2024-08-30T10:30:00Z",
+      "responseDate": "2024-08-30T15:20:00Z",
+      "validUntil": "2024-09-13T23:59:59Z",
+      "product": {
+        "itemCd": "001826",
+        "itemNm": "고성능 모터 드라이브",
+        "filePath": "/images/products/001826.jpg",
+        "unitPrice": 720000,
+        "currency": "KRW"
+      },
+      "quantity": 180,
+      "totalAmount": 142560000,
+      "customerInfo": {
+        "companyName": "㈜한화시스템",
+        "contactPerson": "오세진",
+        "phone": "010-6666-7777",
+        "email": "osj@hanwha.com",
+        "address": "경기도 성남시 분당구 판교로 220",
+        "requestDate": "2024-09-08",
+        "notes": "품질 검사서 포함 요청"
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 720000,
+        "quantity": 180,
+        "subtotal": 129600000,
+        "discountRate": 0,
+        "discountAmount": 0,
+        "taxRate": 10,
+        "taxAmount": 12960000,
+        "shippingCost": 0,
+        "totalAmount": 142560000,
+        "paymentTerms": "현금",
+        "deliveryTerms": "주문 후 12일",
+        "warranty": "제품 보증 1년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-08-30T10:30:00Z",
+          "user": "오세진",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-08-30T13:00:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        },
+        {
+          "action": "견적 거절",
+          "date": "2024-08-30T15:20:00Z",
+          "user": "박영희",
+          "comment": "조건이 맞지 않아 견적을 거절합니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-008",
+      "quoteNumber": "견적서-20240829-008",
+      "status": "검토중",
+      "statusColor": "#17a2b8",
+      "requestDate": "2024-08-29T14:15:00Z",
+      "responseDate": null,
+      "validUntil": "2024-09-12T23:59:59Z",
+      "product": {
+        "itemCd": "000641",
+        "itemNm": "내열성 세라믹 부품",
+        "filePath": "/images/products/000641.jpg",
+        "unitPrice": 580000,
+        "currency": "KRW"
+      },
+      "quantity": 420,
+      "totalAmount": 268040000,
+      "customerInfo": {
+        "companyName": "㈜두산중공업",
+        "contactPerson": "한지영",
+        "phone": "010-8888-9999",
+        "email": "hjy@doosan.com",
+        "address": "경상남도 창원시 성산구 두산볼보로 22",
+        "requestDate": "2024-09-15",
+        "notes": "정확한 치수로 제작 필요"
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 580000,
+        "quantity": 420,
+        "subtotal": 243600000,
+        "discountRate": 3,
+        "discountAmount": 7308000,
+        "taxRate": 10,
+        "taxAmount": 23629200,
+        "shippingCost": 750000,
+        "totalAmount": 260671200,
+        "paymentTerms": "선불 30%, 납품 후 70%",
+        "deliveryTerms": "주문 후 18일",
+        "warranty": "제품 보증 2년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-08-29T14:15:00Z",
+          "user": "한지영",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-08-29T16:30:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-009",
+      "quoteNumber": "견적서-20240828-009",
+      "status": "승인됨",
+      "statusColor": "#28a745",
+      "requestDate": "2024-08-28T11:20:00Z",
+      "responseDate": "2024-08-28T17:45:00Z",
+      "validUntil": "2024-09-11T23:59:59Z",
+      "product": {
+        "itemCd": "000622",
+        "itemNm": "초경량 복합소재",
+        "filePath": "/images/products/000622.jpg",
+        "unitPrice": 950000,
+        "currency": "KRW"
+      },
+      "quantity": 150,
+      "totalAmount": 156750000,
+      "customerInfo": {
+        "companyName": "㈜GS건설",
+        "contactPerson": "문태호",
+        "phone": "010-1111-2222",
+        "email": "mth@gsenc.co.kr",
+        "address": "서울시 종로구 종로 33",
+        "requestDate": "2024-09-20",
+        "notes": ""
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 950000,
+        "quantity": 150,
+        "subtotal": 142500000,
+        "discountRate": 2,
+        "discountAmount": 2850000,
+        "taxRate": 10,
+        "taxAmount": 13965000,
+        "shippingCost": 380000,
+        "totalAmount": 153995000,
+        "paymentTerms": "월말 정산",
+        "deliveryTerms": "주문 후 15일",
+        "warranty": "제품 보증 1년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-08-28T11:20:00Z",
+          "user": "문태호",
+          "comment": "신규 견적 요청"
+        },
+        {
+          "action": "견적 검토 시작",
+          "date": "2024-08-28T14:00:00Z",
+          "user": "박영희",
+          "comment": "견적 검토를 시작합니다"
+        },
+        {
+          "action": "견적 승인",
+          "date": "2024-08-28T17:45:00Z",
+          "user": "박영희",
+          "comment": "견적이 승인되었습니다"
+        }
+      ]
+    },
+    {
+      "quoteId": "QT-2024-010",
+      "quoteNumber": "견적서-20240827-010",
+      "status": "대기중",
+      "statusColor": "#ffc107",
+      "requestDate": "2024-08-27T09:30:00Z",
+      "responseDate": null,
+      "validUntil": "2024-09-10T23:59:59Z",
+      "product": {
+        "itemCd": "000569",
+        "itemNm": "고정밀 가공 툴",
+        "filePath": "/images/products/000569.jpg",
+        "unitPrice": 820000,
+        "currency": "KRW"
+      },
+      "quantity": 280,
+      "totalAmount": 252560000,
+      "customerInfo": {
+        "companyName": "㈜대우조선해양",
+        "contactPerson": "권영미",
+        "phone": "010-3333-4444",
+        "email": "kym@dsme.co.kr",
+        "address": "경상남도 거제시 장평로 42",
+        "requestDate": "2024-09-22",
+        "notes": "품질 인증서 첨부 요청"
+      },
+      "supplierInfo": {
+        "companyName": "뉴원산업㈜",
+        "contactPerson": "박영희",
+        "phone": "02-555-1234",
+        "email": "sales@newone.co.kr"
+      },
+      "quoteDetails": {
+        "unitPrice": 820000,
+        "quantity": 280,
+        "subtotal": 229600000,
+        "discountRate": 5,
+        "discountAmount": 11480000,
+        "taxRate": 10,
+        "taxAmount": 21812000,
+        "shippingCost": 540000,
+        "totalAmount": 240472000,
+        "paymentTerms": "선불 50%, 납품 후 50%",
+        "deliveryTerms": "주문 후 25일",
+        "warranty": "제품 보증 3년"
+      },
+      "history": [
+        {
+          "action": "견적 요청",
+          "date": "2024-08-27T09:30:00Z",
+          "user": "권영미",
+          "comment": "신규 견적 요청"
+        }
+      ]
+    }
+  ]
+}

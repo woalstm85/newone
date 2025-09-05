@@ -4,7 +4,7 @@ import './CUST0040.css';
 import QuoteDetailModal from '../modals/QuoteDetailModal';
 import QuoteHistoryModal from '../modals/QuoteHistoryModal';
 import Pagination from '../common/Pagination';
-import { generateQuoteData } from '../utils/quoteDataGenerator';
+import quotesDB from '../../data/quotesDB.json';
 import { generateQuotePDF, generateQuoteHTML } from '../utils/pdfGenerator';
 
 const CUST0040 = () => {
@@ -67,10 +67,9 @@ const CUST0040 = () => {
         // const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/CUST0040`);
         // const data = await response.json();
         
-        // 현재는 생성된 데이터 사용
-        const generatedData = generateQuoteData();
-        setQuotes(generatedData);
-        setFilteredQuotes(generatedData);
+        // 현재는 JSON 데이터 사용 (DB 연동 준비됨)
+        setQuotes(quotesDB.quotes);
+        setFilteredQuotes(quotesDB.quotes);
       } catch (error) {
         console.error('견적 데이터 로드 실패:', error);
       } finally {
