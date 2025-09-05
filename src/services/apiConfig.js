@@ -15,10 +15,10 @@ export const API_ENDPOINTS = {
   
   // 고객 관련 (CUST)
   CUST: {
-    // 재고현황
-    INVENTORY_NORMAL: (params = {}) => `/api/CUST0010/normal${buildQueryString(params)}`,
-    INVENTORY_OPTION: (params = {}) => `/api/CUST0010/option${buildQueryString(params)}`,
-    INVENTORY_SERIAL: (params = {}) => `/api/CUST0010/serial${buildQueryString(params)}`,
+    // 재고현황 - 새로운 API 엔드포인트로 변경
+    INVENTORY_NORMAL: () => `/Comm/Stock?p_mode=normal`,
+    INVENTORY_OPTION: () => `/Comm/Stock?p_mode=option`,
+    INVENTORY_SERIAL: () => `/Comm/Stock?p_mode=serial`,
     
     // 고객관리
     CUSTOMER_LIST: (params = {}) => `/api/CUST0020${buildQueryString(params)}`,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, ShoppingCart, Calculator, User, Phone, Mail, Building, MapPin, MessageSquare, Calendar, FileText } from 'lucide-react';
 import './QuoteModal.css';
+import ImageWithFallback from '../common/ImageWithFallback';
 
 const QuoteModal = ({ product, isOpen, onClose }) => {
   const [quantity, setQuantity] = useState(1);
@@ -122,13 +123,11 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
               
               <div className="product-details">
                 <div className="product-image">
-                  <img 
-                    src={product.filePath || "https://via.placeholder.com/120?text=No+Image"} 
+                  <ImageWithFallback
+                    src={product.filePath || product.thFilePath}
                     alt={product.itemNm}
-                    onError={(e) => { 
-                      e.target.onerror = null; 
-                      e.target.src="https://via.placeholder.com/120?text=No+Image" 
-                    }}
+                    width={120}
+                    height={120}
                   />
                 </div>
                 <div className="product-info">

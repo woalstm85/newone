@@ -3,6 +3,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './DASHBOARD.css';
 import QuoteModal from '../modals/QuoteModal';
+import ImageWithFallback from '../common/ImageWithFallback';
 
 // 로딩 중에 보여줄 스켈레톤 컴포넌트
 const DashboardSkeleton = () => {
@@ -48,11 +49,12 @@ const ProductCard = ({ product, onProductClick }) => {
         {product.badge && <span className="dash-product-badge">{product.badge}</span>}
       </div>
       <div className="dash-product-image-wrapper">
-        <img
+        <ImageWithFallback
           src={product.filePath || product.thFilePath}
           alt={product.itemNm}
           className="dash-product-image"
-          onError={(e) => { e.target.onerror = null; e.target.src="https://via.placeholder.com/200?text=No+Image" }}
+          width={200}
+          height={200}
         />
       </div>
       <div className="dash-product-info">
@@ -122,7 +124,19 @@ const DASHBOARD = ({ onProductClick }) => {
                 if (!res.ok) throw new Error(`Failed to fetch ${itemCd}`);
                 return res.json();
               })
-              .then(data => data[0]) // API가 배열로 감싸서 응답하므로 첫 번째 항목을 추출
+              .then(data => {
+                const item = data[0]; // API가 배열로 감싸서 응답하므로 첫 번째 항목을 추출
+                console.log(`API 응답 데이터 (${itemCd}):`, item); // 디버깅 로그 추가
+                if (item) {
+                  console.log(`이미지 경로 정보:`, {
+                    filePath: item.filePath,
+                    thFilePath: item.thFilePath,
+                    itemCd: item.itemCd,
+                    itemNm: item.itemNm
+                  });
+                }
+                return item;
+              })
               .catch(err => {
                 console.error(`Error processing item ${itemCd}:`, err);
                 return null; // 실패한 경우 null 반환

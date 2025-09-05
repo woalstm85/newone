@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Package, List, Grid3X3, Search, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Package, List, Grid3X3, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
 import { useCustomerApi, useErrorHandler } from '../../hooks'; // 커스텀 훅 사용
@@ -14,6 +14,15 @@ function CUST0020() {
   const [viewMode, setViewMode] = useState('list'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
+  const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
+  
+  // 스와이프 제스처용 ref와 상태
+  const searchToggleRef = useRef(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
+  // 스와이프 최소 거리 (픽셀)
+  const minSwipeDistance = 50;
   
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,6 +30,53 @@ function CUST0020() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
+
+  // 스와이프 시작
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 중
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 종료
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+    const isDownSwipe = distance < -minSwipeDistance;
+
+    // 아래로 스와이프하면 검색영역 열기
+    if (isDownSwipe && !isSearchVisible) {
+      setIsSearchVisible(true);
+    }
+    // 위로 스와이프하면 검색영역 닫기
+    else if (isUpSwipe && isSearchVisible) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  // 검색영역 외부 클릭시 닫기
+  const handleClickOutside = useCallback((event) => {
+    if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
+      // 모바일에서만 작동하도록 체크
+      if (window.innerWidth <= 768 && isSearchVisible) {
+        setIsSearchVisible(false);
+      }
+    }
+  }, [isSearchVisible]);
+
+  // 외부 클릭 이벤트 리스너 등록
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
 
   // 페이지네이션 계산
   const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
@@ -53,7 +109,7 @@ function CUST0020() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ 서버 에러 응답:', errorText);
+        console.error('⌛ 서버 에러 응답:', errorText);
         throw new Error(`서버 응답 오류: ${response.status}`);
       }
 
@@ -63,7 +119,7 @@ function CUST0020() {
       setCurrentPage(1); // 새로운 검색 시 첫 페이지로
 
     } catch (error) {
-      console.error('❌ 데이터 조회 실패:', error);
+      console.error('⌛ 데이터 조회 실패:', error);
       setIsModalOpen(true);
       setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
     } finally {
@@ -74,6 +130,15 @@ function CUST0020() {
   // 검색 버튼 클릭
   const handleSearch = () => {
     fetchData();
+    // 모바일에서 검색 후 검색영역 숨기기
+    if (window.innerWidth <= 768) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  // 검색영역 토글
+  const toggleSearchArea = () => {
+    setIsSearchVisible(!isSearchVisible);
   };
 
   // 컴포넌트 마운트 시 초기 데이터 로드
@@ -135,7 +200,7 @@ function CUST0020() {
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((row, index) => (
+            {currentItems.length > 0 ? currentItems.map((row, index) => (
               <tr key={row.itemCd || index} onClick={() => handleRowClick(row)}>
                 <td className="cust0020-center-column">
                   <div className="cust0020-list-image-wrapper">
@@ -173,7 +238,13 @@ function CUST0020() {
                   {row.spec}
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={4} className="cust0020-center-column" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -184,7 +255,7 @@ function CUST0020() {
   const renderImageView = () => (
     <div className="cust0020-image-container">      
       <div className="cust0020-image-grid">
-        {currentItems.map((row, index) => (
+        {currentItems.length > 0 ? currentItems.map((row, index) => (
           <div 
             key={row.itemCd || index} 
             className="cust0020-image-card"
@@ -227,7 +298,11 @@ function CUST0020() {
               {row.spec && <div className="item-eng-name">{row.spec}</div>}
             </div>
           </div>
-        ))}
+        )) : (
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#666' }}>
+            데이터가 없습니다.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -260,29 +335,43 @@ function CUST0020() {
         </div>
       </div>
 
-      {/* 검색 영역 */}
-      <div className="cust0020-search-container">
-        <div className="cust0020-search-row">
-          <div className="cust0020-search-field">
-            <label>제품명</label>
-            <input
-              type="text"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="제품명 입력"
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          
-          <div className="cust0020-search-buttons">
-            <button className="cust0020-search-btn" onClick={handleSearch}>
-              <Search size={16} />
-              검색
-            </button>
-            <button className="cust0020-reset-btn" onClick={handleReset}>
-              <RotateCcw size={16} />
-              초기화
-            </button>
+      {/* 검색 영역 - 스와이프 제스처 추가 */}
+      <div 
+        className="cust0020-search-section"
+        ref={searchToggleRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* 모바일 검색 토글 버튼 */}
+        <div className="cust0020-mobile-search-toggle" onClick={toggleSearchArea}>
+          <span>검색 옵션 </span>
+          {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </div>
+        
+        <div className={`cust0020-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
+          <div className="cust0020-search-row">
+            <div className="cust0020-search-field">
+              <label>제품명</label>
+              <input
+                type="text"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="제품명 입력"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            
+            <div className="cust0020-search-buttons">
+              <button className="cust0020-search-btn" onClick={handleSearch}>
+                <Search size={16} />
+                검색
+              </button>
+              <button className="cust0020-reset-btn" onClick={handleReset}>
+                <RotateCcw size={16} />
+                초기화
+              </button>
+            </div>
           </div>
         </div>
       </div>

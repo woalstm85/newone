@@ -17,8 +17,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 16px;
 }
 
 .cust0010-program-header h1 {
@@ -69,13 +67,81 @@
   background: #0056b3;
 }
 
-/* ===== 4. 검색 영역 ===== */
+/* ===== 4. 검색 영역 개선 ===== */
+.cust0010-search-section {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cust0010-mobile-search-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #17a2b8; /* 틸 블루로 변경 */
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 터치 피드백 효과 */
+.cust0010-mobile-search-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.cust0010-mobile-search-toggle:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.cust0010-mobile-search-toggle:hover {
+  background: #138496; /* 더 어두운 틸로 변경 */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3); /* 틸 색상의 그림자 */
+}
+
+.cust0010-mobile-search-toggle:active {
+  transform: scale(0.98);
+}
+
+/* 검색 컨테이너 애니메이션 개선 */
 .cust0010-search-container {
   background: #f8f9fa;
   border: 1px solid #d1d5db;
   padding: 16px;
   border-radius: 6px;
-  margin-bottom: 16px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  transform-origin: top;
+}
+
+.cust0010-search-container.hidden {
+  max-height: 0;
+  padding: 0 16px;
+  border: none;
+  margin: 0;
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+.cust0010-search-container.visible {
+  max-height: 300px;
+  opacity: 1;
+  transform: scaleY(1);
 }
 
 .cust0010-search-row {
@@ -374,6 +440,12 @@
   100% { transform: rotate(360deg); }
 }
 
+/* 스와이프 제스처 중 시각적 피드백 */
+.cust0010-search-section.swiping {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease-out;
+}
+
 /* ===== 9. 반응형 스타일 ===== */
 @media (max-width: 1024px) {
   .cust0010-search-row {
@@ -386,6 +458,30 @@
 }
 
 @media (max-width: 768px) {
+  /* 모바일 검색 토글 표시 */
+  .cust0010-mobile-search-toggle {
+    display: flex;
+  }
+  
+  /* 초기에는 검색영역 숨김 */
+  .cust0010-search-container {
+    max-height: 0;
+    padding: 0 16px;
+    border: none;
+    margin: 0;
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  
+  .cust0010-search-container.visible {
+    max-height: 300px;
+    padding: 16px;
+    border: 1px solid #d1d5db;
+    margin-bottom: 8px;
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  
   .cust0010-tab-container {
     gap: 0;
   }
@@ -429,6 +525,25 @@
   }
 }
 
+/* 터치 디바이스 최적화 */
+@media (pointer: coarse) {
+  .cust0010-mobile-search-toggle {
+    min-height: 48px; /* 터치하기 쉬운 최소 크기 */
+  }
+  
+  .cust0010-search-field input,
+  .cust0010-search-field select {
+    min-height: 44px; /* 터치 친화적 크기 */
+    font-size: 16px; /* iOS에서 줌 방지 */
+  }
+  
+  .cust0010-search-btn,
+  .cust0010-reset-btn {
+    min-height: 44px;
+    padding: 8px 16px;
+  }
+}
+
 @media (max-width: 480px) {
   .cust0010-program-header h1 {
     font-size: 1.1rem;
@@ -451,6 +566,12 @@
   .cust0010-search-field input {
     min-width: 100px;
     font-size: 0.85rem;
+  }
+  
+  /* 검색 필드 포커스 시 확대 효과 */
+  .cust0010-search-field input:focus {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
   }
   
   .cust0010-search-btn,

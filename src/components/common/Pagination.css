@@ -1,0 +1,212 @@
+/* -------------------------------------------------------------------------- */
+/* 전역 스타일 변수                                */
+/* -------------------------------------------------------------------------- */
+:root {
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #374151;
+  --color-blue-600: #2563eb;
+  --color-white: #ffffff;
+
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+
+  --font-size-sm: 14px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 페이지네이션 컨테이너                              */
+/* -------------------------------------------------------------------------- */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) 0;
+  border-top: 1px solid var(--color-gray-200);
+  margin-top: 24px;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.pagination-info {
+  color: var(--color-gray-500);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 버튼 스타일                                 */
+/* -------------------------------------------------------------------------- */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.pagination-pages {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 2px;
+  margin: 0 8px;
+}
+
+.pagination-btn,
+.pagination-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-gray-300);
+  background: var(--color-white);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-gray-600);
+  font-weight: 500;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.pagination-page {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.pagination-btn:hover:not(.disabled),
+.pagination-page:hover:not(.active):not(.dots) {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-500);
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-gray-100);
+}
+
+.pagination-page.active {
+  background: var(--color-blue-600);
+  border-color: var(--color-blue-600);
+  color: var(--color-white);
+}
+
+.pagination-page.dots {
+  border: none;
+  background: none;
+  cursor: default;
+  color: var(--color-gray-500);
+}
+
+.pagination-page.dots:hover {
+  background: none;
+  border: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 페이지당 항목 선택기                             */
+/* -------------------------------------------------------------------------- */
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-gray-500);
+  font-size: var(--font-size-sm);
+}
+
+.items-per-page label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.items-per-page select {
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-md);
+  background: var(--color-white);
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.items-per-page select:focus {
+  outline: none;
+  border-color: var(--color-blue-600);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.items-per-page select:hover {
+  border-color: var(--color-gray-500);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 반응형 디자인                                 */
+/* -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+
+  .pagination-info,
+  .items-per-page {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pagination-pages {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination-btn,
+  .pagination-page {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-container {
+    padding: 16px 0;
+  }
+
+  .pagination-info {
+    font-size: 13px;
+  }
+
+  .pagination-btn,
+  .pagination-page {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 13px;
+  }
+
+  .items-per-page {
+    font-size: 13px;
+  }
+
+  .items-per-page select {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+}

@@ -9,19 +9,26 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative; /* 토글 버튼 포지셔닝을 위해 추가 */
 }
 
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 12px;
   margin-left: 240px;   /* left-menu-container 너비만큼 */
   overflow-y: auto;
+  transition: margin-left 0.3s ease; /* 부드러운 전환 효과 */
 }
 
-/* ✨ 대시보드 선택 시 컨텐츠 영역을 전체 너비로 설정 */
+/* 대시보드 선택 시 컨텐츠 영역을 전체 너비로 설정 */
 .main-content.full-width {
   width: 100%;
   margin-left: 0;
+}
+
+/* 왼쪽 메뉴가 접힌 상태일 때 메인 콘텐츠 마진 조정 */
+.main-content.collapsed-menu {
+  margin-left: 60px; /* 접힌 메뉴 너비만큼 */
 }
 
 .top-bar {
@@ -42,14 +49,14 @@
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: 16px; /* 사용자 정보와 로그아웃 버튼 사이 간격 */
+  gap: 16px;
 }
 
 .separator {
   width: 1px;
-  height: 16px; /* 구분선 높이 */
-  background-color: rgba(0, 0, 0, 0.1); /* 투명도 조절하여 더 잘 보이게 수정 */
-  margin: 0 16px; /* 구분선 좌우에 16px 마진 */
+  height: 16px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: 0 16px;
 }
 
 .user-info {
@@ -71,11 +78,10 @@
   color: #1f2937;
 }
 
-
 .logo-section {
   display: flex;
   align-items: center;
-  margin-left: 15px; /* 햄버거 메뉴 공간 확보 */
+  margin-left: 15px;
 }
 
 .logo-section img {
@@ -99,18 +105,18 @@
   cursor: pointer;
   background: none;
   border: none;
-  padding: 8px;   /* 패딩 추가하여 호버 영역 확장 */
-  border-radius: 50%;   /* 원형 효과 */
-  transition: all 0.2s ease-in-out;   /* 부드러운 전환 효과 */
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
 }
 
 .logout-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);   /* 배경색 변경 */
-  transform: scale(1.1);   /* 살짝 확대 효과 */
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
 }
 
 .logout-btn:active {
-  transform: scale(0.95);   /* 클릭시 살짝 축소 효과 */
+  transform: scale(0.95);
 }
 
 .logout-btn img {
@@ -127,16 +133,69 @@
   background: white;
   border-right: 1px solid #e5e7eb;
   overflow-y: auto;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
   z-index: 91;
+  transition: width 0.3s ease, transform 0.3s ease; /* 부드러운 전환 효과 */
 }
 
-/* --- 태블릿 반응형 (기존 코드 유지) --- */
+/* Dashboard 모드일 때 데스크탑에서는 숨기기 */
+.left-menu-container.dashboard-mode {
+  display: none;
+}
+
+/* 왼쪽 메뉴 접힌 상태 */
+.left-menu-container.collapsed {
+  width: 40px; /* 접힌 상태 너비 */
+}
+
+/* 왼쪽 메뉴 토글 버튼 */
+.left-menu-toggle-btn {
+  position: fixed;
+  left: 240px; /* 기본 메뉴 너비에 맞춰 위치 */
+  bottom: 30px; /* 화면 하단에 위치 */
+  width: 20px; /* 폭 줄임 */
+  height: 32px; /* 높이도 줄임 */
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-left: none;
+  border-radius: 0 4px 4px 0; /* 더 작은 border-radius */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 92;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+.left-menu-toggle-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+  transform: translateX(2px);
+}
+
+/* 메뉴가 접힌 상태일 때 토글 버튼 위치 조정 */
+.left-menu-container.collapsed + .left-menu-toggle-btn {
+  left: 40px; /* 접힌 메뉴 너비에 맞춰 위치 */
+}
+
+/* 태블릿 반응형 */
 @media (max-width: 768px) {
+  /* 모바일에서는 Dashboard 모드일 때도 메뉴 보이기 */
+  .left-menu-container.dashboard-mode {
+    display: block;
+  }
+  
   .main-content {
     margin-left: 0;
   }
 
-    .user-info {
+  .main-content.collapsed-menu {
+    margin-left: 0; /* 모바일에서는 메뉴 접기 무시 */
+  }
+
+  .user-info {
     display: none;
   }
 
@@ -148,11 +207,16 @@
     transform: translateX(-100%);
     width: 80%;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    top: 123px; /* top-bar + top-menu 높이 */
+    top: 123px;
   }
 
   .left-menu-container.active {
     transform: translateX(0);
+  }
+
+  /* 모바일에서는 토글 버튼 숨기기 */
+  .left-menu-toggle-btn {
+    display: none;
   }
 
   .menu-overlay.active {
@@ -165,7 +229,6 @@
     z-index: 89;
   }
 
-  /*top 로고 정렬 */
   .logo-section {
     position: absolute;
     left: 50%;
@@ -173,10 +236,8 @@
   }
 }
 
-/* --- 모바일 반응형 (요청하신 부분만 새로 추가) --- */
+/* 모바일 반응형 */
 @media (max-width: 480px) {
-
-  /* 로고 섹션이 햄버거 메뉴와 겹치지 않도록 조정 */
   .logo-section {
     left: 50%;
     transform: translateX(-50%);

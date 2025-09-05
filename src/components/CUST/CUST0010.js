@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Package2, Archive, Hash, Search, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Package2, Archive, Hash, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
 import { useInventoryApi } from '../../hooks'; // 커스텀 훅 사용
@@ -13,6 +13,7 @@ function CUST0010() {
   const [activeTab, setActiveTab] = useState('normal'); // 'normal', 'option', 'serial'
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
+  const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
   
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,186 +32,55 @@ function CUST0010() {
     clearError 
   } = useInventoryApi();
 
-  // 샘플 데이터 - 실제로는 API에서 가져옴 (useMemo로 최적화)
-  const sampleData = useMemo(() => ({
-    normal: [
-      {
-        itemCd: "000001",
-        itemNm: "TFR-CV 3C 2.5SQ (골드)",
-        spec: "TFR-CV 3C 2.5SQ",
-        unit: "M",
-        currentStock: 3461,
-        availableStock: 3461,
-        purchaseQty: 0,
-        locationQty: 0,
-        shortageQty: 0
-      },
-      {
-        itemCd: "000001",
-        itemNm: "TFR-CV 3C 2.5SQ (실버)",
-        spec: "TFR-CV 3C 2.5SQ",
-        unit: "M", 
-        currentStock: 1000,
-        availableStock: 1000,
-        purchaseQty: 0,
-        locationQty: 0,
-        shortageQty: 0
-      },
-      {
-        itemCd: "000002",
-        itemNm: "TFR-GV(접지선) 6SQ(실버)",
-        spec: "TFR-GV 6SQ",
-        unit: "M",
-        currentStock: 500,
-        availableStock: 500,
-        purchaseQty: 0,
-        locationQty: 0,
-        shortageQty: 0
-      },
-      {
-        itemCd: "000003",
-        itemNm: "HFIX 2.5SQ(1.78mm)(실버)외",
-        spec: "HFIX 2.5SQ",
-        unit: "롤",
-        currentStock: 5,
-        availableStock: 5,
-        purchaseQty: 0,
-        locationQty: 0,
-        shortageQty: 0
-      }
-    ],
-    option: [
-      {
-        itemCd: "000002",
-        itemNm: "삼정전원 6W 주력직(오각)",
-        optionCode: "1-B(파랑)",
-        optionName: "파랑",
-        spec: "6W",
-        unit: "EA",
-        currentStock: 2570,
-        availableStock: 2570,
-        price: 15.4,
-        locationInfo: "A구역"
-      },
-      {
-        itemCd: "000002", 
-        itemNm: "삼정전원 6W 주력직(오각)",
-        optionCode: "1-R(빨강)",
-        optionName: "빨강",
-        spec: "6W",
-        unit: "EA",
-        currentStock: 700,
-        availableStock: 700,
-        price: 15.4,
-        locationInfo: "A구역"
-      },
-      {
-        itemCd: "000003",
-        itemNm: "삼정전원 6W 주력직",
-        optionCode: "1-G(초록)",
-        optionName: "초록",
-        spec: "6W",
-        unit: "EA", 
-        currentStock: 330,
-        availableStock: 330,
-        price: 15.4,
-        locationInfo: "B구역"
-      }
-    ],
-    serial: [
-      {
-        itemCd: "000001",
-        itemNm: "TFR-CV 3C 6SQ (실버)",
-        serialNo: "2-도료/Z1 04 13:07:22",
-        lotNo: "LOT001",
-        spec: "3C 6SQ",
-        unit: "M",
-        currentStock: 1000,
-        availableStock: 1000,
-        manufactureDate: "2023-08-15",
-        expiryDate: "2025-08-15",
-        locationInfo: "창고A/1층/001"
-      },
-      {
-        itemCd: "000001",
-        itemNm: "TFR-CV 3C 6SQ (실버)", 
-        serialNo: "2-도료/Z1 11 09:19:04",
-        lotNo: "LOT002",
-        spec: "3C 6SQ",
-        unit: "M",
-        currentStock: 1400,
-        availableStock: 1400,
-        manufactureDate: "2023-08-20", 
-        expiryDate: "2025-08-20",
-        locationInfo: "창고A/1층/002"
-      },
-      {
-        itemCd: "000002",
-        itemNm: "TFR-CV 3C 6SQ (골드)",
-        serialNo: "2-도료/Z1 11 10:17:16",
-        lotNo: "LOT003",
-        spec: "3C 6SQ",
-        unit: "M",
-        currentStock: 900,
-        availableStock: 900,
-        manufactureDate: "2023-08-25",
-        expiryDate: "2025-08-25", 
-        locationInfo: "창고A/2층/001"
-      }
-    ]
-
-}),[]);
-
-// 제품코드별 그룹화 함수
-const getGroupedData = useMemo(() => {
-  const data = sampleData[activeTab] || [];
-  const grouped = {};
-  
-  data.forEach(item => {
-    if (!grouped[item.itemCd]) {
-      grouped[item.itemCd] = {
-        items: [],
-        totals: {
-          currentStock: 0,
-          availableStock: 0,
-          purchaseQty: 0,
-          locationQty: 0,
-          shortageQty: 0
-        }
-      };
-    }
+  // 제품코드별 그룹화 함수
+  const getGroupedData = useMemo(() => {
+    const grouped = {};
     
-    grouped[item.itemCd].items.push(item);
-    grouped[item.itemCd].totals.currentStock += item.currentStock || 0;
-    grouped[item.itemCd].totals.availableStock += item.availableStock || 0;
-    grouped[item.itemCd].totals.purchaseQty += item.purchaseQty || 0;
-    grouped[item.itemCd].totals.locationQty += item.locationQty || 0;
-    grouped[item.itemCd].totals.shortageQty += item.shortageQty || 0;
-  });
-  
-  return grouped;
-}, [sampleData, activeTab]);
+    gridData.forEach(item => {
+      if (!grouped[item.itemCd]) {
+        grouped[item.itemCd] = {
+          items: [],
+          totals: {
+            currentStock: 0,
+            availableStock: 0,
+            purchaseQty: 0,
+            locationQty: 0,
+            shortageQty: 0
+          }
+        };
+      }
+      
+      grouped[item.itemCd].items.push(item);
+      grouped[item.itemCd].totals.currentStock += item.currentStock || 0;
+      grouped[item.itemCd].totals.availableStock += item.availableStock || 0;
+      grouped[item.itemCd].totals.purchaseQty += item.purchaseQty || 0;
+      grouped[item.itemCd].totals.locationQty += item.locationQty || 0;
+      grouped[item.itemCd].totals.shortageQty += item.shortageQty || 0;
+    });
+    
+    return grouped;
+  }, [gridData]);
 
   // 페이지네이션 계산
   const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
-    const data = sampleData[activeTab] || [];
     const startIdx = (currentPage - 1) * itemsPerPage;
     const endIdx = startIdx + itemsPerPage;
-    const currentItems = data.slice(startIdx, endIdx);
-    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const currentItems = gridData.slice(startIdx, endIdx);
+    const totalPages = Math.ceil(gridData.length / itemsPerPage);
     
     return {
       currentItems,
       totalPages,
       startIndex: startIdx + 1,
-      endIndex: Math.min(endIdx, data.length)
+      endIndex: Math.min(endIdx, gridData.length)
     };
-  }, [activeTab, currentPage, itemsPerPage]);
+  }, [gridData, currentPage, itemsPerPage]);
 
   // 탭 변경 시 페이지 초기화
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
+    setGridData([]); // 데이터 초기화
   };
 
   // 검색 초기화
@@ -219,7 +89,7 @@ const getGroupedData = useMemo(() => {
     setCurrentPage(1);
   };
 
-  // 커스텀 훅을 사용한 데이터 조회
+  // 실제 API 호출 함수
   const fetchData = useCallback(async () => {
     try {
       // 검색 파라미터 설정
@@ -246,28 +116,37 @@ const getGroupedData = useMemo(() => {
       }
       
       // API 응답 처리
-      if (response && response.data) {
+      if (response && Array.isArray(response)) {
+        setGridData(response);
+      } else if (response && response.data && Array.isArray(response.data)) {
         setGridData(response.data);
       } else {
-        // API 응답이 비어있으면 기존 샘플 데이터 사용
-        setGridData(sampleData[activeTab] || []);
+        setGridData([]);
+        console.warn('예상치 못한 API 응답 형식:', response);
       }
 
     } catch (error) {
       console.error('데이터 조회 실패:', error);
+      setGridData([]);
       
-      // API 에러 발생 시 기존 샘플 데이터를 fallback으로 사용
-      setGridData(sampleData[activeTab] || []);
-      
-      // 에러 메시지 표시 (원하는 경우 주석 해제)
-      // setIsModalOpen(true);
-      // setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
+      // 에러 메시지 표시
+      setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
+      setIsModalOpen(true);
     }
-  }, [activeTab, itemName, currentPage, itemsPerPage, getNormalInventory, getOptionInventory, getSerialInventory, sampleData]);
+  }, [activeTab, itemName, currentPage, itemsPerPage, getNormalInventory, getOptionInventory, getSerialInventory]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
     fetchData();
+    // 모바일에서 검색 후 검색영역 숨기기
+    if (window.innerWidth <= 768) {
+      setIsSearchVisible(false);
+    }
+  };
+  
+  // 검색영역 토글
+  const toggleSearchArea = () => {
+    setIsSearchVisible(!isSearchVisible);
   };
 
   // 탭 변경 시 데이터 새로고침
@@ -311,235 +190,253 @@ const getGroupedData = useMemo(() => {
   };
 
   // 일반 재고 테이블
-const renderNormalInventory = () => {
-  const groupedData = getGroupedData;
-  const rows = [];
-  
-  Object.entries(groupedData).forEach(([itemCd, group]) => {
-    // 개별 행들 추가
-    group.items.forEach((row, index) => {
-      rows.push(
-        <tr key={`${row.itemCd}-${index}`} onClick={() => handleRowClick(row)}>
-          <td className="cust0010-center">{row.itemCd}</td>
-          <td className="cust0010-left">{row.itemNm}</td>
-          <td className="cust0010-center">{row.spec}</td>
-          <td className="cust0010-center">{row.unit}</td>
-          <td className="cust0010-right">{row.currentStock.toLocaleString()}</td>
-          <td className="cust0010-right">{row.availableStock.toLocaleString()}</td>
-          <td className="cust0010-right">{row.purchaseQty.toLocaleString()}</td>
-          <td className="cust0010-right">{row.locationQty.toLocaleString()}</td>
-          <td className="cust0010-right">{row.shortageQty.toLocaleString()}</td>
-        </tr>
-      );
-    });
+  const renderNormalInventory = () => {
+    const groupedData = getGroupedData;
+    const rows = [];
     
-    // 합계 행 추가 (2개 이상의 항목이 있을 때만)
-    if (group.items.length > 1) {
-      rows.push(
-        <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
-          <td 
-            colSpan={2} 
-            className="cust0010-center" 
-            style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
-          >
-            {itemCd} : {group.items[0].itemNm} 계
-          </td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.currentStock.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.availableStock.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.purchaseQty.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.locationQty.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.shortageQty.toLocaleString()}
-          </td>
-        </tr>
-      );
-    }
-  });
-
-  return (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
-        <thead>
-          <tr>
-            <th style={{ width: '120px' }}>제품코드</th>
-            <th>품목명</th>
-            <th style={{ width: '100px' }}>규격</th>
-            <th style={{ width: '60px' }}>단위</th>
-            <th style={{ width: '80px' }}>현재고</th>
-            <th style={{ width: '80px' }}>가용수량</th>
-            <th style={{ width: '80px' }}>구매량</th>
-            <th style={{ width: '80px' }}>위치량</th>
-            <th style={{ width: '80px' }}>할당부족</th>
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      // 개별 행들 추가
+      group.items.forEach((row, index) => {
+        rows.push(
+          <tr key={`${row.itemCd}-${index}`} onClick={() => handleRowClick(row)}>
+            <td className="cust0010-center">{row.itemCd}</td>
+            <td className="cust0010-left">{row.itemNm}</td>
+            <td className="cust0010-center">{row.spec}</td>
+            <td className="cust0010-center">{row.unit}</td>
+            <td className="cust0010-right">{(row.currentStock || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.availableStock || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.purchaseQty || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.locationQty || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.shortageQty || 0).toLocaleString()}</td>
           </tr>
-        </thead>
-        <tbody>
-          {rows}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        );
+      });
+      
+      // 합계 행 추가 (2개 이상의 항목이 있을 때만)
+      if (group.items.length > 1) {
+        rows.push(
+          <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
+            <td 
+              colSpan={2} 
+              className="cust0010-center" 
+              style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
+            >
+              {itemCd} : {group.items[0].itemNm} 계
+            </td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.currentStock.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.availableStock.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.purchaseQty.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.locationQty.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.shortageQty.toLocaleString()}
+            </td>
+          </tr>
+        );
+      }
+    });
+
+    return (
+      <div className="cust0010-table-container">
+        <table className="cust0010-table">
+          <thead>
+            <tr>
+              <th style={{ width: '120px' }}>제품코드</th>
+              <th>품목명</th>
+              <th style={{ width: '100px' }}>규격</th>
+              <th style={{ width: '60px' }}>단위</th>
+              <th style={{ width: '80px' }}>현재고</th>
+              <th style={{ width: '80px' }}>가용수량</th>
+              <th style={{ width: '80px' }}>구매량</th>
+              <th style={{ width: '80px' }}>위치량</th>
+              <th style={{ width: '80px' }}>할당부족</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length > 0 ? rows : (
+              <tr>
+                <td colSpan={9} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   // 옵션 재고 테이블
-const renderOptionInventory = () => {
-  const groupedData = getGroupedData;
-  const rows = [];
-  
-  Object.entries(groupedData).forEach(([itemCd, group]) => {
-    // 개별 행들 추가
-    group.items.forEach((row, index) => {
-      rows.push(
-        <tr key={`${row.itemCd}-${row.optionCode}-${index}`} onClick={() => handleRowClick(row)}>
-          <td className="cust0010-center">{row.itemCd}</td>
-          <td className="cust0010-left">{row.itemNm}</td>
-          <td className="cust0010-center">{row.optionCode}</td>
-          <td className="cust0010-center">{row.optionName}</td>
-          <td className="cust0010-center">{row.unit}</td>
-          <td className="cust0010-right">{row.currentStock.toLocaleString()}</td>
-          <td className="cust0010-right">{row.availableStock.toLocaleString()}</td>
-          <td className="cust0010-right">{row.price}</td>
-          <td className="cust0010-center">{row.locationInfo}</td>
-        </tr>
-      );
-    });
+  const renderOptionInventory = () => {
+    const groupedData = getGroupedData;
+    const rows = [];
     
-    // 합계 행 추가 (2개 이상의 항목이 있을 때만)
-    if (group.items.length > 1) {
-      rows.push(
-        <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
-          <td 
-            colSpan={2} 
-            className="cust0010-center" 
-            style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
-          >
-            {itemCd} : {group.items[0].itemNm} 계
-          </td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.currentStock.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.availableStock.toLocaleString()}
-          </td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-        </tr>
-      );
-    }
-  });
-
-  return (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
-        <thead>
-          <tr>
-            <th style={{ width: '120px' }}>제품코드</th>
-            <th>품목명</th>
-            <th style={{ width: '120px' }}>옵션코드</th>
-            <th style={{ width: '100px' }}>옵션명</th>
-            <th style={{ width: '60px' }}>단위</th>
-            <th style={{ width: '80px' }}>현재고</th>
-            <th style={{ width: '80px' }}>가용수량</th>
-            <th style={{ width: '80px' }}>단가</th>
-            <th style={{ width: '120px' }}>위치정보</th>
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      // 개별 행들 추가
+      group.items.forEach((row, index) => {
+        rows.push(
+          <tr key={`${row.itemCd}-${row.optionCode}-${index}`} onClick={() => handleRowClick(row)}>
+            <td className="cust0010-center">{row.itemCd}</td>
+            <td className="cust0010-left">{row.itemNm}</td>
+            <td className="cust0010-center">{row.optionCode}</td>
+            <td className="cust0010-center">{row.optionName}</td>
+            <td className="cust0010-center">{row.unit}</td>
+            <td className="cust0010-right">{(row.currentStock || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.availableStock || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{row.price || '-'}</td>
+            <td className="cust0010-center">{row.locationInfo || '-'}</td>
           </tr>
-        </thead>
-        <tbody>
-          {rows}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        );
+      });
+      
+      // 합계 행 추가 (2개 이상의 항목이 있을 때만)
+      if (group.items.length > 1) {
+        rows.push(
+          <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
+            <td 
+              colSpan={2} 
+              className="cust0010-center" 
+              style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
+            >
+              {itemCd} : {group.items[0].itemNm} 계
+            </td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.currentStock.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.availableStock.toLocaleString()}
+            </td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+          </tr>
+        );
+      }
+    });
+
+    return (
+      <div className="cust0010-table-container">
+        <table className="cust0010-table">
+          <thead>
+            <tr>
+              <th style={{ width: '120px' }}>제품코드</th>
+              <th>품목명</th>
+              <th style={{ width: '120px' }}>옵션코드</th>
+              <th style={{ width: '100px' }}>옵션명</th>
+              <th style={{ width: '60px' }}>단위</th>
+              <th style={{ width: '80px' }}>현재고</th>
+              <th style={{ width: '80px' }}>가용수량</th>
+              <th style={{ width: '80px' }}>단가</th>
+              <th style={{ width: '120px' }}>위치정보</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length > 0 ? rows : (
+              <tr>
+                <td colSpan={9} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   // 시리얼/로트 재고 테이블
-const renderSerialInventory = () => {
-  const groupedData = getGroupedData;
-  const rows = [];
-  
-  Object.entries(groupedData).forEach(([itemCd, group]) => {
-    // 개별 행들 추가
-    group.items.forEach((row, index) => {
-      rows.push(
-        <tr key={`${row.itemCd}-${row.serialNo}-${index}`} onClick={() => handleRowClick(row)}>
-          <td className="cust0010-center">{row.itemCd}</td>
-          <td className="cust0010-left">{row.itemNm}</td>
-          <td className="cust0010-center">{row.serialNo}</td>
-          <td className="cust0010-center">{row.lotNo}</td>
-          <td className="cust0010-center">{row.unit}</td>
-          <td className="cust0010-right">{row.currentStock.toLocaleString()}</td>
-          <td className="cust0010-right">{row.availableStock.toLocaleString()}</td>
-          <td className="cust0010-center">{row.manufactureDate}</td>
-          <td className="cust0010-center">{row.expiryDate}</td>
-          <td className="cust0010-center">{row.locationInfo}</td>
-        </tr>
-      );
-    });
+  const renderSerialInventory = () => {
+    const groupedData = getGroupedData;
+    const rows = [];
     
-    // 합계 행 추가 (2개 이상의 항목이 있을 때만)
-    if (group.items.length > 1) {
-      rows.push(
-        <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
-          <td 
-            colSpan={2} 
-            className="cust0010-center" 
-            style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
-          >
-            {itemCd} : {group.items[0].itemNm} 계
-          </td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.currentStock.toLocaleString()}
-          </td>
-          <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
-            {group.totals.availableStock.toLocaleString()}
-          </td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-          <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
-        </tr>
-      );
-    }
-  });
-
-  return (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
-        <thead>
-          <tr>
-            <th style={{ width: '120px' }}>제품코드</th>
-            <th>품목명</th>
-            <th style={{ width: '150px' }}>시리얼번호</th>
-            <th style={{ width: '80px' }}>로트번호</th>
-            <th style={{ width: '60px' }}>단위</th>
-            <th style={{ width: '80px' }}>현재고</th>
-            <th style={{ width: '80px' }}>가용수량</th>
-            <th style={{ width: '100px' }}>제조일자</th>
-            <th style={{ width: '100px' }}>유통기한</th>
-            <th style={{ width: '120px' }}>위치정보</th>
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      // 개별 행들 추가
+      group.items.forEach((row, index) => {
+        rows.push(
+          <tr key={`${row.itemCd}-${row.serialNo}-${index}`} onClick={() => handleRowClick(row)}>
+            <td className="cust0010-center">{row.itemCd}</td>
+            <td className="cust0010-left">{row.itemNm}</td>
+            <td className="cust0010-center">{row.serialNo}</td>
+            <td className="cust0010-center">{row.lotNo}</td>
+            <td className="cust0010-center">{row.unit}</td>
+            <td className="cust0010-right">{(row.currentStock || 0).toLocaleString()}</td>
+            <td className="cust0010-right">{(row.availableStock || 0).toLocaleString()}</td>
+            <td className="cust0010-center">{row.manufactureDate || '-'}</td>
+            <td className="cust0010-center">{row.expiryDate || '-'}</td>
+            <td className="cust0010-center">{row.locationInfo || '-'}</td>
           </tr>
-        </thead>
-        <tbody>
-          {rows}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        );
+      });
+      
+      // 합계 행 추가 (2개 이상의 항목이 있을 때만)
+      if (group.items.length > 1) {
+        rows.push(
+          <tr key={`${itemCd}-subtotal`} className="cust0010-subtotal-row">
+            <td 
+              colSpan={2} 
+              className="cust0010-center" 
+              style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}
+            >
+              {itemCd} : {group.items[0].itemNm} 계
+            </td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.currentStock.toLocaleString()}
+            </td>
+            <td className="cust0010-right" style={{ fontWeight: 'bold', backgroundColor: '#f0f9ff' }}>
+              {group.totals.availableStock.toLocaleString()}
+            </td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+            <td className="cust0010-center" style={{ backgroundColor: '#f0f9ff' }}>-</td>
+          </tr>
+        );
+      }
+    });
+
+    return (
+      <div className="cust0010-table-container">
+        <table className="cust0010-table">
+          <thead>
+            <tr>
+              <th style={{ width: '120px' }}>제품코드</th>
+              <th>품목명</th>
+              <th style={{ width: '150px' }}>시리얼번호</th>
+              <th style={{ width: '80px' }}>로트번호</th>
+              <th style={{ width: '60px' }}>단위</th>
+              <th style={{ width: '80px' }}>현재고</th>
+              <th style={{ width: '80px' }}>가용수량</th>
+              <th style={{ width: '100px' }}>제조일자</th>
+              <th style={{ width: '100px' }}>유통기한</th>
+              <th style={{ width: '120px' }}>위치정보</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length > 0 ? rows : (
+              <tr>
+                <td colSpan={10} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   // 현재 탭에 따른 테이블 렌더링
   const renderCurrentTable = () => {
@@ -591,28 +488,36 @@ const renderSerialInventory = () => {
       </div>
 
       {/* 검색 영역 */}
-      <div className="cust0010-search-container">
-        <div className="cust0010-search-row">
-          <div className="cust0010-search-field">
-            <label>제품명</label>
-            <input
-              type="text"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="제품명 입력"
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
+      <div className="cust0010-search-section">
+        {/* 모바일 검색 토글 버튼 */}
+        <div className="cust0010-mobile-search-toggle" onClick={toggleSearchArea}>
+          <span>검색 옵션</span>
+          {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </div>
+        
+        <div className={`cust0010-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
+          <div className="cust0010-search-row">
+            <div className="cust0010-search-field">
+              <label>제품명</label>
+              <input
+                type="text"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="제품명 입력"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
 
-          <div className="cust0010-search-buttons">
-            <button className="cust0010-search-btn" onClick={handleSearch}>
-              <Search size={16} />
-              검색
-            </button>
-            <button className="cust0010-reset-btn" onClick={handleReset}>
-              <RotateCcw size={16} />
-              초기화
-            </button>
+            <div className="cust0010-search-buttons">
+              <button className="cust0010-search-btn" onClick={handleSearch}>
+                <Search size={16} />
+                검색
+              </button>
+              <button className="cust0010-reset-btn" onClick={handleReset}>
+                <RotateCcw size={16} />
+                초기화
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -620,7 +525,7 @@ const renderSerialInventory = () => {
       {/* 페이지네이션 정보 및 설정 */}
       <div className="cust0010-pagination-info">
         <div className="cust0010-data-info">
-          전체 {(sampleData[activeTab] || []).length.toLocaleString()}건 중 {(sampleData[activeTab] || []).length > 0 ? startIndex.toLocaleString() : 0}-{endIndex.toLocaleString()}건 표시
+          전체 {gridData.length.toLocaleString()}건 중 {gridData.length > 0 ? startIndex.toLocaleString() : 0}-{endIndex.toLocaleString()}건 표시
         </div>
         <div className="cust0010-page-size-selector">
           <label>페이지당 표시:</label>

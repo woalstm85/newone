@@ -9,7 +9,7 @@ import UserInfo from './UserInfo';
 import LeftMenu from './LeftMenu';
 import TopMenu from './TopMenu';
 import DASHBOARD from '../dashboard/DASHBOARD';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import './Layout.css';
 import Modal from '../common/Modal';
 
@@ -18,6 +18,7 @@ function Layout() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTopMenuCd, setActiveTopMenuCd] = useState('DASHBOARD');
     const [activeTopMenuNm, setActiveTopMenuNm] = useState('DASHBOARD');
+    const [isLeftMenuCollapsed, setIsLeftMenuCollapsed] = useState(false); // 왼쪽 메뉴 접기 상태
     const navigate = useNavigate();
     const location = useLocation();
     const { clearGlobalState, globalState } = useAuth();
@@ -69,6 +70,11 @@ function Layout() {
 
     const closeMenuOverlay = () => {
         setIsMenuOpen(false);
+    };
+
+    // 왼쪽 메뉴 토글 핸들러
+    const toggleLeftMenu = () => {
+        setIsLeftMenuCollapsed(!isLeftMenuCollapsed);
     };
 
     // 탑메뉴가 변경될 때 첫 번째 메뉴 자동 선택
@@ -144,6 +150,7 @@ function Layout() {
     return (
         <>
             <div className="top-bar">
+                {/* 모바일에서 항상 햄버거 메뉴 표시 */}
                 <div className="menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                     {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </div>
@@ -183,18 +190,29 @@ function Layout() {
                 
                 {/* 메인 컨테이너 */}
                 <div className="main-container">
-                    {/* 왼쪽 메뉴: 대시보드가 활성 상태가 아닐 때만 표시 */}
+                    {/* 왼쪽 메뉴: 데스크탑에서는 대시보드가 아닐 때만, 모바일에서는 항상 표시 */}
+                    <div className={`left-menu-container ${isMenuOpen ? 'active' : ''} ${isLeftMenuCollapsed ? 'collapsed' : ''} ${isDashboardActive ? 'dashboard-mode' : ''}`}>
+                        <LeftMenu 
+                            closeMenuOverlay={closeMenuOverlay} 
+                            activeTopMenuCd={activeTopMenuCd}
+                            isCollapsed={isLeftMenuCollapsed}
+                            isDashboardMode={isDashboardActive}
+                        />
+                    </div>
+                    
+                    {/* 왼쪽 메뉴 토글 버튼: 대시보드가 아닐 때만 표시 */}
                     {!isDashboardActive && (
-                        <div className={`left-menu-container ${isMenuOpen ? 'active' : ''}`}>
-                            <LeftMenu 
-                                closeMenuOverlay={closeMenuOverlay} 
-                                activeTopMenuCd={activeTopMenuCd}
-                            />
-                        </div>
+                        <button 
+                            className="left-menu-toggle-btn"
+                            onClick={toggleLeftMenu}
+                            title={isLeftMenuCollapsed ? "메뉴 펼치기" : "메뉴 접기"}
+                        >
+                            {isLeftMenuCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                        </button>
                     )}
 
-                    {/* 메인 컨텐츠 영역 */}
-                    <div className={`main-content ${isDashboardActive ? 'full-width' : ''}`}>
+                    {/* 메인 콘텐츠 영역 */}
+                    <div className={`main-content ${isDashboardActive ? 'full-width' : ''} ${isLeftMenuCollapsed && !isDashboardActive ? 'collapsed-menu' : ''}`}>
                         {/* 대시보드 탭 - TabContainer로 감싸서 상태 유지 */}
                         {renderedTabs['DASHBOARD'] && (
                             <TabContainer 
