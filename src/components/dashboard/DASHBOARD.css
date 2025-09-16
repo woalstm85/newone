@@ -1,16 +1,15 @@
-/* Global Box Sizing */
-* {
-  box-sizing: border-box;
-}
-
 /* Dashboard Container */
 .dash-dashboard-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - 150px);
   background-color: #f5f5f5;
   padding: 20px;
   box-sizing: border-box;
   overflow-x: hidden;
+}
+
+.dash-dashboard-container * {
+  box-sizing: border-box;
 }
 
 .dash-dashboard-content {
@@ -45,6 +44,14 @@
   font-weight: bold;
   color: #333;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-title-icon {
+  font-size: 28px;
+  display: inline-block;
 }
 
 .dash-section-subtitle {
@@ -86,6 +93,9 @@
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dash-product-card:hover {
@@ -119,6 +129,7 @@
   overflow: hidden;
   background-color: #f8f8f8;
   position: relative;
+  flex-shrink: 0;
 }
 
 .dash-product-image {
@@ -136,9 +147,55 @@
   transform: scale(1.1);
 }
 
+.dash-product-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 3;
+}
+
+.dash-product-image-wrapper:hover .dash-product-image-overlay {
+  opacity: 1;
+}
+
+.dash-overlay-view-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dash-overlay-view-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
 /* Product Info */
 .dash-product-info {
   padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .dash-product-name {
@@ -157,7 +214,10 @@
 
 /* Price Container */
 .dash-price-container {
-  margin-top: 10px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .dash-delivery-badge {
@@ -202,25 +262,323 @@
   font-size: 14px;
   color: #999;
   text-decoration: line-through;
+  position: relative;
 }
 
-/* Rating */
-.dash-product-rating {
-  margin-top: 10px;
+.dash-original-price::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #ff8c00;
+  transform: translateY(-50%);
+}
+
+/* 할인 표시 스타일 */
+.dash-discount-info {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.dash-rating-text {
+.dash-discount-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 100%);
+  color: white;
+  font-size: 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.dash-savings-amount {
   font-size: 12px;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+/* 자사재고현황 이미지 뷰 관련 스타일 */
+.dash-inventory-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.dash-inventory-image-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dash-inventory-image-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #007bff;
+}
+
+.dash-inventory-image-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f8f9fa;
+}
+
+.dash-inventory-image-header h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.dash-inventory-image-content {
+  display: flex;
+  padding: 15px;
+  gap: 15px;
+}
+
+.dash-inventory-image-placeholder {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+  position: relative;
+}
+
+.dash-inventory-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Package 아이콘 스타일 */
+.dash-inventory-image-placeholder .fallback-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #ccc;
+}
+
+.dash-inventory-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-inventory-item-details h5 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.dash-inventory-item-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-inventory-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.dash-inventory-spec-row:last-child {
+  border-bottom: none;
+}
+
+.dash-inventory-spec-label {
+  font-size: 13px;
   color: #666;
+  font-weight: 500;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.dash-inventory-spec-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+  text-align: right;
+}
+
+.dash-inventory-spec-client {
+  font-size: 13px;
+  color: #28a745;
+  font-weight: 600;
+  text-align: right;
+}
+
+.dash-inventory-spec-date {
+  font-size: 12px;
+  color: #6c757d;
+  text-align: right;
+}
+
+/* 인벤토리 배지 스타일 */
+.dash-inventory-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dash-inventory-badge.normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.dash-inventory-badge.warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* 반응형 디자인 - 자사재고현황 이미지 뷰 */
+@media (max-width: 1200px) {
+  .dash-inventory-image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-inventory-image-grid {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
+  }
+
+  .dash-inventory-image-card {
+    border-radius: 8px;
+  }
+
+  .dash-inventory-image-content {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .dash-inventory-image-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .dash-inventory-item-details h5 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-inventory-image-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .dash-inventory-image-placeholder {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
+  }
+
+  .dash-inventory-spec-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .dash-inventory-spec-label,
+  .dash-inventory-spec-value,
+  .dash-inventory-spec-client,
+  .dash-inventory-spec-date {
+    text-align: center;
+    width: 100%;
+  }
+
+  .dash-inventory-spec-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+  }
+}
+
+/* 로그인 필요 메시지 스타일 */
+.dash-login-required {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 2px dashed #dee2e6;
+}
+
+.dash-login-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dash-login-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.dash-login-message p {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.dash-login-button {
+  padding: 10px 30px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dash-login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
   .dash-products-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  
+  .dash-inventory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 
@@ -231,6 +589,11 @@
 
   .dash-products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .dash-inventory-grid {
+    grid-template-columns: repeat(1, 1fr);
     gap: 15px;
   }
 
@@ -244,8 +607,29 @@
     font-size: 20px;
   }
 
+  .dash-title-icon {
+    font-size: 24px;
+  }
+
   .dash-more-button {
     align-self: flex-end;
+  }
+
+  .dash-inventory-card {
+    padding: 15px;
+  }
+
+  .dash-inventory-name {
+    font-size: 15px;
+  }
+
+  .dash-login-message {
+    padding: 30px 15px;
+  }
+
+  .dash-login-icon {
+    font-size: 36px;
+    margin-bottom: 15px;
   }
 }
 
@@ -256,5 +640,30 @@
 
   .dash-product-image-wrapper {
     height: 150px;
+  }
+
+  .dash-inventory-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .dash-inventory-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .dash-inventory-label,
+  .dash-inventory-value,
+  .dash-inventory-quantity,
+  .dash-inventory-client,
+  .dash-inventory-date {
+    text-align: left;
+    width: 100%;
+  }
+
+  .dash-inventory-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
   }
 }

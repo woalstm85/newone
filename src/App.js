@@ -10,32 +10,40 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import MySpinner from './components/common/MySpinner';
 
-
-// ✨ DynamicRouteComponent 수정
+// ✨ DynamicRouteComponent 수정 - 로그인 체크 제거
 const DynamicRouteComponent = () => {
   const [Component, setComponent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate(); // ✨ useNavigate 훅 사용
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // ✨ 루트 경로('/')일 경우 '/dashboard'로 리디렉션
-    if (location.pathname === '/') {
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-
     const loadComponent = async () => {
-      setComponent(null); // 경로 변경 시 컴포넌트 초기화
       try {
-        const path = location.pathname.slice(1);
+        setIsLoading(true);
+        setShowModal(false);
+        setComponent(null);
+        
+        const path = location.pathname.slice(1) || 'dashboard';
+        
+        // Layout에서 처리하는 경로들은 빈 컴포넌트 반환
+        if (path === 'surplus' || path === 'event') {
+          setComponent(() => () => null); // 빈 컴포넌트
+          return;
+        }
+        
         let module;
 
-        console.log('최습 Loading component for path:', path);
+        console.log('Loading component for path:', path);
 
         // ✨ 경로별 특별 처리 - 상세 매핑
         if (path === 'dashboard') {
-          module = await import('./components/dashboard/DASHBOARD');
+          // dashboard는 Layout에서 처리하므로 빈 컴포넌트
+          setComponent(() => () => null);
+          return;
+        } else if (path === 'cart') {
+          module = await import('./components/cart/Cart');
         } else if (path === 'CUST0010' || path === 'CUST/CUST0010') {
           module = await import('./components/CUST/CUST0010');
         } else if (path === 'CUST0020' || path === 'CUST/CUST0020') {
@@ -43,20 +51,11 @@ const DynamicRouteComponent = () => {
         } else {
           // 기존 동적 임포트 로직 - 여러 방식 시도
           try {
-            // 첫 번째 시도: 정확한 경로
-            module = await import(
-              /* webpackChunkName: "[request]" */
-              `./components/${path}`
-            );
+            module = await import(`./components/${path}`);
           } catch (firstError) {
             try {
-              // 두 번째 시도: 소문자로 변환
-              module = await import(
-                /* webpackChunkName: "[request]" */
-                `./components/${path.toLowerCase()}`
-              );
+              module = await import(`./components/${path.toLowerCase()}`);
             } catch (secondError) {
-              // 세 번째 시도: CUST 폴더 내 컴포넌트인지 확인
               if (path.includes('/')) {
                 const [folder, component] = path.split('/');
                 if (folder === 'CUST') {
@@ -78,30 +77,62 @@ const DynamicRouteComponent = () => {
         }
       } catch (err) {
         console.error('🔴 Component load error for path:', location.pathname, err);
-        // 준비 중인 페이지가 아닐 경우에만 모달 표시
         setShowModal(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadComponent();
-  }, [location.pathname, navigate]);
+  }, [location.pathname]);
 
   // 로딩 중 표시
-   if (!Component) return <MySpinner />;
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100%',
+        minHeight: '400px'
+      }}>
+        <MySpinner />
+      </div>
+    );
+  }
   
+  // 에러 발생 시 모달 표시
+  if (showModal) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h3>페이지를 불러오는 중입니다...</h3>
+        <Modal
+          isOpen={showModal}
+          title="안내"
+          message="요청하신 페이지를 찾을 수 없거나 준비 중입니다. 대시보드로 이동하시겠습니까?"
+          onConfirm={() => {
+            setShowModal(false);
+            navigate('/dashboard');
+          }}
+          onCancel={() => {
+            setShowModal(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // 컴포넌트가 있는 경우 렌더링
+  if (Component) {
+    return <Component key={location.pathname} />;
+  }
+
+  // fallback
   return (
-    <>
-      <Component key={location.pathname} />
-      <Modal
-        isOpen={showModal}
-        title="안내"
-        message="요청하신 페이지를 찾을 수 없거나 준비 중입니다."
-        onConfirm={() => {
-          setShowModal(false);
-          navigate('/dashboard'); // 모달 확인 시 대시보드로 이동
-        }}
-      />
-    </>
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+      <h3>페이지를 불러올 수 없습니다.</h3>
+      <button onClick={() => navigate('/dashboard')}>대시보드로 이동</button>
+    </div>
   );
 };
 
@@ -111,16 +142,18 @@ function App() {
       <MenuProvider>
         <TabStateProvider>
           <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            {/* ✨ Layout 라우트 구조를 Outlet을 사용하도록 변경 */}
-            <Route path="/*" element={<Layout />}>
-              <Route path="*" element={
-                <Suspense fallback={<div>로딩중...</div>}>
-                  <DynamicRouteComponent />
-                </Suspense>
-              } />
-            </Route>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              {/* 루트 경로 리디렉션 */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* ✨ Layout 라우트 - 로그인 체크 없이 모든 경로 허용 */}
+              <Route path="/*" element={<Layout />}>
+                <Route path="*" element={
+                  <Suspense fallback={<div>로딩중...</div>}>
+                    <DynamicRouteComponent />
+                  </Suspense>
+                } />
+              </Route>
             </Routes>
             {/* ToastContainer 추가 */}
             <ToastContainer 

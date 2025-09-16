@@ -1,36 +1,230 @@
+/* 전체 페이지 레이아웃 컨테이너 */
 .layout-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 75px);   /* top-bar 높이만큼 뺌 */
-  margin-top: 75px;   /* top-bar 높이만큼 여백 */
+  height: calc(100vh - 75px);
+  margin-top: 75px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
+/* 태블릿 및 모바일 반응형 */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 8px;
+  }
+  
+  /* 유저인포 숨김 - 더 구체적인 선택자 */
+  .top-bar .top-bar-right .user-info {
+    display: none !important;
+  }
+  
+  .top-bar .top-bar-right .separator {
+    display: none !important;
+  }
+
+  .logo-section {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  /* 모바일에서 추가 스타일링 */
+}
+
+/* 메인 콘텐츠와 왼쪽 메뉴를 포함하는 컨테이너 */
 .main-container {
   display: flex;
   flex: 1;
   overflow: hidden;
-  position: relative; /* 토글 버튼 포지셔닝을 위해 추가 */
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
+/* 메인 콘텐츠 영역 */
 .main-content {
   flex: 1;
   padding: 12px;
-  margin-left: 240px;   /* left-menu-container 너비만큼 */
   overflow-y: auto;
-  transition: margin-left 0.3s ease; /* 부드러운 전환 효과 */
-}
-
-/* 대시보드 선택 시 컨텐츠 영역을 전체 너비로 설정 */
-.main-content.full-width {
+  overflow-x: hidden;
+  background: #fff;
+  position: relative;
   width: 100%;
-  margin-left: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* 왼쪽 메뉴가 접힌 상태일 때 메인 콘텐츠 마진 조정 */
-.main-content.collapsed-menu {
-  margin-left: 60px; /* 접힌 메뉴 너비만큼 */
+/* 콘텐츠 영역을 전체 너비로 확장 - 더 이상 사용하지 않음 */
+.main-content.full-width {
+  flex: 1;
 }
 
+/* 왼쪽 메뉴 컨테이너 - 데스크탑에서는 flex 레이아웃 */
+.left-menu-container {
+  flex: 0 0 280px; /* 고정 너비 280px */
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+/* 왼쪽 메뉴가 닫힌 상태 */
+.left-menu-container.hidden {
+  flex: 0 0 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* 탭메뉴 위로 올라가는 문제 해결 - 태블릿/모바일에서만 */
+@media (max-width: 1024px) {
+  .left-menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 150;
+    display: flex;
+    flex: none; /* flex 속성 제거 */
+  }
+  
+  .left-menu-container.hidden {
+    display: none;
+  }
+  
+  .left-menu-container .product-category-overlay {
+    width: 80%;
+    max-width: 320px;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    animation: slideInLeft 0.3s ease-out;
+  }
+  
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+
+/* 콘텐츠 헤더 */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+.content-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selected-category-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8f9fa;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 12px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+}
+
+.title-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-count-display {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  margin-left: 12px;
+}
+
+.menu-toggle-btn {
+  display: flex; /* 모든 화면 크기에서 표시 */
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 36px;
+  height: 36px;
+}
+
+.menu-toggle-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  color: #343a40;
+}
+
+.menu-toggle-btn:active {
+  transform: translateY(1px);
+}
+
+/* 태블릿/모바일에서 content-header */
+@media (max-width: 1024px) {
+  .content-header {
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+  }
+  
+  /* 태블릿/모바일에서 선택된 카테고리 숨김 */
+  .selected-category-display {
+    display: none;
+  }
+  
+  /* 모바일에서 카테고리 메뉴가 열렸을 때 햄버거 버튼 숨기기 */
+  .content-header.menu-open .menu-toggle-btn {
+    display: none;
+  }
+}
+
+/* 상단바 */
 .top-bar {
   position: fixed;
   top: 0;
@@ -46,12 +240,14 @@
   z-index: 100;
 }
 
+/* 상단바 오른쪽 섹션 */
 .top-bar-right {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
+/* 구분선 */
 .separator {
   width: 1px;
   height: 16px;
@@ -59,6 +255,7 @@
   margin: 0 16px;
 }
 
+/* 사용자 정보 */
 .user-info {
   display: flex;
   align-items: center;
@@ -78,6 +275,7 @@
   color: #1f2937;
 }
 
+/* 로고 섹션 */
 .logo-section {
   display: flex;
   align-items: center;
@@ -94,11 +292,7 @@
   margin-left: 10px;
 }
 
-.menu-trigger {
-  display: none;
-  cursor: pointer;
-}
-
+/* 로그아웃 버튼 */
 .logout-btn {
   position: absolute;
   right: 20px;
@@ -124,122 +318,54 @@
   height: 30px;
 }
 
-.left-menu-container {
-  position: fixed;
-  left: 0;
-  top: 123px; /* top-bar + top-menu 높이 */
-  bottom: 0;
-  width: 240px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-  z-index: 91;
-  transition: width 0.3s ease, transform 0.3s ease; /* 부드러운 전환 효과 */
-}
-
-/* Dashboard 모드일 때 데스크탑에서는 숨기기 */
-.left-menu-container.dashboard-mode {
-  display: none;
-}
-
-/* 왼쪽 메뉴 접힌 상태 */
-.left-menu-container.collapsed {
-  width: 40px; /* 접힌 상태 너비 */
-}
-
-/* 왼쪽 메뉴 토글 버튼 */
-.left-menu-toggle-btn {
-  position: fixed;
-  left: 240px; /* 기본 메뉴 너비에 맞춰 위치 */
-  bottom: 30px; /* 화면 하단에 위치 */
-  width: 20px; /* 폭 줄임 */
-  height: 32px; /* 높이도 줄임 */
-  background: #f8f9fa;
-  border: 1px solid #e5e7eb;
-  border-left: none;
-  border-radius: 0 4px 4px 0; /* 더 작은 border-radius */
-  cursor: pointer;
+/* 로그인 버튼 */
+.login-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 92;
-  transition: all 0.3s ease;
-  color: #6b7280;
-  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  gap: 8px;
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.left-menu-toggle-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
-  transform: translateX(2px);
+.login-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-/* 메뉴가 접힌 상태일 때 토글 버튼 위치 조정 */
-.left-menu-container.collapsed + .left-menu-toggle-btn {
-  left: 40px; /* 접힌 메뉴 너비에 맞춰 위치 */
+.login-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
-/* 태블릿 반응형 */
-@media (max-width: 768px) {
-  /* 모바일에서는 Dashboard 모드일 때도 메뉴 보이기 */
-  .left-menu-container.dashboard-mode {
-    display: block;
-  }
-  
-  .main-content {
-    margin-left: 0;
-  }
-
-  .main-content.collapsed-menu {
-    margin-left: 0; /* 모바일에서는 메뉴 접기 무시 */
-  }
-
-  .user-info {
-    display: none;
-  }
-
-  .menu-trigger {
-    display: block;
-  }
-
-  .left-menu-container {
-    transform: translateX(-100%);
-    width: 80%;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    top: 123px;
-  }
-
-  .left-menu-container.active {
-    transform: translateX(0);
-  }
-
-  /* 모바일에서는 토글 버튼 숨기기 */
-  .left-menu-toggle-btn {
-    display: none;
-  }
-
-  .menu-overlay.active {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 89;
-  }
-
-  .logo-section {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+/* 게스트 모드 상단바 스타일 */
+.top-bar.guest-mode {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
-/* 모바일 반응형 */
+.top-bar.guest-mode .logo-section {
+  margin-left: 0;
+}
+
+.top-bar.guest-mode .top-bar-right {
+  margin-right: 0;
+}
+
 @media (max-width: 480px) {
   .logo-section {
     left: 50%;
     transform: translateX(-50%);
+  }
+  
+  .main-content {
+    padding: 4px;
   }
 }

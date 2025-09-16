@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Package2, Archive, Hash, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Package2, Archive, Hash, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { CiImageOff } from 'react-icons/ci';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
 import { useInventoryApi } from '../../hooks'; // 커스텀 훅 사용
@@ -11,9 +12,18 @@ function CUST0010() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [activeTab, setActiveTab] = useState('normal'); // 'normal', 'option', 'serial'
+  const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image' - 기본값을 이미지로 설정
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
   const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
+  
+  // 스와이프 제스처용 ref와 상태
+  const searchToggleRef = useRef(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
+  // 스와이프 최소 거리 (픽셀)
+  const minSwipeDistance = 50;
   
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,6 +31,53 @@ function CUST0010() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
+
+  // 스와이프 시작
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 중
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 종료
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+    const isDownSwipe = distance < -minSwipeDistance;
+
+    // 아래로 스와이프하면 검색영역 열기
+    if (isDownSwipe && !isSearchVisible) {
+      setIsSearchVisible(true);
+    }
+    // 위로 스와이프하면 검색영역 닫기
+    else if (isUpSwipe && isSearchVisible) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  // 검색영역 외부 클릭시 닫기
+  const handleClickOutside = useCallback((event) => {
+    if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
+      // 모바일에서만 작동하도록 체크
+      if (window.innerWidth <= 768 && isSearchVisible) {
+        setIsSearchVisible(false);
+      }
+    }
+  }, [isSearchVisible]);
+
+  // 외부 클릭 이벤트 리스너 등록
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
   
   // API 커스텀 훅 사용
   const { 
@@ -147,6 +204,11 @@ function CUST0010() {
   // 검색영역 토글
   const toggleSearchArea = () => {
     setIsSearchVisible(!isSearchVisible);
+  };
+
+  // 뷰 모드 변경
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
   };
 
   // 탭 변경 시 데이터 새로고침
@@ -438,17 +500,196 @@ function CUST0010() {
     );
   };
 
+  // 이미지 뷰 렌더링 함수들
+  const renderNormalInventoryImage = () => {
+    const groupedData = getGroupedData;
+    const items = [];
+    
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      group.items.forEach((item, index) => {
+        items.push(
+          <div key={`${item.itemCd}-${index}`} className="cust0010-image-item" onClick={() => handleRowClick(item)}>
+            <div className="cust0010-image-header">
+              <h4>{item.itemCd}</h4>
+              <span className="cust0010-item-type">일반재고</span>
+            </div>
+            <div className="cust0010-image-content">
+              <div className="cust0010-image-placeholder">
+                <CiImageOff size={48} color="#ccc" />
+              </div>
+              <div className="cust0010-item-details">
+                <h5>{item.itemNm}</h5>
+                <div className="cust0010-item-specs">
+                  <span>규격: {item.spec || '-'}</span>
+                  <span>단위: {item.unit || '-'}</span>
+                </div>
+                <div className="cust0010-stock-info">
+                  <div className="cust0010-stock-row">
+                    <span>현재고:</span>
+                    <strong>{(item.currentStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>가용:</span>
+                    <strong>{(item.availableStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>구매량:</span>
+                    <span>{(item.purchaseQty || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      });
+    });
+
+    return (
+      <div className="cust0010-image-grid">
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <CiImageOff size={48} color="#ccc" />
+            <p>데이터가 없습니다.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderOptionInventoryImage = () => {
+    const groupedData = getGroupedData;
+    const items = [];
+    
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      group.items.forEach((item, index) => {
+        items.push(
+          <div key={`${item.itemCd}-${item.optionCode}-${index}`} className="cust0010-image-item" onClick={() => handleRowClick(item)}>
+            <div className="cust0010-image-header">
+              <h4>{item.itemCd}</h4>
+              <span className="cust0010-item-type">옵션재고</span>
+            </div>
+            <div className="cust0010-image-content">
+              <div className="cust0010-image-placeholder">
+                <Archive size={40} />
+              </div>
+              <div className="cust0010-item-details">
+                <h5>{item.itemNm}</h5>
+                <div className="cust0010-item-specs">
+                  <span>옵션: {item.optionCode || '-'}</span>
+                  <span>옵션명: {item.optionName || '-'}</span>
+                </div>
+                <div className="cust0010-stock-info">
+                  <div className="cust0010-stock-row">
+                    <span>현재고:</span>
+                    <strong>{(item.currentStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>가용:</span>
+                    <strong>{(item.availableStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>단가:</span>
+                    <span>{item.price || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      });
+    });
+
+    return (
+      <div className="cust0010-image-grid">
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <Archive size={48} />
+            <p>데이터가 없습니다.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderSerialInventoryImage = () => {
+    const groupedData = getGroupedData;
+    const items = [];
+    
+    Object.entries(groupedData).forEach(([itemCd, group]) => {
+      group.items.forEach((item, index) => {
+        items.push(
+          <div key={`${item.itemCd}-${item.serialNo}-${index}`} className="cust0010-image-item" onClick={() => handleRowClick(item)}>
+            <div className="cust0010-image-header">
+              <h4>{item.itemCd}</h4>
+              <span className="cust0010-item-type">시리얼/로트</span>
+            </div>
+            <div className="cust0010-image-content">
+              <div className="cust0010-image-placeholder">
+                <Hash size={40} />
+              </div>
+              <div className="cust0010-item-details">
+                <h5>{item.itemNm}</h5>
+                <div className="cust0010-item-specs">
+                  <span>시리얼: {item.serialNo || '-'}</span>
+                  <span>로트: {item.lotNo || '-'}</span>
+                </div>
+                <div className="cust0010-stock-info">
+                  <div className="cust0010-stock-row">
+                    <span>현재고:</span>
+                    <strong>{(item.currentStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>가용:</span>
+                    <strong>{(item.availableStock || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="cust0010-stock-row">
+                    <span>제조일:</span>
+                    <span>{item.manufactureDate || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      });
+    });
+
+    return (
+      <div className="cust0010-image-grid">
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <Hash size={48} />
+            <p>데이터가 없습니다.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // 현재 탭에 따른 테이블 렌더링
   const renderCurrentTable = () => {
-    switch (activeTab) {
-      case 'normal':
-        return renderNormalInventory();
-      case 'option':
-        return renderOptionInventory();
-      case 'serial':
-        return renderSerialInventory();
-      default:
-        return renderNormalInventory();
+    if (viewMode === 'image') {
+      switch (activeTab) {
+        case 'normal':
+          return renderNormalInventoryImage();
+        case 'option':
+          return renderOptionInventoryImage();
+        case 'serial':
+          return renderSerialInventoryImage();
+        default:
+          return renderNormalInventoryImage();
+      }
+    } else {
+      switch (activeTab) {
+        case 'normal':
+          return renderNormalInventory();
+        case 'option':
+          return renderOptionInventory();
+        case 'serial':
+          return renderSerialInventory();
+        default:
+          return renderNormalInventory();
+      }
     }
   };
 
@@ -460,37 +701,64 @@ function CUST0010() {
           <Package2 className="w-6 h-6" />
           <h1>{currentMenuTitle || '재고현황 관리'}</h1>
         </div>
+        
+        {/* 뷰 모드 선택 */}
+        <div className="cust0010-view-toggle">
+          <button
+            className={`cust0010-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => handleViewModeChange('list')}
+            title="리스트 보기"
+          >
+            <List size={16} />
+          </button>
+          <button
+            className={`cust0010-view-btn ${viewMode === 'image' ? 'active' : ''}`}
+            onClick={() => handleViewModeChange('image')}
+            title="이미지 보기"
+          >
+            <ImageIcon size={16} />
+          </button>
+        </div>
       </div>
 
       {/* 탭 메뉴 */}
       <div className="cust0010-tab-container">
-        <button
-          className={`cust0010-tab ${activeTab === 'normal' ? 'active' : ''}`}
-          onClick={() => handleTabChange('normal')}
-        >
-          <Package2 size={16} />
-          일반재고
-        </button>
-        <button
-          className={`cust0010-tab ${activeTab === 'option' ? 'active' : ''}`}
-          onClick={() => handleTabChange('option')}
-        >
-          <Archive size={16} />
-          옵션재고현황
-        </button>
-        <button
-          className={`cust0010-tab ${activeTab === 'serial' ? 'active' : ''}`}
-          onClick={() => handleTabChange('serial')}
-        >
-          <Hash size={16} />
-          시리얼/로트No. 재고현황
-        </button>
+        <div className="cust0010-tab-group">
+          <button
+            className={`cust0010-tab ${activeTab === 'normal' ? 'active' : ''}`}
+            onClick={() => handleTabChange('normal')}
+          >
+            <Package2 size={16} />
+            일반재고
+          </button>
+          <button
+            className={`cust0010-tab ${activeTab === 'option' ? 'active' : ''}`}
+            onClick={() => handleTabChange('option')}
+          >
+            <Archive size={16} />
+            옵션재고현황
+          </button>
+          <button
+            className={`cust0010-tab ${activeTab === 'serial' ? 'active' : ''}`}
+            onClick={() => handleTabChange('serial')}
+          >
+            <Hash size={16} />
+            시리얼/로트No. 재고현황
+          </button>
+        </div>
       </div>
 
       {/* 검색 영역 */}
       <div className="cust0010-search-section">
         {/* 모바일 검색 토글 버튼 */}
-        <div className="cust0010-mobile-search-toggle" onClick={toggleSearchArea}>
+        <div 
+          ref={searchToggleRef}
+          className="cust0010-mobile-search-toggle" 
+          onClick={toggleSearchArea}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <span>검색 옵션</span>
           {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>

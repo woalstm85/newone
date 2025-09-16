@@ -1,127 +1,97 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom'; 
 import { useAuth } from '../../context/AuthContext';
 import { useTabState } from '../../context/TabStateContext';
 import { useMenu } from '../../context/MenuContext';
-import TabContainer from '../common/TabContainer';
 import UserInfo from './UserInfo';
-import LeftMenu from './LeftMenu';
 import TopMenu from './TopMenu';
 import DASHBOARD from '../dashboard/DASHBOARD';
-import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogIn, Menu, Filter } from 'lucide-react';
 import './Layout.css';
 import Modal from '../common/Modal';
+import ProductCategoryMenu from '../product/ProductCategoryMenu';
+import ProductList from '../product/ProductList';
 
 function Layout() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTopMenuCd, setActiveTopMenuCd] = useState('DASHBOARD');
-    const [activeTopMenuNm, setActiveTopMenuNm] = useState('DASHBOARD');
-    const [isLeftMenuCollapsed, setIsLeftMenuCollapsed] = useState(false); // 왼쪽 메뉴 접기 상태
+    const [activeTopMenuCd, setActiveTopMenuCd] = useState('HOME');
+    const [isProductCategoryMenuOpen, setIsProductCategoryMenuOpen] = useState(false);
+    const [isProductListOpen, setIsProductListOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [currentListType, setCurrentListType] = useState('all');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // 768px 이하를 모바일로 처리
+    const [productCount, setProductCount] = useState(0); // 상품 개수 상태 추가
+
     const navigate = useNavigate();
     const location = useLocation();
     const { clearGlobalState, globalState } = useAuth();
-    const { switchTab, saveTabState, getTabState } = useTabState();
+    const { switchTab } = useTabState();
     const { setCurrentMenu } = useMenu();
     
-    // 각 탑메뉴별로 마지막 선택한 경로 저장
-    const [tabPaths, setTabPaths] = useState({});
-    
-    // 렌더링된 탭들을 추적 (한번 렌더링되면 유지)
+    // 렌더링된 탭들을 추적
     const [renderedTabs, setRenderedTabs] = useState({
-        'DASHBOARD': true  // 대시보드는 기본으로 렌더링
+        'HOME': true
     });
 
     // 대시보드가 활성 상태인지 확인
-    const isDashboardActive = activeTopMenuCd === 'DASHBOARD';    
+    const isDashboardActive = activeTopMenuCd === 'HOME' && (location.pathname === '/dashboard' || location.pathname === '/');
+    
+    // 로그인 상태 확인
+    const isLoggedIn = !!globalState.G_USER_ID;
 
-    // 로그인 체크 추가
+    // 로그인하지 않은 상태에서는 dashboard와 cart, surplus, event만 허용
     useEffect(() => {
-        if (!globalState.G_USER_ID) {
-            navigate('/login');
+        const allowedPaths = ['/dashboard', '/', '/cart', '/surplus', '/event'];
+        if (!isLoggedIn && !allowedPaths.includes(location.pathname)) {
+            navigate('/dashboard');
         }
-    }, [globalState, navigate]);
-
-    // 현재 경로가 변경될 때 탭 경로 업데이트
+    }, [isLoggedIn, location.pathname, navigate]);
+    
+    // 화면 크기 변화 감지
     useEffect(() => {
-        if (!isDashboardActive && activeTopMenuCd !== 'DASHBOARD' && location.pathname !== '/dashboard') {
-            setTabPaths(prev => ({
-                ...prev,
-                [activeTopMenuCd]: location.pathname
-            }));
-        }
-    }, [location.pathname, isDashboardActive, activeTopMenuCd]);
-
-    // 로그인 상태가 아니면 아무것도 렌더링하지 않음
-    if (!globalState.G_USER_ID) {
-        return null;
-    }
-
+        const handleResize = () => {
+            const newIsMobile = window.innerWidth <= 768;
+            setIsMobile(newIsMobile);
+            
+            // 화면 크기가 데스크탑으로 변경되고 잉여재고/행사품목 탭에 있을 때 메뉴 자동 열기
+            if (window.innerWidth > 1024 && (activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT')) {
+                setIsProductCategoryMenuOpen(true);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [activeTopMenuCd]);
+    
     const handleLogoutClick = () => {
         setIsModalOpen(true);
     };
 
     const handleLogoutConfirm = () => {
         clearGlobalState();
-        navigate('/login');
+        setActiveTopMenuCd('HOME');
+        navigate('/dashboard');
         setIsModalOpen(false);
     };
 
-    const closeMenuOverlay = () => {
-        setIsMenuOpen(false);
-    };
-
-    // 왼쪽 메뉴 토글 핸들러
-    const toggleLeftMenu = () => {
-        setIsLeftMenuCollapsed(!isLeftMenuCollapsed);
-    };
-
-    // 탑메뉴가 변경될 때 첫 번째 메뉴 자동 선택
-    const selectFirstMenuItem = async (menuCd) => {
-        if (!globalState.G_USER_ID || !menuCd || menuCd === 'DASHBOARD') return;
-        
-        try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=${menuCd}`);
-            
-            const data = await response.json();
-            
-            // 첫 번째 실행 가능한 프로그램 찾기
-            const programs = data.filter(item => item.LEVEL === 2);
-            if (programs.length > 0 && programs[0].MENU_PATH) {
-                const firstProgram = programs[0];
-                const navigationPath = `/${firstProgram.MENU_PATH}`;
-                
-                // 해당 탑메뉴의 기본 경로로 저장
-                setTabPaths(prev => ({
-                    ...prev,
-                    [menuCd]: navigationPath
-                }));
-                
-                // 메뉴 정보 설정
-                setCurrentMenu(firstProgram.MENU_NM, firstProgram.MENUID);
-                
-                // 페이지로 이동
-                navigate(navigationPath);
-            }
-        } catch (error) {
-            console.error('Failed to select first menu item:', error);
-        }
+    const handleLoginClick = () => {
+        navigate('/login');
     };
 
     const handleTopMenuClick = async (menuCd, menuNm) => {
-        const previousTab = activeTopMenuCd;
-        
-        // 현재 탭의 경로 저장 (대시보드가 아닐 때만)
-        if (!isDashboardActive && previousTab !== 'DASHBOARD') {
-            setTabPaths(prev => ({
-                ...prev,
-                [previousTab]: location.pathname
-            }));
+        if (!menuCd) {
+            console.error('Layout: menuCd is undefined');
+            return;
         }
-        
+
+        // 로그인하지 않은 상태에서는 home, surplus, event, cart만 허용
+        if (!isLoggedIn && !['HOME', 'SURPLUS', 'EVENT', 'CART'].includes(menuCd)) {
+            return;
+        }
+
+        // 탭 상태 업데이트
         setActiveTopMenuCd(menuCd);
-        setActiveTopMenuNm(menuNm);
         switchTab(menuCd);
         
         // 새로운 탭을 렌더링 목록에 추가
@@ -132,40 +102,174 @@ function Layout() {
             }));
         }
         
-        // 대시보드로 이동
-        if (menuCd === 'DASHBOARD') {
-            navigate('/dashboard');
-        } 
-        // 다른 탑메뉴로 이동
+        // 잉여재고거래 메뉴인 경우
+        if (menuCd === 'SURPLUS') {
+            setCurrentListType('surplus');
+            setIsProductListOpen(true);
+            // 데스크탑에서는 항상 열림, 모바일에서는 닫힌 상태
+            setIsProductCategoryMenuOpen(window.innerWidth > 1024);
+            setSelectedCategory(null);
+            return;
+        }
+        // 행사품목 메뉴인 경우
+        else if (menuCd === 'EVENT') {
+            setCurrentListType('event');
+            setIsProductListOpen(true);
+            // 데스크탑에서는 항상 열림, 모바일에서는 닫힌 상태
+            setIsProductCategoryMenuOpen(window.innerWidth > 1024);
+            setSelectedCategory(null);
+            return;
+        }
+        // HOME 메뉴인 경우
+        else if (menuCd === 'HOME') {
+            setIsProductListOpen(false);
+            setIsProductCategoryMenuOpen(false);
+            setSelectedCategory(null);
+        }
+        // CART 메뉴인 경우
+        else if (menuCd === 'CART') {
+            setIsProductListOpen(false);
+            setIsProductCategoryMenuOpen(false);
+            setSelectedCategory(null);
+        }
+        // 다른 메뉴들 - 왼쪽 메뉴 상태 초기화
         else {
-            // 이전에 방문한 경로가 있으면 그곳으로, 없으면 첫 번째 메뉴 선택
-            if (tabPaths[menuCd]) {
-                navigate(tabPaths[menuCd]);
-            } else {
-                await selectFirstMenuItem(menuCd);
+            setIsProductListOpen(false);
+            setIsProductCategoryMenuOpen(false);
+            setSelectedCategory(null);
+            
+            // 로그인된 상태에서만 메뉴 설정
+            if (isLoggedIn) {
+                setCurrentMenu(menuNm || menuCd, menuCd);
             }
         }
     };
 
+    // URL 경로에 따라 TopMenu 상태 동기화
+    useEffect(() => {
+        if (location.pathname === '/cart') {
+            setActiveTopMenuCd('CART');
+            setIsProductCategoryMenuOpen(false);
+            setIsProductListOpen(false);
+            setSelectedCategory(null);
+        } else if (location.pathname === '/surplus') {
+            setActiveTopMenuCd('SURPLUS');
+            setCurrentListType('surplus');
+            setIsProductListOpen(true);
+            setIsProductCategoryMenuOpen(window.innerWidth > 1024); // 데스크탑에서는 열림, 태블릿/모바일에서는 닫힘
+            setSelectedCategory(null);
+        } else if (location.pathname === '/event') {
+            setActiveTopMenuCd('EVENT');
+            setCurrentListType('event');
+            setIsProductListOpen(true);
+            setIsProductCategoryMenuOpen(window.innerWidth > 1024); // 데스크탑에서는 열림, 태블릿/모바일에서는 닫힘
+            setSelectedCategory(null);
+        } else if (location.pathname === '/dashboard' || location.pathname === '/') {
+            setActiveTopMenuCd('HOME');
+            setIsProductCategoryMenuOpen(false);
+            setIsProductListOpen(false);
+            setSelectedCategory(null);
+        } else if (location.pathname === '/CUST0010') {
+            setActiveTopMenuCd('CUST0010');
+            setIsProductCategoryMenuOpen(false);
+            setIsProductListOpen(false);
+            setSelectedCategory(null);
+            if (isLoggedIn) {
+                setCurrentMenu('재고현황 관리', 'CUST0010');
+            }
+        } else {
+            // 다른 경로들 - 왼쪽 메뉴 비활성화
+            setIsProductCategoryMenuOpen(false);
+            setIsProductListOpen(false);
+            setSelectedCategory(null);
+        }
+    }, [location.pathname, isLoggedIn, setCurrentMenu]);
+
+    // 더보기 버튼 클릭 시 TopMenu로 이동
+    const handleMoreClick = (targetMenuCd) => {
+
+        
+        // CUST0010으로 직접 이동
+        if (targetMenuCd === 'CUST0010') {
+            
+            // TopMenu 상태도 업데이트
+            setActiveTopMenuCd('CUST0010');
+            switchTab('CUST0010');
+            
+            // 선택된 상태 초기화
+            setIsProductListOpen(false);
+            setIsProductCategoryMenuOpen(false);
+            setSelectedCategory(null);
+            
+            // 로그인된 상태에서만 메뉴 설정
+            if (isLoggedIn) {
+                setCurrentMenu('재고현황 관리', 'CUST0010');
+            }
+            
+            navigate('/CUST0010');
+            return;
+        }
+        
+        handleTopMenuClick(targetMenuCd, targetMenuCd === 'SURPLUS' ? '잉여재고거래' : '행사품목');
+    };
+
+    const handleCloseProductList = () => {
+        setIsProductListOpen(false);
+        setIsProductCategoryMenuOpen(false);
+        setSelectedCategory(null);
+        // HOME으로 이동
+        handleTopMenuClick('HOME', 'HOME');
+        navigate('/dashboard');
+    };
+
+    // 상품 개수 업데이트 함수
+    const handleProductCountUpdate = (count) => {
+        setProductCount(count);
+    };
+
+    // 카테고리 선택 시 제품 리스트로 전환
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        setIsProductCategoryMenuOpen(true); // 카테고리 메뉴는 유지
+    };
+
+    // 로그인 전 상단바 렌더링
+    const renderGuestTopBar = () => (
+        <div className="top-bar guest-mode">
+            <div className="logo-section">
+                <img src="/images/top_logo.png" alt="뉴원 로고" />
+                <span></span>
+            </div>
+            <div className="top-bar-right">
+                <button className="login-btn" onClick={handleLoginClick}>
+                    <LogIn size={18} />
+                    로그인
+                </button>
+            </div>
+        </div>
+    );
+
+    // 로그인 후 상단바 렌더링
+    const renderUserTopBar = () => (
+        <div className="top-bar">
+            <div className="logo-section">
+                <img src="/images/top_logo.png" alt="뉴원 로고" />
+                <span></span>
+            </div>
+            <div className="top-bar-right">
+                <UserInfo />
+                <div className="separator"></div>
+                <button className="logout-btn" onClick={handleLogoutClick}>
+                    <img src="/images/icon_logout.png" alt="로그아웃" />
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <>
-            <div className="top-bar">
-                {/* 모바일에서 항상 햄버거 메뉴 표시 */}
-                <div className="menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                    {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </div>
-                <div className="logo-section">
-                    <img src="/images/top_logo.png" alt="뉴원 로고" />
-                    <span></span>
-                </div>
-                <div className="top-bar-right">
-                    <UserInfo />
-                    <div className="separator"></div>
-                    <button className="logout-btn" onClick={handleLogoutClick}>
-                        <img src="/images/icon_logout.png" alt="로그아웃" />
-                    </button>
-                </div>
-            </div>
+            {/* 로그인 상태에 따른 상단바 렌더링 */}
+            {isLoggedIn ? renderUserTopBar() : renderGuestTopBar()}
 
             <Modal
                 isOpen={isModalOpen}
@@ -175,14 +279,8 @@ function Layout() {
                 onCancel={() => setIsModalOpen(false)}
             />
 
-            {/* 모바일 오버레이 */}
-            <div 
-                className={`menu-overlay ${isMenuOpen ? 'active' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
-            />
-
             <div className="layout-container">
-                {/* 탑 메뉴 */}
+                {/* 탑 메뉴 (항상 표시) */}
                 <TopMenu 
                     onTopMenuClick={handleTopMenuClick}
                     activeTopMenu={activeTopMenuCd}
@@ -190,56 +288,80 @@ function Layout() {
                 
                 {/* 메인 컨테이너 */}
                 <div className="main-container">
-                    {/* 왼쪽 메뉴: 데스크탑에서는 대시보드가 아닐 때만, 모바일에서는 항상 표시 */}
-                    <div className={`left-menu-container ${isMenuOpen ? 'active' : ''} ${isLeftMenuCollapsed ? 'collapsed' : ''} ${isDashboardActive ? 'dashboard-mode' : ''}`}>
-                        <LeftMenu 
-                            closeMenuOverlay={closeMenuOverlay} 
-                            activeTopMenuCd={activeTopMenuCd}
-                            isCollapsed={isLeftMenuCollapsed}
-                            isDashboardMode={isDashboardActive}
-                        />
-                    </div>
-                    
-                    {/* 왼쪽 메뉴 토글 버튼: 대시보드가 아닐 때만 표시 */}
-                    {!isDashboardActive && (
-                        <button 
-                            className="left-menu-toggle-btn"
-                            onClick={toggleLeftMenu}
-                            title={isLeftMenuCollapsed ? "메뉴 펼치기" : "메뉴 접기"}
-                        >
-                            {isLeftMenuCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-                        </button>
+                    {/* 왼쪽 카테고리 메뉴 (잉여재고/행사품목일 때만) */}
+                    {(activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
+                        <div className={`left-menu-container ${
+                            !isProductCategoryMenuOpen ? 'hidden' : ''
+                        }`}>
+                            <ProductCategoryMenu 
+                                isOpen={isProductCategoryMenuOpen} 
+                                onClose={() => setIsProductCategoryMenuOpen(false)}
+                                onCategorySelect={handleCategorySelect}
+                                menuTitle={activeTopMenuCd === 'SURPLUS' ? '잉여재고거래' : '행사품목'}
+                                showCloseButton={window.innerWidth <= 1024} // 태블릿/모바일에서 닫기 버튼 표시
+                            />
+                        </div>
                     )}
 
-                    {/* 메인 콘텐츠 영역 */}
-                    <div className={`main-content ${isDashboardActive ? 'full-width' : ''} ${isLeftMenuCollapsed && !isDashboardActive ? 'collapsed-menu' : ''}`}>
-                        {/* 대시보드 탭 - TabContainer로 감싸서 상태 유지 */}
-                        {renderedTabs['DASHBOARD'] && (
-                            <TabContainer 
-                                tabId="DASHBOARD" 
-                                isActive={isDashboardActive}
-                            >
-                                <DASHBOARD />
-                            </TabContainer>
+                    {/* 메인 컨텐츠 영역 */}
+                    <div className="main-content">
+                        {/* 잉여재고/행사품목 탭에서 햄버거 메뉴 버튼 */}
+                        {(activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
+                            <div className={`content-header ${
+                                isProductCategoryMenuOpen && isMobile ? 'menu-open' : ''
+                            }`}>
+                                <div className="content-title-section">
+                                    <h2 className="page-title">
+                                        {activeTopMenuCd === 'SURPLUS' ? (
+                                            <><span className="title-icon">📦</span> 잉여재고거래</>
+                                        ) : (
+                                            <><span className="title-icon">🎁</span> 행사품목</>
+                                        )}
+                                    </h2>
+                                    <span className="product-count-display">총 <strong>{productCount}</strong>개 상품</span>
+                                    <button 
+                                        className="menu-toggle-btn"
+                                        onClick={() => setIsProductCategoryMenuOpen(!isProductCategoryMenuOpen)}
+                                        title="카테고리 메뉴 토글"
+                                    >
+                                        <Menu size={16} />
+                                    </button>
+                                </div>
+                                
+                                {/* 선택된 카테고리 표시 - 오른쪽 끝 */}
+                                {selectedCategory && (
+                                    <div className="selected-category-display">
+                                        <Filter size={14} />
+                                        <span>
+                                            {selectedCategory.pathString || selectedCategory.catNm || selectedCategory.category}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         )}
                         
-                        {/* 다른 탑메뉴들 - 각각 독립적인 Outlet 유지 */}
-                        {Object.keys(renderedTabs).map(tabId => {
-                            if (tabId === 'DASHBOARD') return null;
-                            
-                            return (
-                                <div
-                                    key={tabId}
-                                    style={{ 
-                                        display: activeTopMenuCd === tabId && !isDashboardActive ? 'block' : 'none',
-                                        height: '100%',
-                                        width: '100%'
-                                    }}
-                                >
-                                    <Outlet />
-                                </div>
-                            );
-                        })}
+                        {/* HOME 탭 - 대시보드 */}
+                        {isDashboardActive && (
+                            <DASHBOARD 
+                                onMoreClick={handleMoreClick} 
+                                isLoggedIn={isLoggedIn} 
+                            />
+                        )}
+
+                        {/* 잉여재고/행사품목 - ProductList */}
+                        {isProductListOpen && (activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
+                            <ProductList 
+                                selectedCategory={selectedCategory}
+                                listType={currentListType}
+                                onClose={handleCloseProductList}
+                                onProductCountUpdate={handleProductCountUpdate}
+                            />
+                        )}
+                        
+                        {/* API 메뉴들과 기타 경로들 - 항상 Outlet 렌더링 */}
+                        {!isDashboardActive && (
+                            <Outlet />
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Package, List, Grid3X3, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { CiImageOff } from 'react-icons/ci';
 import Modal from '../common/Modal';
 import { useMenu } from '../../context/MenuContext';
 import { useCustomerApi, useErrorHandler } from '../../hooks'; // 커스텀 훅 사용
@@ -11,7 +12,7 @@ function CUST0020() {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [viewMode, setViewMode] = useState('list'); // 'list' 또는 'image'
+  const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image' - 기본값을 이미지로 설정
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
   const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
@@ -224,7 +225,7 @@ function CUST0020() {
                       className="fallback-icon"
                       style={{ display: row.filePath ? 'none' : 'flex' }}
                     >
-                      <Package size={24} />
+                      <CiImageOff size={24} color="#ccc" />
                     </div>
                   </div>
                 </td>
@@ -285,10 +286,7 @@ function CUST0020() {
                   flexDirection: 'column'
                 }}
               >
-                <Package size={48} color="#ccc" />
-                <span style={{ marginTop: '8px', fontSize: '0.9rem', color: '#666' }}>
-                  이미지 없음
-                </span>
+                <CiImageOff size={48} color="#ccc" />
               </div>
             </div>
             
@@ -323,14 +321,12 @@ function CUST0020() {
             onClick={() => handleViewModeChange('list')}
           >
             <List size={16} />
-            리스트
           </button>
           <button
             className={`cust0020-view-btn ${viewMode === 'image' ? 'active' : ''}`}
             onClick={() => handleViewModeChange('image')}
           >
-            <Grid3X3 size={16} />
-            이미지
+            <ImageIcon size={16} />
           </button>
         </div>
       </div>
