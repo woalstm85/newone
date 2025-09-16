@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 5000;
 }
 
 .top_modal-content {
@@ -24,8 +24,12 @@
 .top_modal-header {
   font-size: 18px;
   font-weight: bold;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: white;
+  margin: -20px -20px 15px -20px;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
 }
 
 .top_modal-body {

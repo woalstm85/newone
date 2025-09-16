@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, ShoppingCart, Calculator, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './QuoteModal.css';
@@ -12,6 +12,30 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   const [successType, setSuccessType] = useState(''); // 'cart' 또는 'quote'
   const { globalState } = useAuth();
   
+  // 모달이 열릴 때마다 상태 초기화 및 ESC 키 이벤트 추가
+  useEffect(() => {
+    if (isOpen) {
+      setQuantity(1);
+      setShowLoginModal(false);
+      setShowSuccessModal(false);
+      setSuccessType('');
+      
+      // ESC 키 이벤트 리스너 추가
+      const handleEscKey = (e) => {
+        if (e.key === 'Escape') {
+          handleClose();
+        }
+      };
+      
+      document.addEventListener('keydown', handleEscKey);
+      
+      // 모달이 닫힐 때 이벤트 리스너 제거
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
+    }
+  }, [isOpen]);
+
   // 로그인 상태 확인
   const isLoggedIn = !!globalState.G_USER_ID;
 
@@ -30,14 +54,21 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   };
 
   const handleAddToCart = () => {
-    // 장바구니 담기 로직 (로그인 상관없이 가능)
+    // 로그인 체크
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // 로그인된 상태에서 장바구니 담기 처리
+    const price = product.disPrice || product.salePrice || 0;
     const cartItem = {
       itemCd: product.itemCd,
       itemNm: product.itemNm,
-      price: product.price,
+      price: price,
       quantity: quantity,
-      filePath: product.filePath || product.thFilePath,
-      totalAmount: product.price * quantity
+      filePath: product.FILEPATH,
+      totalAmount: price * quantity
     };
     
     // 장바구니에 상품 추가 (localStorage 사용)
@@ -108,16 +139,32 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    // 이벤트 전파 중지
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     // 모달 닫을 때 상태 초기화
     setQuantity(1);
-    onClose();
+    setShowLoginModal(false);
+    setShowSuccessModal(false);
+    setSuccessType('');
+    
+    // 부모 컴포넌트의 onClose 호출
+    if (onClose) {
+      onClose();
+    }
   };
 
   // 백드롭 클릭 시 모달 닫기
   const handleBackdropClick = (e) => {
+    // 오버레이 자체를 클릭한 경우에만 닫기 (컴포넌트 내부 클릭은 제외)
     if (e.target === e.currentTarget) {
-      handleClose();
+      e.preventDefault();
+      e.stopPropagation();
+      handleClose(e);
     }
   };
 
@@ -174,21 +221,31 @@ const formatShipDate = (dateString) => {
         <div className="quote-modal-container updated">
           {/* 모달 헤더 */}
           <div className="quote-modal-header">
-            <h2 className="modal-title">
-              <ShoppingCart className="title-icon" />
+            <h2 className="quote-modal-title">
+              <ShoppingCart className="quote-modal-title-icon" />
               상품 정보
             </h2>
-            <button onClick={handleClose} className="close-button">
-              <X className="close-icon" />
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleClose(e);
+              }}
+              className="quote-modal-close-button"
+              type="button"
+              aria-label="모달 닫기"
+              style={{ zIndex: 10000, position: 'relative', pointerEvents: 'auto' }}
+            >
+              <X className="quote-modal-close-icon" />
             </button>
           </div>
 
           {/* 모달 컨텐츠 */}
           <div className="quote-modal-content">
             {/* 상품 정보 섹션 */}
-            <div className="product-section-updated">
-              <div className="product-details">
-                <div className="product-image">
+            <div className="quote-modal-product-section">
+              <div className="quote-modal-product-details">
+                <div className="quote-modal-product-image">
                   <ImageWithFallback
                     src={product.FILEPATH}
                     alt={product.itemNm}
@@ -196,21 +253,20 @@ const formatShipDate = (dateString) => {
                     height={150}
                   />
                 </div>
-                <div className="product-info">
-                  <h4 className="product-name">{product.itemNm}</h4>
+                <div className="quote-modal-product-info">
+                  <h4 className="quote-modal-product-name">{product.itemNm}</h4>
                   {product.compNm && (
-                    <p className="product-company">회사명: {product.compNm}</p>
+                    <p className="quote-modal-product-code">회사명: {product.compNm}</p>
                   )}
                   {product.shipAvDate && (
-                    <p className="product-ship-date">{formatShipDate(product.shipAvDate)} 출하</p>
-                    
+                    <p className="quote-modal-product-ship-date">{formatShipDate(product.shipAvDate)} 출하</p>
                   )}
-                  <div className="price-info">
-                    <div className="current-price">
+                  <div className="quote-modal-price-info">
+                    <div className="quote-modal-discount-price">
                       {Number(product.disPrice || product.salePrice || 0).toLocaleString()} 원
                     </div>
                     {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && (
-                      <div className="original-price">
+                      <div className="quote-modal-original-price">
                         정가: {Number(product.salePrice).toLocaleString()} 원
                       </div>
                     )}
@@ -220,13 +276,13 @@ const formatShipDate = (dateString) => {
 
               {/* 수량 선택 */}
               <div className="quote-modal-quantity-section">
-                <label className="quote-modal-quantity-label">수량</label>
+                <span className="quote-modal-section-title">수량</span>
                 <div className="quote-modal-quantity-controls">
                   <button 
                     onClick={() => handleQuantityChange(-1)}
-                    className="quote-modal-quantity-btn"
+                    className="quote-modal-quantity-button"
                   >
-                    <Minus className="btn-icon" />
+                    <Minus className="quote-modal-btn-icon" />
                   </button>
                   <input 
                     type="number" 
@@ -237,26 +293,24 @@ const formatShipDate = (dateString) => {
                   />
                   <button 
                     onClick={() => handleQuantityChange(1)}
-                    className="quote-modal-quantity-btn"
+                    className="quote-modal-quantity-button"
                   >
-                    <Plus className="btn-icon" />
+                    <Plus className="quote-modal-btn-icon" />
                   </button>
                   <span className="quote-modal-quantity-unit">개</span>
                 </div>
               </div>
 
               {/* 총 금액 */}
-              <div className="total-section">
-                <div className="total-row">
-                  <span className="total-label">
-                    <Calculator className="calculator-icon" />
-                    예상 총 금액
-                  </span>
-                  <div className="total-amount">
-                    {calculateTotal()} 원
-                  </div>
+              <div className="quote-modal-total-amount">
+                <div className="quote-modal-total-label">
+                  <Calculator className="quote-modal-calculator-icon" />
+                  예상 총 금액
                 </div>
-                <p className="total-note">
+                <div className="quote-modal-total-price">
+                  {calculateTotal()} 원
+                </div>
+                <p className="quote-modal-total-note">
                   * 실제 견적은 수량 및 배송비에 따라 달라질 수 있습니다.
                 </p>
               </div>
@@ -264,16 +318,16 @@ const formatShipDate = (dateString) => {
           </div>
 
           {/* 모달 푸터 */}
-          <div className="quote-modal-footer-updated">
-            <button onClick={handleClose} className="close-btn">
+          <div className="quote-modal-actions">
+            <button onClick={handleClose} className="quote-modal-action-button quote-modal-close-btn">
               닫기
             </button>
-            <button onClick={handleAddToCart} className="cart-btn">
-              <ShoppingBag className="btn-icon" />
+            <button onClick={handleAddToCart} className="quote-modal-action-button quote-modal-cart-button">
+              <ShoppingBag className="quote-modal-btn-icon" />
               장바구니 담기
             </button>
-            <button onClick={handleQuoteRequest} className="quote-btn">
-              <Calculator className="btn-icon" />
+            <button onClick={handleQuoteRequest} className="quote-modal-action-button quote-modal-quote-button">
+              <Calculator className="quote-modal-btn-icon" />
               견적 의뢰
             </button>
           </div>
@@ -284,7 +338,7 @@ const formatShipDate = (dateString) => {
       <Modal
         isOpen={showLoginModal}
         title="로그인 필요"
-        message="견적 의뢰를 하시려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+        message="장바구니 담기 및 견적 의뢰를 하시려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
         onConfirm={() => {
           setShowLoginModal(false);
           handleClose();

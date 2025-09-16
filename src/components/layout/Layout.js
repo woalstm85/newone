@@ -298,7 +298,7 @@ function Layout() {
                                 onClose={() => setIsProductCategoryMenuOpen(false)}
                                 onCategorySelect={handleCategorySelect}
                                 menuTitle={activeTopMenuCd === 'SURPLUS' ? '잉여재고거래' : '행사품목'}
-                                showCloseButton={window.innerWidth <= 1024} // 태블릿/모바일에서 닫기 버튼 표시
+                                showCloseButton={true} // 모든 화면 크기에서 X 버튼 표시
                             />
                         </div>
                     )}

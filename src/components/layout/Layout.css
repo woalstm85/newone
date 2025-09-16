@@ -25,10 +25,22 @@
     display: none !important;
   }
 
-  .logo-section {
+  /* 로그인 상태: 로고 중앙 배치 */
+  .top-bar:not(.guest-mode) .logo-section {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+  }
+  
+  /* 로그아웃 상태: 로고 왼쪽, 로그인 버튼 오른쪽 */
+  .top-bar.guest-mode {
+    justify-content: space-between;
+  }
+  
+  .top-bar.guest-mode .logo-section {
+    position: relative;
+    left: auto;
+    transform: none;
   }
 }
 
