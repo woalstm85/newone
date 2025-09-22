@@ -8,7 +8,7 @@ export { API_CONFIG, API_ENDPOINTS } from './apiConfig';
 export { 
   authAPI, 
   inventoryAPI, 
-  customerAPI, 
-  dashboardAPI, 
+  quoteAPI,
+  productAPI, 
   commonAPI 
 } from './api';

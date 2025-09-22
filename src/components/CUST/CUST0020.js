@@ -1,21 +1,43 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Package, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, Info } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import Modal from '../common/Modal';
+import ImageModal from '../common/ImageModal';
+import ProductInfoModal from '../common/ProductInfoModal';
 import { useMenu } from '../../context/MenuContext';
-import { useCustomerApi, useErrorHandler } from '../../hooks'; // 커스텀 훅 사용
+import { productAPI, commonAPI } from '../../services/api';
 import './CUST0020.css';
-import MySpinner from '../common/MySpinner'; 
+import MySpinner from '../common/MySpinner';
 
 function CUST0020() {
   // 상태 관리
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image' - 기본값을 이미지로 설정
+  const [viewMode, setViewMode] = useState('image');
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
-  const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
+  const [isSearchVisible, setIsSearchVisible] = useState(true);
+  
+  // 카테고리 관련 상태
+  const [categoryLData, setCategoryLData] = useState([]); // 대분류
+  const [categoryMData, setCategoryMData] = useState([]); // 중분류
+  const [categorySData, setCategorySData] = useState([]); // 소분류
+  const [selectedCategoryL, setSelectedCategoryL] = useState(''); // 선택된 대분류
+  const [selectedCategoryM, setSelectedCategoryM] = useState(''); // 선택된 중분류
+  const [selectedCategoryS, setSelectedCategoryS] = useState(''); // 선택된 소분류
+  
+  // 이미지 모달 상태 추가
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState({
+    url: '',
+    title: '',
+    alt: ''
+  });
+  
+  // 상품 정보 모달 상태 추가
+  const [isProductInfoModalOpen, setIsProductInfoModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   
   // 스와이프 제스처용 ref와 상태
   const searchToggleRef = useRef(null);
@@ -31,6 +53,147 @@ function CUST0020() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
+
+  // 이미지 클릭 핸들러
+  const handleImageClick = (imageUrl, itemName, itemCd) => {
+    if (imageUrl) {
+      setSelectedImage({
+        url: imageUrl,
+        title: itemName || '상품 이미지',
+        alt: `${itemCd || ''} ${itemName || ''} 상품 이미지`
+      });
+      setIsImageModalOpen(true);
+    }
+  };
+
+  // 상품 정보 모달 핸들러
+  const handleProductInfoClick = (product) => {
+    setSelectedProduct(product);
+    setIsProductInfoModalOpen(true);
+  };
+
+  // 카테고리 핸들러 전역 선언
+  // 대분류 변경 시 중분류, 소분류 초기화
+  const handleCategoryLChange = (value) => {
+    setSelectedCategoryL(value);
+    setSelectedCategoryM(''); // 중분류 초기화
+    setSelectedCategoryS(''); // 소분류 초기화
+  };
+
+  // 중분류 변경 시 소분류 초기화
+  const handleCategoryMChange = (value) => {
+    setSelectedCategoryM(value);
+    setSelectedCategoryS(''); // 소분류 초기화
+  };
+
+  // 소분류 변경
+  const handleCategorySChange = (value) => {
+    setSelectedCategoryS(value);
+  };
+
+  // 선택된 대분류에 해당하는 중분류 필터링
+  const getFilteredCategoryM = () => {
+    if (!selectedCategoryL) return categoryMData;
+    return categoryMData.filter(item => item.catLCd === selectedCategoryL);
+  };
+
+  // 선택된 중분류에 해당하는 소분류 필터링
+  const getFilteredCategoryS = () => {
+    if (!selectedCategoryM) return [];
+    return categorySData.filter(item => item.catMCd === selectedCategoryM);
+  };
+
+  // 장바구니 추가 핸들러 - 실제 장바구니 기능 구현
+  const handleAddToCart = async (productWithQuantity) => {
+    try {
+      console.log('장바구니에 추가할 데이터:', productWithQuantity);
+      
+      // 장바구니 데이터 준비
+      const cartItem = {
+        itemCd: productWithQuantity.itemCd,
+        itemNm: productWithQuantity.itemNm,
+        unitNm: productWithQuantity.unitNm,
+        price: productWithQuantity.outUnitPrice || 0, // price 필드로 수정
+        outUnitPrice: productWithQuantity.outUnitPrice,
+        quantity: productWithQuantity.quantity,
+        spec: productWithQuantity.spec,
+        optCd: productWithQuantity.optCd,
+        optValCd: productWithQuantity.optValCd || '', // 옵션값 코드 추가
+        optValNm: productWithQuantity.optValNm || '', // 옵션값명 추가
+        filePath: productWithQuantity.filePath || productWithQuantity.thFilePath,
+        totalAmount: (productWithQuantity.outUnitPrice || 0) * productWithQuantity.quantity
+      };
+
+      console.log('준비된 장바구니 아이템:', cartItem);
+
+      // 로컬 스토리지에 장바구니 데이터 저장
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      
+      // 이미 있는 상품인지 확인 (옵션값도 고려)
+      const existingItemIndex = existingCart.findIndex(item => 
+        item.itemCd === cartItem.itemCd && 
+        item.optCd === cartItem.optCd &&
+        item.optValCd === cartItem.optValCd
+      );
+      
+      if (existingItemIndex > -1) {
+        // 이미 있는 상품이면 수량 추가
+        existingCart[existingItemIndex].quantity += cartItem.quantity;
+        existingCart[existingItemIndex].totalAmount = 
+          existingCart[existingItemIndex].quantity * (existingCart[existingItemIndex].price || 0);
+      } else {
+        // 새로운 상품이면 추가
+        existingCart.push(cartItem);
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(existingCart));
+      console.log('업데이트된 장바구니:', existingCart);
+      
+      // 장바구니 업데이트 이벤트 발생
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      
+      // 성공 메시지 표시
+      const optionText = productWithQuantity.optValNm ? ` (옵션: ${productWithQuantity.optValNm})` : '';
+      setModalMessage(
+        `${productWithQuantity.itemNm}${optionText} 상품이 장바구니에 추가되었습니다.\n수량: ${productWithQuantity.quantity}개\n총 장바구니 상품: ${existingCart.length}개`
+      );
+      setIsModalOpen(true);
+      setIsProductInfoModalOpen(false);
+      
+    } catch (error) {
+      console.error('장바구니 추가 오류:', error);
+      setModalMessage('장바구니 추가 중 오류가 발생했습니다.');
+      setIsModalOpen(true);
+    }
+  };
+
+  // 장바구니 내용 확인 함수 (디버깅용)
+  const checkCartContents = () => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    console.log('현재 장바구니 내용:', cart);
+    console.log('장바구니 상품 수:', cart.length);
+    return cart;
+  };
+
+  // 장바구니 초기화 함수 (디버깅용)
+  const clearCart = () => {
+    localStorage.removeItem('cart');
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
+    console.log('장바구니가 초기화되었습니다.');
+  };
+
+  // 컴포너트 마운트 시 디버깅용 전역 함수 등록
+  useEffect(() => {
+    // 브라우저 콘솔에서 장바구니 확인할 수 있도록 전역 함수로 등록
+    window.checkCart = checkCartContents;
+    window.clearCart = clearCart;
+    
+    return () => {
+      // 컴포너트 언마운트 시 전역 함수 제거
+      delete window.checkCart;
+      delete window.clearCart;
+    };
+  }, []);
 
   // 스와이프 시작
   const onTouchStart = (e) => {
@@ -51,11 +214,9 @@ function CUST0020() {
     const isUpSwipe = distance > minSwipeDistance;
     const isDownSwipe = distance < -minSwipeDistance;
 
-    // 아래로 스와이프하면 검색영역 열기
     if (isDownSwipe && !isSearchVisible) {
       setIsSearchVisible(true);
     }
-    // 위로 스와이프하면 검색영역 닫기
     else if (isUpSwipe && isSearchVisible) {
       setIsSearchVisible(false);
     }
@@ -64,7 +225,6 @@ function CUST0020() {
   // 검색영역 외부 클릭시 닫기
   const handleClickOutside = useCallback((event) => {
     if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
-      // 모바일에서만 작동하도록 체크
       if (window.innerWidth <= 768 && isSearchVisible) {
         setIsSearchVisible(false);
       }
@@ -97,27 +257,25 @@ function CUST0020() {
   // 검색 초기화
   const handleReset = () => {
     setItemName('');
-    setCurrentPage(1); // 페이지도 초기화
+    setSelectedCategoryL('');
+    setSelectedCategoryM('');
+    setSelectedCategoryS('');
+    setCurrentPage(1);
   };
 
-  // ✨ fetchData 함수를 새 API 규격에 맞게 수정합니다.
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      // GET 방식으로 URL에 쿼리 파라미터를 사용하여 요청합니다.
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/CUST0020?p_itemNm=${itemName}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('⌛ 서버 에러 응답:', errorText);
-        throw new Error(`서버 응답 오류: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await productAPI.getProductList(
+        itemName,
+        selectedCategoryL,
+        selectedCategoryM,
+        selectedCategoryS
+      );
       
       setGridData(data);
-      setCurrentPage(1); // 새로운 검색 시 첫 페이지로
+      setCurrentPage(1);
 
     } catch (error) {
       console.error('⌛ 데이터 조회 실패:', error);
@@ -126,12 +284,11 @@ function CUST0020() {
     } finally {
       setIsLoading(false);
     }
-  }, [itemName]);
+  }, [itemName, selectedCategoryL, selectedCategoryM, selectedCategoryS]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
     fetchData();
-    // 모바일에서 검색 후 검색영역 숨기기
     if (window.innerWidth <= 768) {
       setIsSearchVisible(false);
     }
@@ -142,8 +299,26 @@ function CUST0020() {
     setIsSearchVisible(!isSearchVisible);
   };
 
-  // 컴포넌트 마운트 시 초기 데이터 로드
+  // 컴포넌트 마운트 시 카테고리 데이터 로드 및 초기 데이터 로드
   useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        // 대분류, 중분류, 소분류 데이터를 동시에 로드
+        const [categoryLResponse, categoryMResponse, categorySResponse] = await Promise.all([
+          commonAPI.getCategoryL(),
+          commonAPI.getCategoryM(),
+          commonAPI.getCategoryS()
+        ]);
+        
+        setCategoryLData(categoryLResponse || []);
+        setCategoryMData(categoryMResponse || []);
+        setCategorySData(categorySResponse || []);
+      } catch (error) {
+        console.error('카테고리 데이터 로드 실패:', error);
+      }
+    };
+    
+    loadCategories();
     fetchData();
   }, [fetchData]);
 
@@ -165,7 +340,7 @@ function CUST0020() {
   // 페이지 크기 변경
   const handleItemsPerPageChange = (newItemsPerPage) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // 첫 페이지로 이동
+    setCurrentPage(1);
   };
 
   // 페이지 번호 생성
@@ -195,8 +370,10 @@ function CUST0020() {
           <thead>
             <tr>
               <th style={{ width: '80px', textAlign: 'center' }}>이미지</th>
-              <th style={{ width: '150px' }}>제품코드</th>
+              <th style={{ width: '100px', textAlign: 'center' }}>제품코드</th>              
               <th>제품명</th>
+              <th style={{ width: '100px', textAlign: 'center' }}>단위</th>
+              <th style={{ width: '120px', textAlign: 'center' }}>출고단가</th>
               <th>스펙</th>
             </tr>
           </thead>
@@ -204,36 +381,48 @@ function CUST0020() {
             {currentItems.length > 0 ? currentItems.map((row, index) => (
               <tr key={row.itemCd || index} onClick={() => handleRowClick(row)}>
                 <td className="cust0020-center-column">
-                  <div className="cust0020-list-image-wrapper">
-                    {row.filePath ? (
-                      <img 
-                        src={row.filePath || row.thFilePath} 
-                        alt={row.itemNm || '제품 이미지'}
-                        className="cust0020-list-image"
-                        onError={(e) => {
-                          const parent = e.target.parentElement;
-                          if (parent) {
-                            e.target.style.display = 'none';
-                            const fallback = parent.querySelector('.fallback-icon');
-                            if (fallback) fallback.style.display = 'flex';
-                          }
-                        }}
-                      />
-                    ) : null}
-                    
-                    <div 
-                      className="fallback-icon"
-                      style={{ display: row.filePath ? 'none' : 'flex' }}
-                    >
-                      <CiImageOff size={24} color="#ccc" />
-                    </div>
+                  <div className="cust0020-table-image-container">
+                    {row.filePath || row.thFilePath ? (
+                      <>
+                        <img 
+                          src={row.filePath || row.thFilePath} 
+                          alt={row.itemNm || '제품 이미지'}
+                          className="cust0020-table-image-item"
+                        />
+                        <div className="cust0020-table-image-overlay">
+                          <button
+                            className="cust0020-table-overlay-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageClick(row.filePath || row.thFilePath, row.itemNm, row.itemCd);
+                            }}
+                          >
+                            <Eye size={12} />
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="cust0020-table-no-image">
+                        <CiImageOff size={20} color="#ccc" />
+                      </div>
+                    )}
                   </div>
                 </td>
-                <td className="cust0020-center-column cust0020-item-code">
-                  {row.itemCd}
+                <td className="cust0020-center-column">
+                  {row.itemCd || '-'}
                 </td>
-                <td className="cust0020-left-column cust0020-item">
+                <td className="cust0020-left-column cust0020-item cust0020-product-name" 
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleProductInfoClick(row);
+                     }}>
                   {row.itemNm}
+                </td>
+                <td className="cust0020-center-column">
+                  {row.unitNm || '-'}
+                </td>
+                <td className="cust0020-right-column">
+                  {row.outUnitPrice ? row.outUnitPrice.toLocaleString() : '-'}
                 </td>
                 <td className="cust0020-left-column cust0020-item">
                   {row.spec}
@@ -241,7 +430,7 @@ function CUST0020() {
               </tr>
             )) : (
               <tr>
-                <td colSpan={4} className="cust0020-center-column" style={{ padding: '40px', color: '#666' }}>
+                <td colSpan={5} className="cust0020-center-column" style={{ padding: '40px', color: '#666' }}>
                   데이터가 없습니다.
                 </td>
               </tr>
@@ -252,59 +441,105 @@ function CUST0020() {
     </div>
   );
 
-  // 이미지 뷰 렌더링
-  const renderImageView = () => (
-    <div className="cust0020-image-container">      
-      <div className="cust0020-image-grid">
-        {currentItems.length > 0 ? currentItems.map((row, index) => (
-          <div 
-            key={row.itemCd || index} 
-            className="cust0020-image-card"
-            onClick={() => handleRowClick(row)}
-          >
-            <div className="cust0020-image-placeholder">
-              {row.filePath ? (
-                <img 
-                  src={row.filePath || row.thFilePath} 
-                  alt={row.itemNm || '제품 이미지'}
-                  className="cust0020-card-image"
-                  onError={(e) => {
-                    const parent = e.target.parentElement;
-                    if(parent) {
-                      e.target.style.display = 'none';
-                      const fallback = parent.querySelector('.fallback-icon');
-                      if (fallback) fallback.style.display = 'flex';
-                    }
-                  }}
-                />
-              ) : null}
-              
-              <div 
-                className="fallback-icon"
-                style={{ 
-                  display: row.filePath ? 'none' : 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                <CiImageOff size={48} color="#ccc" />
-              </div>
-            </div>
-            
-            <div className="cust0020-card-content">
-              <h3>{row.itemNm}</h3>
-              <div className="item-code">{row.itemCd}</div>
-              {row.spec && <div className="item-eng-name">{row.spec}</div>}
+  // 이미지 뷰 렌더링 (CUST0010 스타일 적용)
+  const renderImageView = () => {
+    const items = currentItems.map((item, index) => (
+      <div key={`${item.itemCd}-${index}`} className="cust0010-inventory-image-card">
+        <div className="cust0010-inventory-image-header">
+          <h4>{item.itemNm}</h4>
+          <span className="cust0020-product-status-badge">
+            제품
+          </span>
+        </div>
+        <div className="cust0010-inventory-image-content">
+          {/* 이미지 섹션 */}
+          <div className="cust0010-inventory-image-section">
+            <div className="cust0010-inventory-image-placeholder">
+              {item.filePath || item.thFilePath ? (
+                <>
+                  <img
+                    src={item.filePath || item.thFilePath}
+                    alt={item.itemNm}
+                    className="cust0010-inventory-image"
+                  />
+                  <div className="cust0010-image-overlay">
+                    <button
+                      className="cust0010-overlay-view-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick(item.filePath || item.thFilePath, item.itemNm, item.itemCd);
+                      }}
+                    >
+                      <Eye size={14} />
+                      확대
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="cust0010-inventory-no-image">
+                  <CiImageOff size={48} color="#ccc" />
+                </div>
+              )}
             </div>
           </div>
-        )) : (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#666' }}>
-            데이터가 없습니다.
+          
+          {/* 상세 정보 섹션 - 여기에 옵션과 단위를 추가 */}
+          <div className="cust0010-inventory-item-details">
+            <div className="cust0010-inventory-item-specs">
+              {item.optCd && (
+                <div className="cust0010-inventory-spec-row">
+                  <span className="cust0010-inventory-spec-label">제품코드:</span>
+                  <span className="cust0010-inventory-spec-value">{item.itemCd}</span>
+                </div>
+              )}
+              {item.unitNm && (
+                <div className="cust0010-inventory-spec-row">
+                  <span className="cust0010-inventory-spec-label">단위:</span>
+                  <span className="cust0010-inventory-spec-value">{item.unitNm}</span>
+                </div>
+              )}
+              {item.outUnitPrice && (
+                <div className="cust0010-inventory-spec-row">
+                  <span className="cust0010-inventory-spec-label">출고단가:</span>
+                  <span className="cust0010-inventory-spec-client">{item.outUnitPrice.toLocaleString()}원</span>
+                </div>
+              )}
+              {/* 데이터가 없을 때 기본 메시지 */}
+              {!item.optCd && !item.unitNm && !item.outUnitPrice && (
+                <div className="cust0010-inventory-spec-row">
+                  <span className="cust0010-inventory-spec-label" style={{ color: '#999', fontStyle: 'italic' }}>상세 정보 없음</span>
+                  <span className="cust0010-inventory-spec-value">-</span>
+                </div>
+              )}
+            </div>
+            {/* 상품 정보 버튼을 이미지와 텍스트 밑에 긴 버튼으로 배치 */}
+            <button 
+              className="cust0020-product-info-long-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProductInfoClick(item);
+              }}
+            >
+              <Info size={16} />
+              상품 정보
+            </button>
+          </div>
+        </div>
+      </div>
+    ));
+
+    return (
+      <div className="cust0010-inventory-image-grid">
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <CiImageOff size={48} color="#ccc" />
+            <p>데이터가 없습니다.</p>
           </div>
         )}
       </div>
-    </div>
-  );
-
+    );
+  };
+  
   return (
     <div className="cust0020-container">
       {/* 프로그램 헤더 */}
@@ -347,6 +582,56 @@ function CUST0020() {
         
         <div className={`cust0020-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
           <div className="cust0020-search-row">
+            {/* 대분류 */}
+            <div className="cust0020-search-field">
+              <label>대분류</label>
+              <select
+                value={selectedCategoryL}
+                onChange={(e) => handleCategoryLChange(e.target.value)}
+              >
+                <option value="">전체</option>
+                {categoryLData.map((category) => (
+                  <option key={category.catLCd} value={category.catLCd}>
+                    {category.catLNm}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 중분류 */}
+            <div className="cust0020-search-field">
+              <label>중분류</label>
+              <select
+                value={selectedCategoryM}
+                onChange={(e) => handleCategoryMChange(e.target.value)}
+                disabled={!selectedCategoryL}
+              >
+                <option value="">전체</option>
+                {getFilteredCategoryM().map((category) => (
+                  <option key={category.catMCd} value={category.catMCd}>
+                    {category.catMNm}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 소분류 */}
+            <div className="cust0020-search-field">
+              <label>소분류</label>
+              <select
+                value={selectedCategoryS}
+                onChange={(e) => handleCategorySChange(e.target.value)}
+                disabled={!selectedCategoryM}
+              >
+                <option value="">전체</option>
+                {getFilteredCategoryS().map((category) => (
+                  <option key={category.catSCd} value={category.catSCd}>
+                    {category.catSNm}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
             <div className="cust0020-search-field">
               <label>제품명</label>
               <input
@@ -431,12 +716,34 @@ function CUST0020() {
       {/* 로딩 표시 */}
       {isLoading && <MySpinner fullScreen={false} />}
 
-      {/* 모달 */}
+      {/* 기본 모달 */}
       <Modal
         isOpen={isModalOpen}
         title="알림"
         message={modalMessage}
         onConfirm={() => setIsModalOpen(false)}
+      />
+
+      {/* 상품 정보 모달 */}
+      <ProductInfoModal
+        isOpen={isProductInfoModalOpen}
+        onClose={() => setIsProductInfoModalOpen(false)}
+        product={selectedProduct}
+        onAddToCart={handleAddToCart}
+      />
+
+      {/* 이미지 모달 */}
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={(e) => {
+          e && e.stopPropagation && e.stopPropagation();
+          setIsImageModalOpen(false);
+        }}
+        imageUrl={selectedImage.url}
+        title={selectedImage.title}
+        altText={selectedImage.alt}
+        showControls={true}
+        showDownload={true}
       />
     </div>
   );

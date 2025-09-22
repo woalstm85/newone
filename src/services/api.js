@@ -34,158 +34,194 @@ export const authAPI = {
 
 // 재고관리 관련 API
 export const inventoryAPI = {
-  // 일반재고 조회
-  getNormalInventory: async (searchParams = {}) => {
+  // 자사재고현황 조회
+  getCompanyInventory: async (userId) => {
     try {
       const response = await apiClient.get(
-        API_ENDPOINTS.CUST.INVENTORY_NORMAL(),
-        searchParams
+        API_ENDPOINTS.CUST.COMPANY_INVENTORY(userId)
       );
       return response;
     } catch (error) {
-      console.error('일반재고 조회 오류:', error);
-      throw error;
-    }
-  },
-
-  // 옵션재고 조회
-  getOptionInventory: async (searchParams = {}) => {
-    try {
-      const response = await apiClient.get(
-        API_ENDPOINTS.CUST.INVENTORY_OPTION(),
-        searchParams
-      );
-      return response;
-    } catch (error) {
-      console.error('옵션재고 조회 오류:', error);
+      console.error('자사재고현황 조회 오류:', error);
       throw error;
     }
   },
 
   // 시리얼/로트 재고 조회
-  getSerialInventory: async (searchParams = {}) => {
+  getLotInventory: async (userId) => {
     try {
       const response = await apiClient.get(
-        API_ENDPOINTS.CUST.INVENTORY_SERIAL(),
-        searchParams
+        API_ENDPOINTS.CUST.LOT_INVENTORY(userId)
       );
       return response;
     } catch (error) {
-      console.error('시리얼재고 조회 오류:', error);
+      console.error('시리얼/로트 재고 조회 오류:', error);
       throw error;
     }
   }
 };
 
-// 고객관리 관련 API
-export const customerAPI = {
-  // 고객 목록 조회
-  getCustomerList: async (searchParams = {}) => {
+// 견적의뢰 관리 관련 API
+export const quoteAPI = {
+  // 견적의뢰 목록 조회
+  getQuoteRequests: async (ym, userId) => {
     try {
-      const response = await apiClient.get(
-        API_ENDPOINTS.CUST.CUSTOMER_LIST(),
-        searchParams
-      );
+      const url = `https://api.newonetotal.co.kr/Comm/CUST0040?ym=${ym}&userId=${userId}`;
+      console.log('CUST0040 API URL:', url);
+      
+      const response = await apiClient.get(url);
       return response;
     } catch (error) {
-      console.error('고객 목록 조회 오류:', error);
+      console.error('견적의뢰 목록 조회 오류:', error);
       throw error;
     }
   },
 
-  // 고객 상세 조회
-  getCustomerDetail: async (custId) => {
+  // 견적의뢰 등록 (MrsOtRequest)
+  createQuoteRequest: async (requestData) => {
     try {
-      const response = await apiClient.get(
-        API_ENDPOINTS.CUST.CUSTOMER_DETAIL(custId)
-      );
+      const url = 'https://api.newonetotal.co.kr/Comm/MrsQtRequest';
+      console.log('견적의뢰 등록 API URL:', url);
+      console.log('견적의뢰 등록 데이터:', requestData);
+      
+      const response = await apiClient.post(url, requestData);
       return response;
     } catch (error) {
-      console.error('고객 상세 조회 오류:', error);
-      throw error;
-    }
-  },
-
-  // 고객 등록
-  createCustomer: async (customerData) => {
-    try {
-      const response = await apiClient.post(
-        API_ENDPOINTS.CUST.CUSTOMER_CREATE(),
-        customerData
-      );
-      return response;
-    } catch (error) {
-      console.error('고객 등록 오류:', error);
-      throw error;
-    }
-  },
-
-  // 고객 수정
-  updateCustomer: async (custId, customerData) => {
-    try {
-      const response = await apiClient.put(
-        API_ENDPOINTS.CUST.CUSTOMER_UPDATE(custId),
-        customerData
-      );
-      return response;
-    } catch (error) {
-      console.error('고객 수정 오류:', error);
-      throw error;
-    }
-  },
-
-  // 고객 삭제
-  deleteCustomer: async (custId) => {
-    try {
-      const response = await apiClient.delete(
-        API_ENDPOINTS.CUST.CUSTOMER_DELETE(custId)
-      );
-      return response;
-    } catch (error) {
-      console.error('고객 삭제 오류:', error);
+      console.error('견적의뢰 등록 오류:', error);
       throw error;
     }
   }
 };
 
-// 대시보드 관련 API
-export const dashboardAPI = {
-  // 대시보드 요약 정보
-  getSummary: async () => {
+// 제품 관련 API
+export const productAPI = {
+  // 제품 목록 조회 (CUST0020) - 카테고리 파라미터 추가
+  getProductList: async (itemName = '', itemGroupLCd = '', itemGroupMCd = '', itemGroupSCd = '') => {
     try {
-      const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.SUMMARY());
+      let url = 'https://api.newonetotal.co.kr/Comm/CUST0020';
+      const params = [];
+      
+      if (itemName.trim()) {
+        params.push(`itemName=${encodeURIComponent(itemName.trim())}`);
+      }
+      if (itemGroupLCd) {
+        params.push(`itemGroupLCd=${itemGroupLCd}`);
+      }
+      if (itemGroupMCd) {
+        params.push(`itemGroupMCd=${itemGroupMCd}`);
+      }
+      if (itemGroupSCd) {
+        params.push(`itemGroupSCd=${itemGroupSCd}`);
+      }
+      
+      if (params.length > 0) {
+        url += '?' + params.join('&');
+      }
+      
+      console.log('CUST0020 API URL:', url);
+      
+      const response = await apiClient.get(url);
       return response;
     } catch (error) {
-      console.error('대시보드 요약 조회 오류:', error);
+      console.error('제품 목록 조회 오류:', error);
       throw error;
     }
   },
 
-  // 대시보드 차트 데이터
-  getChartData: async () => {
+  // 대시보드 아이템 조회 (잉여재고, 행사품목)
+  getDashItems: async (itemDivCd) => {
     try {
-      const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.CHARTS());
+      const response = await apiClient.get(
+        API_ENDPOINTS.PRODUCT.DASH_ITEMS(itemDivCd)
+      );
       return response;
     } catch (error) {
-      console.error('대시보드 차트 조회 오류:', error);
+      console.error('대시보드 아이템 조회 오류:', error);
       throw error;
     }
   },
 
-  // 최근 활동 조회
-  getRecentActivity: async () => {
+  // 카테고리 목록 조회
+  getCategories: async () => {
     try {
-      const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.RECENT_ACTIVITY());
+      const response = await apiClient.get(
+        API_ENDPOINTS.PRODUCT.CATEGORIES()
+      );
       return response;
     } catch (error) {
-      console.error('최근 활동 조회 오류:', error);
+      console.error('카테고리 목록 조회 오류:', error);
       throw error;
     }
   }
 };
+
+// 대시보드 관련 API (사용하지 않으므로 제거)
 
 // 공통 API
 export const commonAPI = {
+  // 카테고리 API들
+  getCategoryL: async () => {
+    try {
+      const response = await apiClient.get(
+        'https://api.newonetotal.co.kr/Comm/categoryL'
+      );
+      return response;
+    } catch (error) {
+      console.error('대분류 조회 오류:', error);
+      throw error;
+    }
+  },
+
+  getCategoryM: async () => {
+    try {
+      const response = await apiClient.get(
+        'https://api.newonetotal.co.kr/Comm/categoryM'
+      );
+      return response;
+    } catch (error) {
+      console.error('중분류 조회 오류:', error);
+      throw error;
+    }
+  },
+
+  getCategoryS: async () => {
+    try {
+      const response = await apiClient.get(
+        'https://api.newonetotal.co.kr/Comm/categoryS'
+      );
+      return response;
+    } catch (error) {
+      console.error('소분류 조회 오류:', error);
+      throw error;
+    }
+  },
+
+  // 옵션값 API
+  getOptionValues: async (optCd) => {
+    try {
+      const response = await apiClient.get(
+        `https://api.newonetotal.co.kr/Comm/OptionValues?optCd=${optCd}`
+      );
+      return response;
+    } catch (error) {
+      console.error('옵션값 조회 오류:', error);
+      throw error;
+    }
+  },
+
+  // 옵션값 API
+  getOptionValues: async (optCd) => {
+    try {
+      const response = await apiClient.get(
+        `https://api.newonetotal.co.kr/Comm/OptionValues?optCd=${optCd}`
+      );
+      return response;
+    } catch (error) {
+      console.error('옵션값 조회 오류:', error);
+      throw error;
+    }
+  },
+
   // 파일 업로드
   uploadFile: async (file, additionalData = {}) => {
     try {
@@ -238,7 +274,7 @@ export const commonAPI = {
 export default {
   auth: authAPI,
   inventory: inventoryAPI,
-  customer: customerAPI,
-  dashboard: dashboardAPI,
+  quote: quoteAPI,
+  product: productAPI,
   common: commonAPI
 };

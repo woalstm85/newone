@@ -3,8 +3,7 @@
 export { 
   default as useApi, 
   useInventoryApi, 
-  useAuthApi, 
-  useCustomerApi 
+  useAuthApi
 } from './useApi';
 
 export { default as useErrorHandler } from './useErrorHandler';

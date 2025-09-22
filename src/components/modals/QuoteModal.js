@@ -1,24 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, ShoppingCart, Calculator, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, ShoppingCart, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { commonAPI } from '../../services/api';
 import './QuoteModal.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
+import ProductQuoteModal from './ProductQuoteModal';
 
 const QuoteModal = ({ product, isOpen, onClose }) => {
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successType, setSuccessType] = useState(''); // 'cart' 또는 'quote'
+  const [optionValues, setOptionValues] = useState([]);
+  const [selectedOptionValue, setSelectedOptionValue] = useState('');
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [showQuoteRequestModal, setShowQuoteRequestModal] = useState(false);
   const { globalState } = useAuth();
   
   // 모달이 열릴 때마다 상태 초기화 및 ESC 키 이벤트 추가
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && product) {
       setQuantity(1);
       setShowLoginModal(false);
       setShowSuccessModal(false);
-      setSuccessType('');
+      setSelectedOptionValue('');
+      
+      // 옵션값 로드
+      if (product.optCd) {
+        loadOptionValues(product.optCd);
+      } else {
+        setOptionValues([]);
+      }
       
       // ESC 키 이벤트 리스너 추가
       const handleEscKey = (e) => {
@@ -34,7 +46,30 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
         document.removeEventListener('keydown', handleEscKey);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, product]);
+
+  // 옵션값 로드 함수
+  const loadOptionValues = async (optCd) => {
+    try {
+      setLoadingOptions(true);
+      const options = await commonAPI.getOptionValues(optCd);
+      
+      if (options && Array.isArray(options)) {
+        setOptionValues(options);
+        // 첫 번째 옵션을 기본값으로 선택
+        if (options.length > 0) {
+          setSelectedOptionValue(options[0].optValCd);
+        }
+      } else {
+        setOptionValues([]);
+      }
+    } catch (error) {
+      console.error('옵션값 로드 실패:', error);
+      setOptionValues([]);
+    } finally {
+      setLoadingOptions(false);
+    }
+  };
 
   // 로그인 상태 확인
   const isLoggedIn = !!globalState.G_USER_ID;
@@ -53,6 +88,24 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     return (price * quantity).toLocaleString();
   };
 
+  // 견적의뢰 버튼 클릭 핸들러
+  const handleQuoteRequest = () => {
+    // 로그인 체크
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // 옵션값 선택 체크
+    if (optionValues.length > 0 && !selectedOptionValue) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
+
+    // 견적의뢰 모달 열기
+    setShowQuoteRequestModal(true);
+  };
+
   const handleAddToCart = () => {
     // 로그인 체크
     if (!isLoggedIn) {
@@ -60,20 +113,45 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       return;
     }
 
+    // 옵션값 선택 체크
+    if (optionValues.length > 0 && !selectedOptionValue) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
+
     // 로그인된 상태에서 장바구니 담기 처리
     const price = product.disPrice || product.salePrice || 0;
+    const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
+    
+    console.log('대시보드 장바구니 추가 데이터:', {
+      product,
+      selectedOption,
+      selectedOptionValue,
+      price
+    });
+    
     const cartItem = {
       itemCd: product.itemCd,
       itemNm: product.itemNm,
+      optCd: product.optCd || '',
+      optValCd: selectedOptionValue || '',
+      optValNm: selectedOption ? selectedOption.optValNm : '',
       price: price,
+      outUnitPrice: price, // 동일한 가격 정보
       quantity: quantity,
       filePath: product.FILEPATH,
       totalAmount: price * quantity
     };
     
+    console.log('준비된 카트 아이템:', cartItem);
+    
     // 장바구니에 상품 추가 (localStorage 사용)
     const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItemIndex = existingCart.findIndex(item => item.itemCd === product.itemCd);
+    const existingItemIndex = existingCart.findIndex(item => 
+      item.itemCd === product.itemCd && 
+      item.optCd === (product.optCd || '') &&
+      item.optValCd === (selectedOptionValue || '')
+    );
     
     if (existingItemIndex >= 0) {
       // 이미 있는 상품이면 수량 증가
@@ -85,6 +163,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }
     
     localStorage.setItem('cart', JSON.stringify(existingCart));
+    console.log('업데이트된 장바구니:', existingCart);
     
     // 장바구니 업데이트 이벤트 발생 (여러 번 호출로 확실하게)
     window.dispatchEvent(new Event('cartUpdated'));
@@ -93,50 +172,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }, 100);
     
     // 성공 모달 표시
-    setSuccessType('cart');
     setShowSuccessModal(true);
-  };
-
-  const handleQuoteRequest = () => {
-    // 로그인 체크
-    if (!isLoggedIn) {
-      setShowLoginModal(true);
-      return;
-    }
-
-    // 로그인된 상태에서 견적 의뢰 처리
-    try {
-      const price = product.disPrice || product.salePrice || 0;
-      const quoteData = {
-        product: {
-          itemCd: product.itemCd,
-          itemNm: product.itemNm,
-          price: price,
-          filePath: product.FILEPATH
-        },
-        quantity,
-        totalAmount: price * quantity,
-        requestDate: new Date().toISOString(),
-        userId: globalState.G_USER_ID,
-        companyName: globalState.G_CUST_NM
-      };
-      
-      console.log('견적 요청 데이터:', quoteData);
-      
-      // TODO: 실제 API 호출
-      // const response = await fetch(`${process.env.REACT_APP_API_URL}/api/quote-request`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(quoteData)
-      // });
-      
-      // 성공 모달 표시
-      setSuccessType('quote');
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error('견적 의뢰 전송 실패:', error);
-      alert('견적 의뢰 전송 중 오류가 발생했습니다.');
-    }
   };
 
   const handleClose = (e) => {
@@ -150,7 +186,6 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     setQuantity(1);
     setShowLoginModal(false);
     setShowSuccessModal(false);
-    setSuccessType('');
     
     // 부모 컴포넌트의 onClose 호출
     if (onClose) {
@@ -274,6 +309,28 @@ const formatShipDate = (dateString) => {
                 </div>
               </div>
 
+              {/* 옵션 선택 */}
+              {optionValues.length > 0 && (
+                <div className="quote-modal-option-section">
+                  <span className="quote-modal-section-title">옵션</span>
+                  {loadingOptions ? (
+                    <div className="quote-modal-option-loading">옵션 로드 중...</div>
+                  ) : (
+                    <select 
+                      value={selectedOptionValue}
+                      onChange={(e) => setSelectedOptionValue(e.target.value)}
+                      className="quote-modal-option-select"
+                    >
+                      {optionValues.map((option) => (
+                        <option key={option.optValCd} value={option.optValCd}>
+                          {option.optValNm}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+
               {/* 수량 선택 */}
               <div className="quote-modal-quantity-section">
                 <span className="quote-modal-section-title">수량</span>
@@ -304,14 +361,14 @@ const formatShipDate = (dateString) => {
               {/* 총 금액 */}
               <div className="quote-modal-total-amount">
                 <div className="quote-modal-total-label">
-                  <Calculator className="quote-modal-calculator-icon" />
+                  <ShoppingCart className="quote-modal-calculator-icon" />
                   예상 총 금액
                 </div>
                 <div className="quote-modal-total-price">
                   {calculateTotal()} 원
                 </div>
                 <p className="quote-modal-total-note">
-                  * 실제 견적은 수량 및 배송비에 따라 달라질 수 있습니다.
+                  * 수량에 따른 총 금액입니다.
                 </p>
               </div>
             </div>
@@ -323,22 +380,35 @@ const formatShipDate = (dateString) => {
               닫기
             </button>
             <button onClick={handleAddToCart} className="quote-modal-action-button quote-modal-cart-button">
-              <ShoppingBag className="quote-modal-btn-icon" />
+              <ShoppingCart className="quote-modal-btn-icon" />
               장바구니 담기
-            </button>
+            </button>            
             <button onClick={handleQuoteRequest} className="quote-modal-action-button quote-modal-quote-button">
               <Calculator className="quote-modal-btn-icon" />
-              견적 의뢰
+              견적의뢰
             </button>
+
           </div>
         </div>
       </div>
+
+      {/* 견적의뢰 모달 */}
+      <ProductQuoteModal 
+        product={{
+          ...product,
+          optCd: product.optCd,
+          disPrice: product.disPrice,
+          salePrice: product.salePrice
+        }}
+        isOpen={showQuoteRequestModal}
+        onClose={() => setShowQuoteRequestModal(false)}
+      />
 
       {/* 로그인 필요 모달 */}
       <Modal
         isOpen={showLoginModal}
         title="로그인 필요"
-        message="장바구니 담기 및 견적 의뢰를 하시려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+        message="장바구니 담기를 하시려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
         onConfirm={() => {
           setShowLoginModal(false);
           handleClose();
@@ -351,14 +421,9 @@ const formatShipDate = (dateString) => {
       <Modal
         isOpen={showSuccessModal}
         title="성공"
-        message={
-          successType === 'cart' ? 
-            `상품이 장바구니에 성공적으로 추가되었습니다! (수량: ${quantity}개)` :
-            "견적 의뢰가 성공적으로 전송되었습니다!"
-        }
+        message={`상품이 장바구니에 성공적으로 추가되었습니다! (수량: ${quantity}개)`}
         onConfirm={() => {
           setShowSuccessModal(false);
-          setSuccessType('');
           handleClose();
         }}
       />

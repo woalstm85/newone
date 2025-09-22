@@ -6,6 +6,8 @@ import QuoteModal from '../modals/QuoteModal';
 import ImageWithFallback from '../common/ImageWithFallback';
 import { CiImageOff } from 'react-icons/ci';
 import { Eye } from 'lucide-react';
+import { inventoryAPI, productAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 // 로딩 중에 보여줄 스켈레톤 컴포넌트
 const DashboardSkeleton = ({ isLoggedIn }) => {
@@ -40,7 +42,7 @@ const DashboardSkeleton = ({ isLoggedIn }) => {
     <SkeletonTheme baseColor="#e9ecef" highlightColor="#f8f9fa">
       <div className="dash-dashboard-content">
         <SkeletonSection title="잉여 재고 거래" icon="📦" />
-        <SkeletonSection title="행사 품목" icon="🎁" />
+        <SkeletonSection title="행사 품목" icon="🔥" />
         {isLoggedIn && <SkeletonSection title="자사재고현황" icon="🏢" />}
       </div>
     </SkeletonTheme>
@@ -78,7 +80,6 @@ const formatShipDate = (dateString) => {
     
     // 날짜가 유효한지 확인
     if (isNaN(date.getTime())) {
-
       return dateString; // 원본 문자열 반환
     }
     
@@ -89,7 +90,6 @@ const formatShipDate = (dateString) => {
     
     return `${month}.${day} (${weekday})`;
   } catch (error) {
-
     return dateString; // 에러 시 원본 문자열 반환
   }
 };
@@ -167,7 +167,7 @@ const ProductCard = ({ product, onProductClick }) => {
         <h3 className="dash-product-name">{product.itemNm}</h3>
         <div className="dash-price-container">
           {product.shipAvDate && (
-            <span className="dash-delivery-badge">🚚 {formatShipDate(product.shipAvDate)} 출하가능</span>
+            <span className="dash-delivery-badge">🚛 {formatShipDate(product.shipAvDate)} 출하가능</span>
           )}
           <div className="dash-price-display">
             {/* 할인가가 있으면 할인가를 메인으로, 없으면 판매가를 메인으로 */}
@@ -179,28 +179,27 @@ const ProductCard = ({ product, onProductClick }) => {
               <span className="dash-original-price">{Number(product.salePrice).toLocaleString()} 원</span>
             )}
           </div>
-
         </div>
       </div>
     </div>
   );
 };
 
-// 자사재고현황용 이미지 카드 컴포넌트 (CUST0010 스타일 적용)
+// 자사재고현황용 이미지 카드 컴포넌트 (API 데이터 기반)
 const InventoryImageCard = ({ inventory, onInventoryClick }) => {
   return (
     <div className="dash-inventory-image-card" onClick={() => onInventoryClick && onInventoryClick(inventory)} style={{ cursor: 'pointer' }}>
       <div className="dash-inventory-image-header">
-        <h4>{inventory.itemCd}</h4>
-        <span className={`dash-inventory-badge ${inventory.status === '정상' ? 'normal' : 'warning'}`}>
-          {inventory.status}
+        <h4>{inventory.itemNm}</h4>
+        <span className={`dash-inventory-badge ${inventory.closingQty > 0 ? 'normal' : 'warning'}`}>
+          {inventory.closingQty > 0 ? '재고있음' : '재고없음'}
         </span>
       </div>
       <div className="dash-inventory-image-content">
         <div className="dash-inventory-image-placeholder">
-          {inventory.FILEPATH ? (
+          {inventory.thFilePath ? (
             <ImageWithFallback
-              src={inventory.FILEPATH}
+              src={inventory.thFilePath}
               alt={inventory.itemNm}
               width={120}
               height={120}
@@ -219,27 +218,31 @@ const InventoryImageCard = ({ inventory, onInventoryClick }) => {
               <CiImageOff size={48} color="#ccc" />
             </div>
           )}
-      </div>
+        </div>
         <div className="dash-inventory-item-details">
-          <h5>{inventory.itemNm}</h5>
           <div className="dash-inventory-item-specs">
             <div className="dash-inventory-spec-row">
-              <span className="dash-inventory-spec-label">수량:</span>
-              <span className="dash-inventory-spec-value">{inventory.quantity.toLocaleString()} 개</span>
+              <span className="dash-inventory-spec-label">현재고:</span>
+              <span className="dash-inventory-spec-value">{inventory.closingQty?.toLocaleString() || 0}</span>
             </div>
             <div className="dash-inventory-spec-row">
-              <span className="dash-inventory-spec-label">창고:</span>
-              <span className="dash-inventory-spec-value">{inventory.warehouse}</span>
+              <span className="dash-inventory-spec-label">현재고금액:</span>
+              <span className="dash-inventory-spec-value">{inventory.closingAmt?.toLocaleString() || 0}원</span>
             </div>
             <div className="dash-inventory-spec-row">
-              <span className="dash-inventory-spec-label">거래처:</span>
-              <span className="dash-inventory-spec-client">{inventory.clientName}</span>
-            </div>
-            <div className="dash-inventory-spec-row">
-              <span className="dash-inventory-spec-label">보관기간:</span>
-              <span className="dash-inventory-spec-date">{inventory.storageDate}</span>
+              <span className="dash-inventory-spec-label">평균단가:</span>
+              <span className="dash-inventory-spec-client">{inventory.avgPrice?.toLocaleString() || 0}원</span>
             </div>
           </div>
+          {inventory.locCd ? (
+            <span className="dash-inventory-location-badge">
+              📍 {inventory.locCd}
+            </span>
+          ) : (
+            <span className="dash-inventory-no-location-badge">
+              📋 위치 미지정
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -290,8 +293,8 @@ const ProductSection = ({ category, onProductClick, onInventoryClick, onMoreClic
       {/* 자사재고현황은 이미지 뷰로 렌더링 */}
       {category.title.includes('자사재고현황') ? (
         <div className="dash-inventory-image-grid">
-          {category.items.map(inventory => (
-            <InventoryImageCard key={inventory.itemCd} inventory={inventory} onInventoryClick={onInventoryClick} />
+          {category.items.map((inventory, index) => (
+            <InventoryImageCard key={`${inventory.itemCd}-${index}`} inventory={inventory} onInventoryClick={onInventoryClick} />
           ))}
         </div>
       ) : (
@@ -311,81 +314,17 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // 샘플 자사재고현황 데이터 (실제로는 API에서 가져와야 함)
-  const sampleInventoryData = [
-    {
-      itemCd: 'INV001',
-      itemNm: '스테인리스 파이프 50mm',
-      quantity: 2500,
-      warehouse: 'A동 1층',
-      clientName: '대한철강',
-      storageDate: '2025-01-15 ~ 현재',
-      status: '정상',
-      FILEPATH: null
-    },
-    {
-      itemCd: 'INV002',
-      itemNm: '알루미늄 프로파일 20x40',
-      quantity: 1800,
-      warehouse: 'B동 2층',
-      clientName: '서울알루미늄',
-      storageDate: '2024-12-20 ~ 현재',
-      status: '정상',
-      FILEPATH: null
-    },
-    {
-      itemCd: 'INV003',
-      itemNm: '철판 3mm 두께',
-      quantity: 150,
-      warehouse: 'A동 3층',
-      clientName: '부산금속',
-      storageDate: '2025-02-01 ~ 현재',
-      status: '확인필요',
-      FILEPATH: null
-    },
-    {
-      itemCd: 'INV004',
-      itemNm: 'PVC 관 75mm',
-      quantity: 5200,
-      warehouse: 'C동 1층',
-      clientName: '경기화학',
-      storageDate: '2024-11-30 ~ 현재',
-      status: '정상',
-      FILEPATH: null
-    },
-    {
-      itemCd: 'INV005',
-      itemNm: '구리선 2.5sq',
-      quantity: 890,
-      warehouse: 'B동 1층',
-      clientName: '한국전선',
-      storageDate: '2025-01-08 ~ 현재',
-      status: '정상',
-      FILEPATH: null
-    }
-  ];
+  const { globalState } = useAuth(); // 로그인 사용자 정보 가져오기
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
         // 잉여재고와 행사품목 데이터를 병렬로 가져오기
-        const [surplusResponse, eventResponse] = await Promise.all([
-          fetch('https://api.newonetotal.co.kr/Comm/DashItems?itemDivCd=010'),
-          fetch('https://api.newonetotal.co.kr/Comm/DashItems?itemDivCd=020')
+        const [surplusData, eventData] = await Promise.all([
+          productAPI.getDashItems('010'),
+          productAPI.getDashItems('020')
         ]);
-
-        if (!surplusResponse.ok) {
-          throw new Error(`잉여재고 데이터 가져오기 실패: ${surplusResponse.status}`);
-        }
-        if (!eventResponse.ok) {
-          throw new Error(`행사품목 데이터 가져오기 실패: ${eventResponse.status}`);
-        }
-
-        const surplusData = await surplusResponse.json();
-        const eventData = await eventResponse.json();
-
 
         // 데이터 처리 - 각각 최대 10개만 사용
         const processData = (data, maxItems = 10) => {
@@ -410,18 +349,34 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
           },
           { 
             title: "행사 품목", 
-            icon: "🎁",
+            icon: "🔥",
             items: processData(eventData, 10)
           }
         ];
 
-        // 로그인한 사용자에게만 자사재고현황 데이터 추가
-        if (isLoggedIn) {
-          formattedData.push({
-            title: "자사재고현황",
-            icon: "🏢",
-            items: sampleInventoryData.slice(0, 10) // 최대 10개
-          });
+        // 로그인한 사용자에게만 자사재고현황 데이터 API로 가져오기
+        if (isLoggedIn && globalState.G_USER_ID) {
+          try {
+            console.log('자사재고현황 API 호출 시작 - 사용자 ID:', globalState.G_USER_ID);
+            const companyInventoryData = await inventoryAPI.getCompanyInventory(globalState.G_USER_ID);
+            console.log('자사재고현황 API 응답:', companyInventoryData);
+            
+            const processedInventoryData = companyInventoryData.slice(0, 12); // 최대 10개만 표시
+            
+            formattedData.push({
+              title: "자사재고현황",
+              icon: "📋",
+              items: processedInventoryData
+            });
+          } catch (inventoryError) {
+            console.error('자사재고현황 데이터 로드 실패:', inventoryError);
+            // 자사재고현황 API 오류 시 빈 데이터로 추가
+            formattedData.push({
+              title: "자사재고현황",
+              icon: "📋",
+              items: []
+            });
+          }
         }
 
         setProducts(formattedData);
@@ -431,12 +386,12 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
         // 에러 발생 시 빈 데이터로 설정
         const errorData = [
           { title: "잉여 재고 거래", icon: "📦", items: [] },
-          { title: "행사 품목", icon: "🎁", items: [] }
+          { title: "행사 품목", icon: "🔥", items: [] }
         ];
         
-        // 로그인한 사용자에게만 자사재고현황 데이터 추가
+        // 로그인한 사용자에게만 자사재고현황 데이터 추가 (에러 시에도)
         if (isLoggedIn) {
-          errorData.push({ title: "자사재고현황", icon: "🏢", items: sampleInventoryData.slice(0, 10) });
+          errorData.push({ title: "자사재고현황", icon: "🏢", items: [] });
         }
         
         setProducts(errorData);
@@ -446,7 +401,7 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
     };
 
     fetchDashboardData();
-  }, [isLoggedIn]); // isLoggedIn 상태가 바뀔 때마다 데이터 다시 로드
+  }, [isLoggedIn, globalState.G_USER_ID]); // isLoggedIn과 사용자 ID가 바뀔 때마다 데이터 다시 로드
 
   // 상품 클릭 핸들러
   const handleProductClick = (product) => {
@@ -459,6 +414,7 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
 
   // 자사재고 클릭 핸들러
   const handleInventoryClick = (inventory) => {
+    console.log('자사재고 클릭:', inventory);
     // 자사재고 상세 페이지로 이동하거나 모달 열기 등의 로직 추가
   };
 

@@ -328,17 +328,27 @@
 .dash-inventory-image-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 15px;
   border-bottom: 1px solid #f0f0f0;
   background-color: #f8f9fa;
+  min-height: 70px;
 }
 
 .dash-inventory-image-header h4 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: #333;
   margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  margin-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 36px;
 }
 
 .dash-inventory-image-content {
@@ -388,8 +398,41 @@
   font-size: 16px;
   font-weight: bold;
   color: #333;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   line-height: 1.4;
+}
+
+/* 위치 배지 스타일 */
+.dash-inventory-location-badge {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  background: #4a9eff;
+  color: white;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 12px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* 위치 없음 배지 스타일 */
+.dash-inventory-no-location-badge {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  color: #6c757d;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 12px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  border: 1px solid #dee2e6;
+  box-sizing: border-box;
 }
 
 .dash-inventory-item-specs {
@@ -446,6 +489,10 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  height: fit-content;
 }
 
 .dash-inventory-badge.normal {

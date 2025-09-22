@@ -8,6 +8,7 @@ import {
   FolderOpen,
   Home
 } from 'lucide-react';
+import { productAPI } from '../../services/api';
 import './ProductCategoryMenu.css';
 
 const ProductCategoryMenu = ({ isOpen, onClose, onCategorySelect, menuTitle, showCloseButton = true }) => {
@@ -25,12 +26,7 @@ const ProductCategoryMenu = ({ isOpen, onClose, onCategorySelect, menuTitle, sho
         setLoading(true);
         setError(null);
 
-        const response = await fetch('https://api.newonetotal.co.kr/Comm/category');
-        if (!response.ok) {
-          throw new Error(`API 요청 실패: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await productAPI.getCategories();
         console.log('Category API Response:', data);
 
         // 평면 데이터 저장

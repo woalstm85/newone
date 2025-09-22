@@ -69,8 +69,8 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
           const basicMenus = [
             { top_menuCd: 'HOME', top_menuNm: 'HOME' },
             { top_menuCd: 'SURPLUS', top_menuNm: '잉여재고거래', icon: '📦' },
-            { top_menuCd: 'EVENT', top_menuNm: '행사품목', icon: '🎁' },
-            { top_menuCd: 'CART', top_menuNm: '장바구니', isCartMenu: true }
+            { top_menuCd: 'EVENT', top_menuNm: '행사품목', icon: '🔥' },
+            { top_menuCd: 'CART', top_menuNm: '장바구니', icon: '🛒' }
           ];
           setTopMenuItems(basicMenus);
           
@@ -87,7 +87,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
         // 1. 고정 메뉴들 생성
         const homeItem = { top_menuCd: 'HOME', top_menuNm: 'HOME' };
         const surplusItem = { top_menuCd: 'SURPLUS', top_menuNm: '잉여재고거래', icon: '📦' };
-        const eventItem = { top_menuCd: 'EVENT', top_menuNm: '행사품목', icon: '🎁' };
+        const eventItem = { top_menuCd: 'EVENT', top_menuNm: '행사품목', icon: '🔥' };
 
         // 2. LEFT 메뉴에서 LEVEL=2인 항목들만 필터링하여 TOP 메뉴 형태로 변환
         const level2LeftMenus = leftMenuData.filter(item => item.LEVEL === 2);
@@ -106,7 +106,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
         });
 
         // 3. CART 메뉴 아이템 추가
-        const cartItem = { top_menuCd: 'CART', top_menuNm: '장바구니', isCartMenu: true };
+        const cartItem = { top_menuCd: 'CART', top_menuNm: '장바구니', icon: '🛒' };
 
         // 4. HOME + 잉여재고거래 + 행사품목 + LEFT 메뉴(LEVEL=2) + CART 합치기
         const combinedMenuItems = [homeItem, surplusItem, eventItem, ...convertedLeftMenu, cartItem];
@@ -244,7 +244,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
                 }`}
                 onClick={() => handleTopMenuClick(menu.top_menuCd, menu.top_menuNm)}
               >
-                {menu.top_menuCd === 'CART' && <ShoppingCart size={16} />}
+                {menu.top_menuCd === 'CART'}
                 {menu.icon && <span className="menu-icon">{menu.icon}</span>}
                 {menu.top_menuNm || menu.top_menuCd}
                 {menu.top_menuCd === 'CART' && cartItemCount > 0 && (
@@ -278,7 +278,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
             }`}
             onClick={() => handleTopMenuClick(cartMenu.top_menuCd, cartMenu.top_menuNm)}
           >
-            <ShoppingCart size={16} />
+
             {cartMenu.top_menuNm || cartMenu.top_menuCd}
             {cartItemCount > 0 && (
               <span className="cart-count-badge">{cartItemCount}</span>

@@ -1,241 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Calendar, Eye, Download, Plus, FileText, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, History, Printer } from 'lucide-react';
-import './CUST0040.css';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Search, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useMenu } from '../../context/MenuContext';
+import { quoteAPI } from '../../services/api';
+import Modal from '../common/Modal';
 import QuoteDetailModal from '../modals/QuoteDetailModal';
-import QuoteHistoryModal from '../modals/QuoteHistoryModal';
-import Pagination from '../common/Pagination';
-import quotesDB from '../../data/quotesDB.json';
-import { generateQuotePDF, generateQuoteHTML } from '../utils/pdfGenerator';
+import MySpinner from '../common/MySpinner';
+import './CUST0040.css';
 
 const CUST0040 = () => {
-  const [quotes, setQuotes] = useState([]);
-  const [filteredQuotes, setFilteredQuotes] = useState([]);
-  const [paginatedQuotes, setPaginatedQuotes] = useState([]);
-  const [selectedQuote, setSelectedQuote] = useState(null);
-  const [historyQuote, setHistoryQuote] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('전체');
-  const [dateFilter, setDateFilter] = useState('전체');
-  const [sortField, setSortField] = useState('requestDate');
-  const [sortDirection, setSortDirection] = useState('desc');
+  // 상태 관리
+  const [quotesData, setQuotesData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  
+  // 검색 조건
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 모달 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isQuoteDetailModalOpen, setIsQuoteDetailModalOpen] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState(null);
 
-  // 상태별 아이콘 매핑
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case '대기중':
-        return <Clock className="status-icon" />;
-      case '검토중':
-        return <AlertCircle className="status-icon" />;
-      case '승인됨':
-        return <CheckCircle className="status-icon" />;
-      case '거절됨':
-        return <XCircle className="status-icon" />;
-      default:
-        return <FileText className="status-icon" />;
+  // 컨텍스트
+  const { globalState } = useAuth();
+  const { currentMenuTitle } = useMenu();
+
+  // 현재 년월 기본값 설정
+  useEffect(() => {
+    const currentDate = new Date();
+    const currentYM = `${currentDate.getFullYear()}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    setSelectedMonth(currentYM);
+  }, []);
+
+  // 페이지네이션 계산
+  const { currentItems, totalPages, startIndex, endIndex, totalItems } = useMemo(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    let filteredData = quotesData;
+
+    // 검색 필터링
+    if (searchTerm.trim()) {
+      filteredData = quotesData.filter(item =>
+        (item.reqNo && item.reqNo.toLowerCase().includes(searchTerm.trim().toLowerCase())) ||
+        (item.custNm && item.custNm.toLowerCase().includes(searchTerm.trim().toLowerCase())) ||
+        (item.contactNm && item.contactNm.toLowerCase().includes(searchTerm.trim().toLowerCase()))
+      );
     }
+
+    const currentItems = filteredData.slice(startIdx, endIdx);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+    return {
+      currentItems,
+      totalPages,
+      startIndex: startIdx + 1,
+      endIndex: Math.min(endIdx, filteredData.length),
+      totalItems: filteredData.length
+    };
+  }, [quotesData, currentPage, itemsPerPage, searchTerm]);
+
+  // API 호출 함수
+  const fetchQuotesData = useCallback(async () => {
+    if (!globalState.G_USER_ID || !selectedMonth) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log('호출하는 API 매개변수:', { selectedMonth, userId: globalState.G_USER_ID });
+      
+      const data = await quoteAPI.getQuoteRequests(selectedMonth, globalState.G_USER_ID);
+      
+      console.log('반환된 데이터:', data);
+      
+      if (data && Array.isArray(data)) {
+        setQuotesData(data);
+        console.log(`선택된 월: ${selectedMonth}, 데이터 건수: ${data.length}`);
+      } else {
+        setQuotesData([]);
+        console.warn('예상치 못한 API 응답 형식:', data);
+      }
+    } catch (error) {
+      console.error('견적의뢰 데이터 조회 실패:', error);
+      setQuotesData([]);
+      setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedMonth, globalState.G_USER_ID]);
+
+  // 검색 버튼 클릭
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchQuotesData();
+  };
+
+  // 초기 데이터 로드 - selectedMonth 변경 시마다 자동 호출
+  useEffect(() => {
+    if (selectedMonth && globalState.G_USER_ID) {
+      console.log('월 변경 감지 - fetchQuotesData 호출:', selectedMonth);
+      fetchQuotesData();
+    }
+  }, [selectedMonth, globalState.G_USER_ID, fetchQuotesData]);
+
+  // 견적의뢰 상세 모달 핸들러
+  const handleQuoteDetailClick = (quote) => {
+    setSelectedQuote(quote);
+    setIsQuoteDetailModalOpen(true);
+  };
+
+  // 견적의뢰 상세 모달 닫기
+  const handleQuoteDetailClose = () => {
+    setIsQuoteDetailModalOpen(false);
+    setSelectedQuote(null);
   };
 
   // 날짜 포맷팅
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (dateString.length === 8) {
+      const year = dateString.substring(0, 4);
+      const month = dateString.substring(4, 6);
+      const day = dateString.substring(6, 8);
+      return `${year}-${month}-${day}`;
+    }
+    return dateString;
   };
 
   // 금액 포맷팅
   const formatAmount = (amount) => {
+    if (!amount || amount === 0) return '0';
     return new Intl.NumberFormat('ko-KR').format(amount);
   };
 
-  // 데이터 로드
-  useEffect(() => {
-    const loadQuotes = async () => {
-      setIsLoading(true);
-      try {
-        // 실제 환경에서는 API 호출
-        // const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/CUST0040`);
-        // const data = await response.json();
-        
-        // 현재는 JSON 데이터 사용 (DB 연동 준비됨)
-        setQuotes(quotesDB.quotes);
-        setFilteredQuotes(quotesDB.quotes);
-      } catch (error) {
-        console.error('견적 데이터 로드 실패:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadQuotes();
-  }, []);
-
-  // 필터링 및 정렬 로직
-  useEffect(() => {
-    let filtered = quotes;
-
-    // 검색어 필터링
-    if (searchTerm) {
-      filtered = filtered.filter(quote => 
-        quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quote.customerInfo.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quote.product.itemNm.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // 상태 필터링
-    if (statusFilter !== '전체') {
-      filtered = filtered.filter(quote => quote.status === statusFilter);
-    }
-
-    // 날짜 필터링
-    if (dateFilter !== '전체') {
-      const now = new Date();
-      const filterDate = new Date();
-      
-      switch (dateFilter) {
-        case '오늘':
-          filterDate.setHours(0, 0, 0, 0);
-          filtered = filtered.filter(quote => {
-            const quoteDate = new Date(quote.requestDate);
-            return quoteDate >= filterDate;
-          });
-          break;
-        case '일주일':
-          filterDate.setDate(now.getDate() - 7);
-          filtered = filtered.filter(quote => {
-            const quoteDate = new Date(quote.requestDate);
-            return quoteDate >= filterDate;
-          });
-          break;
-        case '한달':
-          filterDate.setMonth(now.getMonth() - 1);
-          filtered = filtered.filter(quote => {
-            const quoteDate = new Date(quote.requestDate);
-            return quoteDate >= filterDate;
-          });
-          break;
-        default:
-          break;
-      }
-    }
-
-    // 정렬
-
-    
-    const sortedFiltered = [...filtered].sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortField) {
-        case 'requestDate':
-          aValue = new Date(a.requestDate).getTime();
-          bValue = new Date(b.requestDate).getTime();
-          break;
-        case 'totalAmount':
-          aValue = Number(a.totalAmount) || 0;
-          bValue = Number(b.totalAmount) || 0;
-          break;
-        case 'status':
-          aValue = a.status || '';
-          bValue = b.status || '';
-          break;
-        case 'companyName':
-          aValue = (a.customerInfo?.companyName || '').toLowerCase();
-          bValue = (b.customerInfo?.companyName || '').toLowerCase();
-          break;
-        case 'quoteNumber':
-          aValue = a.quoteNumber || '';
-          bValue = b.quoteNumber || '';
-          break;
-        default:
-          aValue = new Date(a.requestDate).getTime();
-          bValue = new Date(b.requestDate).getTime();
-      }
-
-      // 숫자 비교
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
-      // 문자열 비교
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        if (sortDirection === 'asc') {
-          return aValue.localeCompare(bValue);
-        } else {
-          return bValue.localeCompare(aValue);
-        }
-      }
-      
-      // 기본 비교
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-      }
-    });
-
-
-    setFilteredQuotes(sortedFiltered);
-    setCurrentPage(1); // 필터링 시 첫 페이지로 이동
-  }, [quotes, searchTerm, statusFilter, dateFilter, sortField, sortDirection]);
-
-  // 페이지네이션 로직
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginated = filteredQuotes.slice(startIndex, endIndex);
-
-    
-    setPaginatedQuotes(paginated);
-  }, [filteredQuotes, currentPage, itemsPerPage]);
-
-  // 견적 상세 보기
-  const handleQuoteDetail = (quote) => {
-    setSelectedQuote(quote);
-    setIsModalOpen(true);
-  };
-
-  // 견적 이력 보기
-  const handleQuoteHistory = (quote, e) => {
-    e.stopPropagation();
-    setHistoryQuote(quote);
-    setIsHistoryModalOpen(true);
-  };
-
-  // 모달 닫기
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedQuote(null);
-  };
-
-  const handleHistoryModalClose = () => {
-    setIsHistoryModalOpen(false);
-    setHistoryQuote(null);
-  };
-
-  // 정렬 변경
-  const handleSort = (field) => {
-
-    
-    if (sortField === field) {
-      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-      setSortDirection(newDirection);
-
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-
-    }
+  // 행 클릭 처리 - 견적상세 모달 열기
+  const handleRowClick = (quote) => {
+    handleQuoteDetailClick(quote);
   };
 
   // 페이지 변경
@@ -243,293 +148,215 @@ const CUST0040 = () => {
     setCurrentPage(page);
   };
 
-  // 페이지당 항목 수 변경
+  // 페이지 크기 변경
   const handleItemsPerPageChange = (newItemsPerPage) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
   };
 
-  // 견적서 다운로드 (PDF)
-  const handleDownload = (quote, e) => {
-    e.stopPropagation();
-    try {
-      generateQuotePDF(quote);
-    } catch (error) {
-      console.error('PDF 생성 실패:', error);
-      alert('PDF 생성에 실패했습니다. HTML 버전으로 대체합니다.');
-      generateQuoteHTML(quote);
+  // 페이지 번호 생성
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
   };
-
-  // 견적서 인쇄
-  const handlePrint = (quote, e) => {
-    e.stopPropagation();
-    generateQuoteHTML(quote);
-  };
-
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(filteredQuotes.length / itemsPerPage);
-
-  if (isLoading) {
-    return (
-      <div className="cust0040-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>견적 데이터를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="cust0040-container">
-      {/* 헤더 */}
-      <div className="cust0040-header">
-        <div className="header-left">
-          <h1 className="page-title">
-            <FileText className="title-icon" />
-            견적 관리
-          </h1>
-          <p className="page-description">견적 요청 현황을 확인하고 관리할 수 있습니다.</p>
-        </div>
-        <div className="header-actions">
-          <button className="btn btn-primary">
-            <Plus className="btn-icon" />
-            새 견적 작성
-          </button>
+      {/* 프로그램 헤더 */}
+      <div className="cust0040-program-header">
+        <div className="cust0040-header-left">
+          <FileText className="w-6 h-6" />
+          <h1>{currentMenuTitle || '견적의뢰 관리'}</h1>
         </div>
       </div>
 
-      {/* 필터 섹션 */}
-      <div className="cust0040-filters">
-        <div className="filter-row">
-          {/* 검색 */}
-          <div className="search-box">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="견적번호, 회사명, 제품명 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          {/* 상태 필터 */}
-          <div className="filter-group">
-            <Filter className="filter-icon" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="전체">전체 상태</option>
-              <option value="대기중">대기중</option>
-              <option value="검토중">검토중</option>
-              <option value="승인됨">승인됨</option>
-              <option value="거절됨">거절됨</option>
-            </select>
-          </div>
-
-          {/* 날짜 필터 */}
-          <div className="filter-group">
-            <Calendar className="filter-icon" />
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="전체">전체 기간</option>
-              <option value="오늘">오늘</option>
-              <option value="일주일">최근 일주일</option>
-              <option value="한달">최근 한달</option>
-            </select>
-          </div>
-        </div>
-
-          {/* 통계 정보 */}
-        <div className="stats-row">
-          <div className="stat-item">
-            <span className="stat-label">전체 견적</span>
-            <span className="stat-value">{quotes.length}건</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">검색 결과</span>
-            <span className="stat-value">{filteredQuotes.length}건</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">대기중</span>
-            <span className="stat-value waiting">
-              {quotes.filter(q => q.status === '대기중').length}건
-            </span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">승인됨</span>
-            <span className="stat-value approved">
-              {quotes.filter(q => q.status === '승인됨').length}건
-            </span>
-          </div>
-        </div>
-
-        {/* 정렬 옵션 */}
-        <div className="sort-row">
-          <span className="sort-label">정렬 </span>
-          <div className="sort-buttons">
-            <button 
-              className={`sort-btn ${sortField === 'requestDate' ? 'active' : ''}`}
-              onClick={() => handleSort('requestDate')}
-            >
-              요청일
-              <ArrowUpDown className={`sort-icon ${sortField === 'requestDate' ? sortDirection : ''}`} />
-            </button>
-            <button 
-              className={`sort-btn ${sortField === 'totalAmount' ? 'active' : ''}`}
-              onClick={() => handleSort('totalAmount')}
-            >
-              금액
-              <ArrowUpDown className={`sort-icon ${sortField === 'totalAmount' ? sortDirection : ''}`} />
-            </button>
-            <button 
-              className={`sort-btn ${sortField === 'status' ? 'active' : ''}`}
-              onClick={() => handleSort('status')}
-            >
-              상태
-              <ArrowUpDown className={`sort-icon ${sortField === 'status' ? sortDirection : ''}`} />
-            </button>
-            <button 
-              className={`sort-btn ${sortField === 'companyName' ? 'active' : ''}`}
-              onClick={() => handleSort('companyName')}
-            >
-              회사명
-              <ArrowUpDown className={`sort-icon ${sortField === 'companyName' ? sortDirection : ''}`} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 견적 리스트 */}
-      <div className="cust0040-content">
-        {filteredQuotes.length === 0 ? (
-          <div className="empty-state">
-            <FileText className="empty-icon" />
-            <h3>견적이 없습니다</h3>
-            <p>검색 조건을 변경하거나 새로운 견적을 작성해보세요.</p>
-          </div>
-        ) : (
-          <>
-            <div className="quotes-grid">
-              {paginatedQuotes.map((quote) => (
-                <div
-                  key={quote.quoteId}
-                  className="quote-card"
-                  onClick={() => handleQuoteDetail(quote)}
-                >
-                  {/* 카드 헤더 */}
-                  <div className="quote-card-header">
-                    <div className="quote-number">
-                      <FileText className="quote-icon" />
-                      {quote.quoteNumber}
-                    </div>
-                    <div 
-                      className="quote-status"
-                      style={{ color: quote.statusColor }}
-                    >
-                      {getStatusIcon(quote.status)}
-                      {quote.status}
-                    </div>
-                  </div>
-
-                  {/* 카드 바디 */}
-                  <div className="quote-card-body">
-                    <div className="customer-info">
-                      <h4 className="company-name">{quote.customerInfo.companyName}</h4>
-                      <p className="contact-person">{quote.customerInfo.contactPerson}</p>
-                    </div>
-
-                    <div className="product-info">
-                      <h5 className="product-name">{quote.product.itemNm}</h5>
-                      <p className="product-details">
-                        {formatAmount(quote.quantity)}개 × {formatAmount(quote.product.unitPrice)}원
-                      </p>
-                    </div>
-
-                    <div className="amount-info">
-                      <span className="amount-label">총 견적금액</span>
-                      <span className="amount-value">
-                        {formatAmount(quote.totalAmount)}원
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 카드 푸터 */}
-                  <div className="quote-card-footer">
-                    <div className="date-info">
-                      <span className="date-label">요청일:</span>
-                      <span className="date-value">{formatDate(quote.requestDate)}</span>
-                    </div>
-                    <div className="card-actions">
-                      <button
-                        className="action-btn view-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleQuoteDetail(quote);
-                        }}
-                        title="상세보기"
-                      >
-                        <Eye className="action-icon" />
-                      </button>
-                      <button
-                        className="action-btn history-btn"
-                        onClick={(e) => handleQuoteHistory(quote, e)}
-                        title="이력 보기"
-                      >
-                        <History className="action-icon" />
-                      </button>
-                      <button
-                        className="action-btn print-btn"
-                        onClick={(e) => handlePrint(quote, e)}
-                        title="인쇄"
-                      >
-                        <Printer className="action-icon" />
-                      </button>
-                      <button
-                        className="action-btn download-btn"
-                        onClick={(e) => handleDownload(quote, e)}
-                        title="다운로드"
-                      >
-                        <Download className="action-icon" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* 검색 영역 */}
+      <div className="cust0040-search-section">
+        <div className="cust0040-search-container">
+          <div className="cust0040-search-row">
+            <div className="cust0040-search-field">
+              <label>조회월</label>
+              <input
+                type="month"
+                value={selectedMonth ? `${selectedMonth.substring(0,4)}-${selectedMonth.substring(4,6)}` : ''}
+                onChange={(e) => {
+                  const value = e.target.value; // YYYY-MM 형식
+                  const yearMonth = value.replace('-', ''); // YYYYMM 형식으로 변환
+                  console.log('월 선택 변경:', { original: value, converted: yearMonth });
+                  setSelectedMonth(yearMonth);
+                }}
+              />
             </div>
 
-            {/* 페이지네이션 */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={filteredQuotes.length}
-              itemsPerPage={itemsPerPage}
-              onPageChange={handlePageChange}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </>
-        )}
+            <div className="cust0040-search-field">
+              <label>검색</label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="견적번호, 고객명, 담당자명 입력"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+
+            <div className="cust0040-search-buttons">
+              <button className="cust0040-search-btn" onClick={handleSearch}>
+                <Search size={16} />
+                검색
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* 견적 상세 모달 */}
-      <QuoteDetailModal 
-        quote={selectedQuote}
+      {/* 페이지네이션 정보 */}
+      <div className="cust0040-pagination-info">
+        <div className="cust0040-data-info">
+          전체 {quotesData.length.toLocaleString()}건 중 {quotesData.length > 0 ? startIndex.toLocaleString() : 0}-{endIndex.toLocaleString()}건 표시
+        </div>
+        <div className="cust0040-page-size-selector">
+          <label>페이지당 표시:</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+          >
+            <option value={10}>10개</option>
+            <option value={20}>20개</option>
+            <option value={50}>50개</option>
+            <option value={100}>100개</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 테이블 영역 */}
+      <div className="cust0040-grid-container">
+        <div className="cust0040-grid-wrapper">
+          <div className="cust0040-table-container">
+            <table className="cust0040-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '100px' }}>진행상태</th>                  
+                  <th style={{ width: '120px' }}>견적번호</th>
+                  <th style={{ width: '100px' }}>요청일자</th>
+                  <th style={{ width: '100px' }}>담당자</th>
+                  <th style={{ width: '120px' }}>연락처</th>
+                  <th>주소</th>
+                  <th style={{ width: '100px' }}>희망납기</th>
+                  <th style={{ width: '80px' }}>품목수</th>
+                  <th style={{ width: '100px' }}>상세보기</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((quote, index) => (
+                    <tr 
+                      key={`${quote.reqNo}-${index}`}
+                      className="quote-main-row" 
+                      onClick={() => handleRowClick(quote)}
+                      style={{ cursor: 'pointer' }}
+>
+                      <td className="cust0040-center">{formatDate(quote.reqStatus)}</td>
+                      <td className="cust0040-center" style={{ fontWeight: '600', color: '#007bff' }}>
+                        {quote.reqNo}
+                      </td>
+                      <td className="cust0040-center">{formatDate(quote.reqDate)}</td>
+                      <td className="cust0040-center">{quote.contactNm}</td>
+                      <td className="cust0040-center">{quote.contactTel}</td>
+                      <td className="cust0040-left">{quote.siteNm}</td>
+                      <td className="cust0040-center">{formatDate(quote.dueDate)}</td>
+                      <td className="cust0040-center">
+                        <span className="quote-item-count-badge">
+                          {quote.subData?.length || 0}건
+                        </span>
+                      </td>
+                      <td className="cust0040-center">
+                        <button 
+                          className="quote-detail-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuoteDetailClick(quote);
+                          }}
+                        >
+                          상세보기
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="cust0040-center" style={{ padding: '40px', color: '#666' }}>
+                      데이터가 없습니다.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* 페이지네이션 */}
+      {totalPages > 1 && (
+        <div className="cust0040-pagination">
+          <button
+            className="cust0040-page-btn"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={16} />
+            이전
+          </button>
+
+          {getPageNumbers().map(page => (
+            <button
+              key={page}
+              className={`cust0040-page-number ${currentPage === page ? 'active' : ''}`}
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            className="cust0040-page-btn"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            다음
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* 로딩 표시 */}
+      {loading && <MySpinner />}
+
+      {/* 기본 모달 */}
+      <Modal
         isOpen={isModalOpen}
-        onClose={handleModalClose}
+        title="알림"
+        message={modalMessage}
+        onConfirm={() => setIsModalOpen(false)}
       />
 
-      {/* 견적 이력 모달 */}
-      <QuoteHistoryModal 
-        quote={historyQuote}
-        isOpen={isHistoryModalOpen}
-        onClose={handleHistoryModalClose}
+      {/* 견적 상세 모달 */}
+      <QuoteDetailModal
+        isOpen={isQuoteDetailModalOpen}
+        onClose={handleQuoteDetailClose}
+        quote={selectedQuote}
       />
     </div>
   );

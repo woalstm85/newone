@@ -1,0 +1,783 @@
+/* ===============================================
+   ProductQuoteModal 전용 스타일
+=============================================== */
+
+/* 모달 오버레이 */
+.product-quote-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 모달 컨테이너 */
+.product-quote-modal-large {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: productQuoteModalSlideUp 0.3s ease-out;
+  position: relative;
+  z-index: 100000;
+}
+
+@keyframes productQuoteModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 모달 헤더 */
+.product-quote-modal-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 20px 24px;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.product-quote-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+}
+
+.product-quote-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.product-quote-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 모달 바디 */
+.product-quote-modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 상품 섹션 */
+.product-quote-products-section {
+  border-right: 1px solid #e5e7eb;
+  padding-right: 24px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.product-quote-products-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.product-quote-products-header h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.product-quote-total-amount {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 600;
+}
+
+.product-quote-products-list {
+  max-height: calc(100% - 80px);
+  overflow-y: auto;
+}
+
+/* 상품 아이템 */
+.product-quote-product-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 메인 상품 정보 영역 */
+.product-quote-item-main {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.product-quote-item-image {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-quote-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-quote-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-quote-item-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-quote-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-quote-item-code,
+.product-quote-item-company,
+.product-quote-item-ship-date,
+.product-quote-item-price,
+.product-quote-item-original-price,
+.product-quote-item-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.product-quote-detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.product-quote-detail-value {
+  color: #1f2937;
+  font-weight: 600;
+  flex: 1;
+}
+
+.product-quote-detail-value.price {
+  color: #059669;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.product-quote-detail-value.original {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.product-quote-item-ship-date .product-quote-detail-value {
+  color: #059669;
+  font-weight: 600;
+}
+
+.product-quote-item-option .product-quote-detail-value {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+/* 수량 및 총액 컨트롤 영역 */
+.product-quote-item-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  gap: 16px;
+}
+
+.product-quote-quantity-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-quote-quantity-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.product-quote-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.product-quote-quantity-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.product-quote-quantity-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.product-quote-quantity-input {
+  width: 40px;
+  height: 24px;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: white;
+  color: #1f2937;
+  outline: none;
+}
+
+.product-quote-quantity-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.product-quote-item-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-quote-total-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.product-quote-item-total .product-quote-total-amount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  background: #f0f9ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #bae6fd;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* 상품 삭제 버튼 */
+.product-quote-item-actions {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.product-quote-remove-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ef4444;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.product-quote-remove-btn:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.05);
+}
+
+.product-quote-remove-btn:active {
+  transform: scale(0.95);
+}
+
+/* 폼 섹션 */
+.product-quote-form-section {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.product-quote-form-section h4 {
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.product-quote-form {
+  display: grid;
+  gap: 20px;
+}
+
+.product-quote-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.product-quote-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-quote-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.product-quote-form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.product-quote-form-group input,
+.product-quote-form-group textarea,
+.product-quote-form-group select {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: white;
+}
+
+.product-quote-form-group input.error,
+.product-quote-form-group textarea.error,
+.product-quote-form-group select.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  background-color: #fef2f2;
+}
+
+.product-quote-form-group input:focus,
+.product-quote-form-group textarea:focus,
+.product-quote-form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.product-quote-form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* 옵션 섹션 */
+.product-quote-option-section {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.product-quote-option-header {
+  margin-bottom: 12px;
+}
+
+.product-quote-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.product-quote-option-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-quote-option-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.product-quote-option-select:hover {
+  border-color: #9ca3af;
+}
+
+.product-quote-option-loading {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+/* 모달 푸터 */
+.product-quote-modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.product-quote-modal-btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+  min-width: 120px;
+}
+
+.product-quote-modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.product-quote-modal-btn.cancel {
+  background: white;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.product-quote-modal-btn.cancel:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.product-quote-modal-btn.confirm {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.product-quote-modal-btn.confirm:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .product-quote-modal-overlay {
+    padding: 0;
+  }
+  
+  .product-quote-modal-large {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .product-quote-modal-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
+  }
+  
+  .product-quote-products-section {
+    border-right: none;
+    border-bottom: 2px solid #e5e7eb;
+    padding-right: 0;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+  
+  .product-quote-form-section {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .product-quote-product-item {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .product-quote-item-main {
+    gap: 10px;
+  }
+  
+  .product-quote-item-image {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .product-quote-item-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  
+  .product-quote-item-details {
+    gap: 2px;
+  }
+  
+  .product-quote-detail-label {
+    min-width: 35px;
+    font-size: 12px;
+  }
+  
+  .product-quote-detail-value {
+    font-size: 12px;
+  }
+  
+  .product-quote-detail-value.price {
+    font-size: 13px;
+  }
+  
+  .product-quote-item-controls {
+    padding-top: 8px;
+    gap: 12px;
+  }
+  
+  .product-quote-quantity-label,
+  .product-quote-total-label {
+    font-size: 11px;
+  }
+  
+  .product-quote-quantity-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .product-quote-quantity-input {
+    width: 50px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .product-quote-item-total .product-quote-total-amount {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+  
+  .product-quote-remove-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .product-quote-form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .product-quote-form-group input,
+  .product-quote-form-group textarea {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+
+  .product-quote-modal-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+
+  .product-quote-modal-btn {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-quote-modal-header {
+    padding: 12px 16px;
+  }
+  
+  .product-quote-modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .product-quote-modal-body {
+    padding: 12px;
+    gap: 12px;
+    max-height: 80vh;
+  }
+  
+  .product-quote-products-section {
+    max-height: 30vh;
+    padding-bottom: 12px;
+  }
+  
+  .product-quote-form-section {
+    max-height: 40vh;
+  }
+  
+  .product-quote-products-header h4,
+  .product-quote-form-section h4 {
+    font-size: 14px;
+  }
+  
+  .product-quote-product-item {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .product-quote-item-main {
+    gap: 8px;
+  }
+  
+  .product-quote-item-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .product-quote-item-name {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  
+  .product-quote-detail-label {
+    min-width: 30px;
+    font-size: 11px;
+  }
+  
+  .product-quote-detail-value {
+    font-size: 11px;
+  }
+  
+  .product-quote-detail-value.price {
+    font-size: 12px;
+  }
+  
+  .product-quote-item-controls {
+    padding-top: 6px;
+    gap: 10px;
+  }
+  
+  .product-quote-quantity-label,
+  .product-quote-total-label {
+    font-size: 10px;
+  }
+  
+  .product-quote-quantity-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .product-quote-quantity-input {
+    width: 40px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .product-quote-item-total .product-quote-total-amount {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .product-quote-remove-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .product-quote-form-group input,
+  .product-quote-form-group textarea {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  
+  .product-quote-modal-footer {
+    padding: 12px 16px;
+  }
+  
+  .product-quote-modal-btn {
+    padding: 14px 20px;
+    font-size: 14px;
+    min-width: 100px;
+  }
+}

@@ -4,6 +4,7 @@ import { CiImageOff } from 'react-icons/ci';
 import './ProductList.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import QuoteModal from '../modals/QuoteModal';
+import { productAPI } from '../../services/api';
 
 const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCountUpdate }) => {
   const [products, setProducts] = useState([]);
@@ -73,13 +74,45 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
         setLoading(true);
         setError(null);
 
-        let apiUrl = '';
-        
-        // listType에 따라 API URL 결정
+        // listType에 따라 API 호출
         if (listType === 'surplus') {
-          apiUrl = 'https://api.newonetotal.co.kr/Comm/DashItems?itemDivCd=010';
+          const data = await productAPI.getDashItems('010');
+          const processedData = data.map(item => ({
+            ...item,
+            id: item.itemCd || item.id,
+            name: item.itemNm,
+            itemNm: item.itemNm,
+            disPrice: item.disPrice,
+            salePrice: item.salePrice,
+            shipAvDate: item.shipAvDate,
+            FILEPATH: item.FILEPATH,
+            compNm: item.compNm,
+            category: item.category || '잉여재고',
+            subcategory: item.subcategory || '기타',
+            item: item.item || item.itemNm,
+            isSurplus: true,
+            isEvent: false
+          }));
+          setProducts(processedData);
         } else if (listType === 'event') {
-          apiUrl = 'https://api.newonetotal.co.kr/Comm/DashItems?itemDivCd=020';
+          const data = await productAPI.getDashItems('020');
+          const processedData = data.map(item => ({
+            ...item,
+            id: item.itemCd || item.id,
+            name: item.itemNm,
+            itemNm: item.itemNm,
+            disPrice: item.disPrice,
+            salePrice: item.salePrice,
+            shipAvDate: item.shipAvDate,
+            FILEPATH: item.FILEPATH,
+            compNm: item.compNm,
+            category: item.category || '행사품목',
+            subcategory: item.subcategory || '기타',
+            item: item.item || item.itemNm,
+            isSurplus: false,
+            isEvent: true
+          }));
+          setProducts(processedData);
         } else {
           // 기본값: products.json 파일 사용 (기존 로직)
           const response = await fetch('/data/products.json');
@@ -88,44 +121,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
           }
           const data = await response.json();
           setProducts(data.products);
-          setLoading(false);
-          return;
         }
-
-        // API에서 데이터 가져오기
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`API 요청 실패: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        console.log('ProductList API Response:', data);
-
-        // 데이터 처리 - API 필드명에 맞춰서 가공
-        const processedData = data.map(item => {
-          return {
-            ...item,
-            // API 응답 필드를 그대로 사용
-            id: item.itemCd || item.id,
-            name: item.itemNm,
-            itemNm: item.itemNm,
-            disPrice: item.disPrice,
-            salePrice: item.salePrice,
-            shipAvDate: item.shipAvDate,
-            FILEPATH: item.FILEPATH,
-            compNm: item.compNm, // 회사명 추가
-            
-            // ProductList에서 사용하는 추가 필드들
-            category: item.category || (listType === 'surplus' ? '잉여재고' : '행사품목'),
-            subcategory: item.subcategory || '기타',
-            item: item.item || item.itemNm,
-            isSurplus: listType === 'surplus',
-            isEvent: listType === 'event'
-          };
-        });
-
-        setProducts(processedData);
       } catch (error) {
         console.error('제품 데이터 로드 실패:', error);
         setError(error.message);
@@ -284,7 +280,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
               <div className="prd_price_container">
                 {/* 출하일 정보 */}
                 {product.shipAvDate && (
-                  <div className="prd_delivery_badge">🚚 {formatShipDate(product.shipAvDate)} 출하가능</div>
+                  <div className="prd_delivery_badge">🚛 {formatShipDate(product.shipAvDate)} 출하가능</div>
                 )}
                 
                 {/* 회사명 */}

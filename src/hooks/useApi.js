@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { inventoryAPI, authAPI, customerAPI } from '../services';
+import { inventoryAPI, authAPI } from '../services';
 
 // API 호출을 위한 커스텀 훅
 export const useApi = () => {
@@ -37,25 +37,20 @@ export const useApi = () => {
 export const useInventoryApi = () => {
   const { loading, error, execute, clearError } = useApi();
 
-  const getNormalInventory = useCallback((searchParams) => {
-    return execute(inventoryAPI.getNormalInventory, searchParams);
+  const getCompanyInventory = useCallback((userId) => {
+    return execute(inventoryAPI.getCompanyInventory, userId);
   }, [execute]);
 
-  const getOptionInventory = useCallback((searchParams) => {
-    return execute(inventoryAPI.getOptionInventory, searchParams);
-  }, [execute]);
-
-  const getSerialInventory = useCallback((searchParams) => {
-    return execute(inventoryAPI.getSerialInventory, searchParams);
+  const getLotInventory = useCallback((userId) => {
+    return execute(inventoryAPI.getLotInventory, userId);
   }, [execute]);
 
   return {
     loading,
     error,
     clearError,
-    getNormalInventory,
-    getOptionInventory,
-    getSerialInventory
+    getCompanyInventory,
+    getLotInventory
   };
 };
 
@@ -77,42 +72,6 @@ export const useAuthApi = () => {
     clearError,
     login,
     logout
-  };
-};
-
-// 고객 API 훅
-export const useCustomerApi = () => {
-  const { loading, error, execute, clearError } = useApi();
-
-  const getCustomerList = useCallback((searchParams) => {
-    return execute(customerAPI.getCustomerList, searchParams);
-  }, [execute]);
-
-  const getCustomerDetail = useCallback((custId) => {
-    return execute(customerAPI.getCustomerDetail, custId);
-  }, [execute]);
-
-  const createCustomer = useCallback((customerData) => {
-    return execute(customerAPI.createCustomer, customerData);
-  }, [execute]);
-
-  const updateCustomer = useCallback((custId, customerData) => {
-    return execute(customerAPI.updateCustomer, custId, customerData);
-  }, [execute]);
-
-  const deleteCustomer = useCallback((custId) => {
-    return execute(customerAPI.deleteCustomer, custId);
-  }, [execute]);
-
-  return {
-    loading,
-    error,
-    clearError,
-    getCustomerList,
-    getCustomerDetail,
-    createCustomer,
-    updateCustomer,
-    deleteCustomer
   };
 };
 
