@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, FileText, List, ImageIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useMenu } from '../../context/MenuContext';
 import { quoteAPI } from '../../services/api';
@@ -15,6 +15,9 @@ const CUST0040 = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   
+  // 뷰 모드 상태 추가
+  const [viewMode, setViewMode] = useState('image'); // 기본값을 'image'로 변경
+  
   // 검색 조건
   const [selectedMonth, setSelectedMonth] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +27,17 @@ const CUST0040 = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [isQuoteDetailModalOpen, setIsQuoteDetailModalOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
+
+  // 검색 영역 표시 상태 추가
+  const [isSearchVisible, setIsSearchVisible] = useState(true);
+  
+  // 스와이프 제스처용 ref와 상태 추가
+  const searchToggleRef = useRef(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
+  // 스와이프 최소 거리 (픽셀)
+  const minSwipeDistance = 50;
 
   // 컨텍스트
   const { globalState } = useAuth();
@@ -98,7 +112,69 @@ const CUST0040 = () => {
   const handleSearch = () => {
     setCurrentPage(1);
     fetchQuotesData();
+    // 모바일에서 검색 후 검색영역 닫기
+    if (window.innerWidth <= 768) {
+      setIsSearchVisible(false);
+    }
   };
+
+  // 뷰 모드 변경 함수
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    setCurrentPage(1); // 뷰 모드 변경 시 페이지 초기화
+  };
+
+  // 검색영역 토글
+  const toggleSearchArea = () => {
+    setIsSearchVisible(!isSearchVisible);
+  };
+
+  // 스와이프 시작
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 중
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  // 스와이프 종료
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+    const isDownSwipe = distance < -minSwipeDistance;
+
+    // 아래로 스와이프하면 검색영역 열기
+    if (isDownSwipe && !isSearchVisible) {
+      setIsSearchVisible(true);
+    }
+    // 위로 스와이프하면 검색영역 닫기
+    else if (isUpSwipe && isSearchVisible) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  // 검색영역 외부 클릭시 닫기
+  const handleClickOutside = useCallback((event) => {
+    if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
+      // 모바일에서만 작동하도록 체크
+      if (window.innerWidth <= 768 && isSearchVisible) {
+        setIsSearchVisible(false);
+      }
+    }
+  }, [isSearchVisible]);
+
+  // 외부 클릭 이벤트 리스너 등록
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
 
   // 초기 데이터 로드 - selectedMonth 변경 시마다 자동 호출
   useEffect(() => {
@@ -143,6 +219,21 @@ const CUST0040 = () => {
     handleQuoteDetailClick(quote);
   };
 
+  // 진행상태에 따른 스타일 반환
+  const getStatusBadgeClass = (status) => {
+    if (!status) return 'status-default';
+    const statusText = status.toString().toLowerCase();
+    
+    if (statusText.includes('접수') || statusText === '접수') {
+      return 'status-received';
+    } else if (statusText.includes('처리') || statusText.includes('진행')) {
+      return 'status-processing';
+    } else if (statusText.includes('완료')) {
+      return 'status-completed';
+    }
+    return 'status-default';
+  };
+
   // 페이지 변경
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -173,6 +264,147 @@ const CUST0040 = () => {
     return pages;
   };
 
+  // 리스트뷰 렌더링
+  const renderListView = () => (
+    <div className="cust0040-table-container">
+      <table className="cust0040-table">
+        <thead>
+          <tr>
+            <th style={{ width: '100px' }}>진행상태</th>                  
+            <th style={{ width: '120px' }}>견적번호</th>
+            <th style={{ width: '100px' }}>요청일자</th>
+            <th style={{ width: '100px' }}>담당자</th>
+            <th style={{ width: '120px' }}>연락처</th>
+            <th>주소</th>
+            <th style={{ width: '100px' }}>희망납기</th>
+            <th style={{ width: '80px' }}>품목수</th>
+            <th style={{ width: '100px' }}>상세보기</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentItems.length > 0 ? (
+            currentItems.map((quote, index) => (
+              <tr 
+                key={`${quote.reqNo}-${index}`}
+                className="quote-main-row" 
+                onClick={() => handleRowClick(quote)}
+                style={{ cursor: 'pointer' }}
+              >
+                <td className="cust0040-center">{formatDate(quote.reqStatus)}</td>
+                <td className="cust0040-center" style={{ fontWeight: '600', color: '#007bff' }}>
+                  {quote.reqNo}
+                </td>
+                <td className="cust0040-center">{formatDate(quote.reqDate)}</td>
+                <td className="cust0040-center">{quote.contactNm}</td>
+                <td className="cust0040-center">{quote.contactTel}</td>
+                <td className="cust0040-left">{quote.siteNm}</td>
+                <td className="cust0040-center">{formatDate(quote.dueDate)}</td>
+                <td className="cust0040-center">
+                  <span className="quote-item-count-badge">
+                    {quote.subData?.length || 0}건
+                  </span>
+                </td>
+                <td className="cust0040-center">
+                  <button 
+                    className="quote-detail-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuoteDetailClick(quote);
+                    }}
+                  >
+                    상세보기
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={9} className="cust0040-center" style={{ padding: '40px', color: '#666' }}>
+                데이터가 없습니다.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  // 이미지뷰 렌더링
+  const renderImageView = () => (
+    <div className="cust0040-image-container">
+      <div className="cust0040-image-grid">
+        {currentItems.length > 0 ? (
+          currentItems.map((quote, index) => (
+            <div 
+              key={`${quote.reqNo}-${index}`} 
+              className="cust0040-image-card"
+              onClick={() => handleRowClick(quote)}
+            >
+              <div className="cust0040-card-header">
+                <div className="cust0040-quote-number">
+                  견적번호: {quote.reqNo}
+                </div>
+                <div className={`cust0040-quote-status ${getStatusBadgeClass(quote.reqStatus)}`}>
+                  {formatDate(quote.reqStatus)}
+                </div>
+              </div>
+              
+              <div className="cust0040-card-content">
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">요청일자:</span>
+                  <span className="cust0040-value">{formatDate(quote.reqDate)}</span>
+                </div>
+                
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">담당자:</span>
+                  <span className="cust0040-value">{quote.contactNm}</span>
+                </div>
+                
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">연락처:</span>
+                  <span className="cust0040-value">{quote.contactTel}</span>
+                </div>
+                
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">주소:</span>
+                  <span className="cust0040-value cust0040-address">{quote.siteNm}</span>
+                </div>
+                
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">희망납기:</span>
+                  <span className="cust0040-value">{formatDate(quote.dueDate)}</span>
+                </div>
+                
+                <div className="cust0040-quote-summary">
+                  <div className="cust0040-item-count">
+                    <span className="quote-item-count-badge">
+                      {quote.subData?.length || 0}건
+                    </span>
+                  </div>
+                  
+                  <button 
+                    className="cust0040-detail-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuoteDetailClick(quote);
+                    }}
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="cust0040-no-data">
+            <FileText size={48} className="cust0040-no-data-icon" />
+            <p>데이터가 없습니다.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="cust0040-container">
       {/* 프로그램 헤더 */}
@@ -181,11 +413,42 @@ const CUST0040 = () => {
           <FileText className="w-6 h-6" />
           <h1>{currentMenuTitle || '견적의뢰 관리'}</h1>
         </div>
+
+        {/* 뷰 모드 선택 */}
+        <div className="cust0040-view-toggle">
+          <button
+            className={`cust0040-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => handleViewModeChange('list')}
+            title="리스트 보기"
+          >
+            <List size={16} />
+          </button>
+          <button
+            className={`cust0040-view-btn ${viewMode === 'image' ? 'active' : ''}`}
+            onClick={() => handleViewModeChange('image')}
+            title="이미지 보기"
+          >
+            <ImageIcon size={16} />
+          </button>
+        </div>
       </div>
 
       {/* 검색 영역 */}
       <div className="cust0040-search-section">
-        <div className="cust0040-search-container">
+        {/* 모바일 검색 토글 버튼 */}
+        <div
+          ref={searchToggleRef}
+          className="cust0040-mobile-search-toggle"
+          onClick={toggleSearchArea}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <span>검색 옵션</span>
+          {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </div>
+
+        <div className={`cust0040-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
           <div className="cust0040-search-row">
             <div className="cust0040-search-field">
               <label>조회월</label>
@@ -244,67 +507,7 @@ const CUST0040 = () => {
       {/* 테이블 영역 */}
       <div className="cust0040-grid-container">
         <div className="cust0040-grid-wrapper">
-          <div className="cust0040-table-container">
-            <table className="cust0040-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '100px' }}>진행상태</th>                  
-                  <th style={{ width: '120px' }}>견적번호</th>
-                  <th style={{ width: '100px' }}>요청일자</th>
-                  <th style={{ width: '100px' }}>담당자</th>
-                  <th style={{ width: '120px' }}>연락처</th>
-                  <th>주소</th>
-                  <th style={{ width: '100px' }}>희망납기</th>
-                  <th style={{ width: '80px' }}>품목수</th>
-                  <th style={{ width: '100px' }}>상세보기</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.length > 0 ? (
-                  currentItems.map((quote, index) => (
-                    <tr 
-                      key={`${quote.reqNo}-${index}`}
-                      className="quote-main-row" 
-                      onClick={() => handleRowClick(quote)}
-                      style={{ cursor: 'pointer' }}
->
-                      <td className="cust0040-center">{formatDate(quote.reqStatus)}</td>
-                      <td className="cust0040-center" style={{ fontWeight: '600', color: '#007bff' }}>
-                        {quote.reqNo}
-                      </td>
-                      <td className="cust0040-center">{formatDate(quote.reqDate)}</td>
-                      <td className="cust0040-center">{quote.contactNm}</td>
-                      <td className="cust0040-center">{quote.contactTel}</td>
-                      <td className="cust0040-left">{quote.siteNm}</td>
-                      <td className="cust0040-center">{formatDate(quote.dueDate)}</td>
-                      <td className="cust0040-center">
-                        <span className="quote-item-count-badge">
-                          {quote.subData?.length || 0}건
-                        </span>
-                      </td>
-                      <td className="cust0040-center">
-                        <button 
-                          className="quote-detail-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleQuoteDetailClick(quote);
-                          }}
-                        >
-                          상세보기
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={9} className="cust0040-center" style={{ padding: '40px', color: '#666' }}>
-                      데이터가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {viewMode === 'list' ? renderListView() : renderImageView()}
         </div>
       </div>
 

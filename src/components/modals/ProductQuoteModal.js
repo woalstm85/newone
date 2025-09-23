@@ -6,7 +6,9 @@ import './ProductQuoteModal.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 
-const ProductQuoteModal = ({ product, products, isOpen, onClose, onRemoveProduct, onUpdateQuantity }) => {
+const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClose, onRemoveProduct, onUpdateQuantity }) => {
+  console.log('ProductQuoteModal 렌더링:', { product, products, selectedProducts, isOpen, onClose });
+  
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -16,12 +18,39 @@ const ProductQuoteModal = ({ product, products, isOpen, onClose, onRemoveProduct
   const [successMessage, setSuccessMessage] = useState('');
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+  
+  // 모바일에서 제품 목록 표시/숨김 상태
+  const [showProductsOnMobile, setShowProductsOnMobile] = useState(false);
+  
+  // 모바일 제품 목록 표시 텍스트 생성
+  const getMobileProductsText = () => {
+    if (currentProducts.length === 0) return '상품 없음';
+    if (currentProducts.length === 1) return currentProducts[0].itemNm;
+    
+    const firstProduct = currentProducts[0].itemNm;
+    const otherCount = currentProducts.length - 1;
+    return `${firstProduct} 외 ${otherCount}개`;
+  };
+  
   const { globalState } = useAuth();
   
   // 단일 상품인지 여러 상품인지 판별
   const isMultipleProducts = products && products.length > 0;
-  const currentProducts = isMultipleProducts ? products : (product ? [product] : []);
-  const isSingleProduct = !isMultipleProducts && product;
+  const hasSelectedProducts = selectedProducts && selectedProducts.length > 0;
+  
+  // 우선순위: selectedProducts > products > product
+  let currentProducts = [];
+  if (hasSelectedProducts) {
+    currentProducts = selectedProducts;
+  } else if (isMultipleProducts) {
+    currentProducts = products;
+  } else if (product) {
+    currentProducts = [product];
+  }
+  
+  console.log('ProductQuoteModal 상품 데이터:', { currentProducts, hasSelectedProducts, isMultipleProducts });
+  
+  const isSingleProduct = !isMultipleProducts && !hasSelectedProducts && product;
   
   // 견적 의뢰 폼 상태
   const [quoteForm, setQuoteForm] = useState({
@@ -383,7 +412,19 @@ const ProductQuoteModal = ({ product, products, isOpen, onClose, onRemoveProduct
             </button>
           </div>
 
-          <div className="product-quote-modal-body">
+          {/* 모바일: 제품 목록 플로팅 버튼 */}
+          <div className="product-quote-mobile-toggle">
+            <button 
+              onClick={() => setShowProductsOnMobile(!showProductsOnMobile)}
+              className="product-quote-mobile-products-btn"
+            >
+              <span>{getMobileProductsText()}</span>
+              <span className="product-quote-mobile-total">{calculateGrandTotal()} 원</span>
+              <span className={`product-quote-mobile-arrow ${showProductsOnMobile ? 'up' : 'down'}`}>▼</span>
+            </button>
+          </div>
+
+          <div className={`product-quote-modal-body ${showProductsOnMobile ? 'mobile-products-visible' : ''}`}>
             {/* 왼쪽: 상품 정보 */}
             <div className="product-quote-products-section">
               <div className="product-quote-products-header">
@@ -519,25 +560,25 @@ const ProductQuoteModal = ({ product, products, isOpen, onClose, onRemoveProduct
 
               {/* 단일 상품인 경우에만 옵션 선택 */}
               {isSingleProduct && optionValues.length > 0 && (
-                <div className="product-quote-option-section">
+                <div className="product-quote-option-section product-quote-option-row">
                   <div className="product-quote-option-header">
-                    <span className="product-quote-section-title">옵션 선택</span>
+                    <span className="product-quote-section-title product-quote-option-label">옵션:</span>
+                    {loadingOptions ? (
+                      <div className="product-quote-option-loading">옵션 로드 중...</div>
+                    ) : (
+                      <select 
+                        value={selectedOptionValue}
+                        onChange={(e) => setSelectedOptionValue(e.target.value)}
+                        className="product-quote-option-select"
+                      >
+                        {optionValues.map((option) => (
+                          <option key={option.optValCd} value={option.optValCd}>
+                            {option.optValNm}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
-                  {loadingOptions ? (
-                    <div className="product-quote-option-loading">옵션 로드 중...</div>
-                  ) : (
-                    <select 
-                      value={selectedOptionValue}
-                      onChange={(e) => setSelectedOptionValue(e.target.value)}
-                      className="product-quote-option-select"
-                    >
-                      {optionValues.map((option) => (
-                        <option key={option.optValCd} value={option.optValCd}>
-                          {option.optValNm}
-                        </option>
-                      ))}
-                    </select>
-                  )}
                 </div>
               )}
             </div>

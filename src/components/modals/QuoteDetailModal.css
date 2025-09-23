@@ -3,6 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .quote-detail-item-with-image {
@@ -14,6 +16,9 @@
   border-radius: 12px;
   gap: 16px;
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .quote-detail-item-with-image:hover {
@@ -147,18 +152,23 @@
   font-size: 13px;
   color: #6c757d;
   font-weight: 500;
+  min-width: 40px;
 }
 
 .quote-detail-amount-value {
   font-size: 14px;
   color: #212529;
   font-weight: 600;
+  text-align: right;
+  flex: 1;
 }
 
 .quote-detail-amount-total {
   font-size: 16px;
   color: #007bff;
   font-weight: 700;
+  text-align: right;
+  flex: 1;
 }
 
 /* 모바일 반응형 */
@@ -166,6 +176,8 @@
   .quote-detail-item-with-image {
     flex-direction: column;
     gap: 16px;
+    padding: 16px;
+    overflow: hidden;
   }
   
   .quote-detail-item-image {
@@ -177,19 +189,60 @@
     height: 100px;
   }
   
+  .quote-detail-item-info {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .quote-detail-item-info h4 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
   .quote-detail-item-amount {
     align-items: stretch;
     min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .quote-detail-amount-row {
     justify-content: space-between;
+    padding: 10px 16px;
+    font-size: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  .quote-detail-amount-label {
+    font-size: 14px;
+    min-width: 50px;
+    flex-shrink: 0;
+  }
+  
+  .quote-detail-amount-value {
+    font-size: 15px;
+    font-weight: 600;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .quote-detail-amount-total {
+    font-size: 17px;
+    font-weight: 700;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }
 
 @media (max-width: 480px) {
   .quote-detail-item-with-image {
     padding: 12px;
+    overflow: hidden;
   }
   
   .quote-detail-image-container {
@@ -197,8 +250,49 @@
     height: 80px;
   }
   
+  .quote-detail-item-info {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
   .quote-detail-item-info h4 {
     font-size: 16px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .quote-detail-item-amount {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .quote-detail-amount-row {
+    padding: 12px 18px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  .quote-detail-amount-label {
+    font-size: 13px;
+    min-width: 45px;
+    flex-shrink: 0;
+  }
+  
+  .quote-detail-amount-value {
+    font-size: 14px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .quote-detail-amount-total {
+    font-size: 16px;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }
 
@@ -658,8 +752,10 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   white-space: nowrap;
+  text-align: center;
 }
 
 .quote-detail-action-btn:disabled {
@@ -747,6 +843,12 @@
     flex-direction: column;
     gap: 12px;
     padding: 16px 20px;
+    text-align: center;
+  }
+  
+  .quote-detail-footer-summary {
+    text-align: center;
+    margin-bottom: 8px;
   }
   
   .quote-detail-footer-actions {
@@ -756,6 +858,10 @@
   
   .quote-detail-action-btn {
     flex: 1;
-    max-width: 120px;
+    max-width: 200px;
+    min-width: 120px;
+    padding: 12px 24px;
+    font-size: 15px;
+    justify-content: center;
   }
 }

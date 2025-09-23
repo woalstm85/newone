@@ -444,27 +444,27 @@ function CUST0020() {
   // 이미지 뷰 렌더링 (CUST0010 스타일 적용)
   const renderImageView = () => {
     const items = currentItems.map((item, index) => (
-      <div key={`${item.itemCd}-${index}`} className="cust0010-inventory-image-card">
-        <div className="cust0010-inventory-image-header">
+      <div key={`${item.itemCd}-${index}`} className="cust0020-inventory-image-card">
+        <div className="cust0020-inventory-image-header">
           <h4>{item.itemNm}</h4>
           <span className="cust0020-product-status-badge">
-            제품
+            상품
           </span>
         </div>
-        <div className="cust0010-inventory-image-content">
+        <div className="cust0020-inventory-image-content">
           {/* 이미지 섹션 */}
-          <div className="cust0010-inventory-image-section">
-            <div className="cust0010-inventory-image-placeholder">
+          <div className="cust0020-inventory-image-section">
+            <div className="cust0020-inventory-image-placeholder">
               {item.filePath || item.thFilePath ? (
                 <>
                   <img
                     src={item.filePath || item.thFilePath}
                     alt={item.itemNm}
-                    className="cust0010-inventory-image"
+                    className="cust0020-inventory-image"
                   />
-                  <div className="cust0010-image-overlay">
+                  <div className="cust0020-image-overlay">
                     <button
-                      className="cust0010-overlay-view-btn"
+                      className="cust0020-overlay-view-btn"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleImageClick(item.filePath || item.thFilePath, item.itemNm, item.itemCd);
@@ -476,7 +476,7 @@ function CUST0020() {
                   </div>
                 </>
               ) : (
-                <div className="cust0010-inventory-no-image">
+                <div className="cust0020-inventory-no-image">
                   <CiImageOff size={48} color="#ccc" />
                 </div>
               )}
@@ -484,31 +484,31 @@ function CUST0020() {
           </div>
           
           {/* 상세 정보 섹션 - 여기에 옵션과 단위를 추가 */}
-          <div className="cust0010-inventory-item-details">
-            <div className="cust0010-inventory-item-specs">
+          <div className="cust0020-inventory-item-details">
+            <div className="cust0020-inventory-item-specs">
               {item.optCd && (
-                <div className="cust0010-inventory-spec-row">
-                  <span className="cust0010-inventory-spec-label">제품코드:</span>
-                  <span className="cust0010-inventory-spec-value">{item.itemCd}</span>
+                <div className="cust0020-inventory-spec-row">
+                  <span className="cust0020-inventory-spec-label">제품코드:</span>
+                  <span className="cust0020-inventory-spec-value">{item.itemCd}</span>
                 </div>
               )}
               {item.unitNm && (
-                <div className="cust0010-inventory-spec-row">
-                  <span className="cust0010-inventory-spec-label">단위:</span>
-                  <span className="cust0010-inventory-spec-value">{item.unitNm}</span>
+                <div className="cust0020-inventory-spec-row">
+                  <span className="cust0020-inventory-spec-label">단위:</span>
+                  <span className="cust0020-inventory-spec-value">{item.unitNm}</span>
                 </div>
               )}
               {item.outUnitPrice && (
-                <div className="cust0010-inventory-spec-row">
-                  <span className="cust0010-inventory-spec-label">출고단가:</span>
-                  <span className="cust0010-inventory-spec-client">{item.outUnitPrice.toLocaleString()}원</span>
+                <div className="cust0020-inventory-spec-row">
+                  <span className="cust0020-inventory-spec-label">출고단가:</span>
+                  <span className="cust0020-inventory-spec-client">{item.outUnitPrice.toLocaleString()}원</span>
                 </div>
               )}
               {/* 데이터가 없을 때 기본 메시지 */}
               {!item.optCd && !item.unitNm && !item.outUnitPrice && (
-                <div className="cust0010-inventory-spec-row">
-                  <span className="cust0010-inventory-spec-label" style={{ color: '#999', fontStyle: 'italic' }}>상세 정보 없음</span>
-                  <span className="cust0010-inventory-spec-value">-</span>
+                <div className="cust0020-inventory-spec-row">
+                  <span className="cust0020-inventory-spec-label" style={{ color: '#999', fontStyle: 'italic' }}>상세 정보 없음</span>
+                  <span className="cust0020-inventory-spec-value">-</span>
                 </div>
               )}
             </div>
@@ -529,9 +529,9 @@ function CUST0020() {
     ));
 
     return (
-      <div className="cust0010-inventory-image-grid">
+      <div className="cust0020-inventory-image-grid">
         {items.length > 0 ? items : (
-          <div className="cust0010-no-data">
+          <div className="cust0020-no-data">
             <CiImageOff size={48} color="#ccc" />
             <p>데이터가 없습니다.</p>
           </div>

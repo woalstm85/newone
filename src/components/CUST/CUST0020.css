@@ -63,7 +63,7 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 8px 12px;
   background: #17a2b8;
   color: white;
   border-radius: 6px;
@@ -73,6 +73,7 @@
   user-select: none;
   position: relative;
   overflow: hidden;
+  min-height: 36px;
 }
 
 .cust0020-mobile-search-toggle::before {
@@ -108,7 +109,7 @@
   border: 1px solid #BFBFBF;
   padding: 12px;
   border-radius: 6px;
-  margin-bottom: 12px;
+
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   transform-origin: top;
@@ -206,6 +207,8 @@
   padding: 8px 0;
   margin-bottom: 8px;
   border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cust0020-data-info {
@@ -579,10 +582,10 @@
   }
   
   .cust0020-search-container.visible {
-    max-height: 200px;
-    padding: 12px;
+    max-height: 230px;
+    padding: 12px 12px 24px 12px;
     border: 1px solid #BFBFBF;
-    margin-bottom: 12px;
+
     opacity: 1;
     transform: scaleY(1);
   }
@@ -593,15 +596,66 @@
     gap: 12px;
   }
   
+  .cust0020-search-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .cust0020-search-field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+  
+  .cust0020-search-field input,
+  .cust0020-search-field select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #BFBFBF;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
   .cust0020-search-buttons {
     margin-left: 0;
     justify-content: center;
+    margin-bottom: 20px;
   }
 
+  /* 모바일에서 페이지네이션 정보를 한 줄로 유지 */
   .cust0020-pagination-info {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    flex-wrap: nowrap;
+  }
+  
+  .cust0020-data-info {
+    flex: 1;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .cust0020-page-size-selector {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+  }
+  
+  .cust0020-page-size-selector label {
+    display: none; /* 모바일에서 라벨 숨김 */
+  }
+  
+  .cust0020-page-size-selector select {
+    min-width: 60px;
+    font-size: 0.8rem;
   }
 
   .cust0020-pagination {
@@ -879,13 +933,13 @@
 }
 
 /* CUST0010 이미지 뷰 스타일 시작 */
-.cust0010-inventory-image-grid {
+.cust0020-inventory-image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
-.cust0010-inventory-image-card {
+.cust0020-inventory-image-card {
   background: white;
   border: 1px solid #e8e8e8;
   border-radius: 10px;
@@ -895,25 +949,25 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.cust0010-inventory-image-card:hover {
+.cust0020-inventory-image-card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   border-color: #007bff;
 }
 
-.cust0010-inventory-image-header {
+.cust0020-inventory-image-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   padding: 15px;
   border-bottom: 1px solid #f0f0f0;
-  background-color: #f8f9fa;
+  background-color: #3b3b3b;
   min-height: 40px;
 }
 
-.cust0010-inventory-image-header h4 {
+.cust0020-inventory-image-header h4 {
   font-size: 14px;
   font-weight: bold;
-  color: #333;
+  color: white;
   margin: 0;
   line-height: 1.3;
   flex: 1;
@@ -926,13 +980,13 @@
   max-height: 36px;
 }
 
-.cust0010-inventory-image-content {
+.cust0020-inventory-image-content {
   display: flex;
   padding: 15px;
   gap: 15px;
 }
 
-.cust0010-inventory-image-section {
+.cust0020-inventory-image-section {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -940,7 +994,7 @@
   gap: 10px;
 }
 
-.cust0010-inventory-image-placeholder {
+.cust0020-inventory-image-placeholder {
   flex-shrink: 0;
   width: 120px;
   height: 120px;
@@ -954,7 +1008,7 @@
   border: 1px solid #dee2e6;
 }
 
-.cust0010-inventory-image {
+.cust0020-inventory-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -963,11 +1017,11 @@
   border-radius: 7px;
 }
 
-.cust0010-inventory-image-placeholder:hover .cust0010-inventory-image {
+.cust0020-inventory-image-placeholder:hover .cust0020-inventory-image {
   transform: scale(1.05);
 }
 
-.cust0010-inventory-no-image {
+.cust0020-inventory-no-image {
   width: 100%;
   height: 100%;
   display: flex;
@@ -978,7 +1032,7 @@
   border-radius: 7px;
 }
 
-.cust0010-inventory-image-info {
+.cust0020-inventory-image-info {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -986,7 +1040,7 @@
   width: 120px;
 }
 
-.cust0010-inventory-option-badge {
+.cust0020-inventory-option-badge {
   display: inline-block;
   padding: 4px 8px;
   background: #e3f2fd;
@@ -1001,7 +1055,7 @@
   white-space: nowrap;
 }
 
-.cust0010-inventory-unit-badge {
+.cust0020-inventory-unit-badge {
   display: inline-block;
   padding: 4px 8px;
   background: #f3e5f5;
@@ -1016,7 +1070,7 @@
   white-space: nowrap;
 }
 
-.cust0010-image-overlay {
+.cust0020-image-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -1031,11 +1085,11 @@
   z-index: 2;
 }
 
-.cust0010-inventory-image-placeholder:hover .cust0010-image-overlay {
+.cust0020-inventory-image-placeholder:hover .cust0020-image-overlay {
   opacity: 1;
 }
 
-.cust0010-overlay-view-btn {
+.cust0020-overlay-view-btn {
   background: rgba(255, 255, 255, 0.95) !important;
   color: #333 !important;
   border: none !important;
@@ -1052,25 +1106,25 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
-.cust0010-overlay-view-btn:hover {
+.cust0020-overlay-view-btn:hover {
   background: white !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
-.cust0010-inventory-item-details {
+.cust0020-inventory-item-details {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.cust0010-inventory-item-specs {
+.cust0020-inventory-item-specs {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.cust0010-inventory-spec-row {
+.cust0020-inventory-spec-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1078,11 +1132,11 @@
   border-bottom: 1px solid #f5f5f5;
 }
 
-.cust0010-inventory-spec-row:last-child {
+.cust0020-inventory-spec-row:last-child {
   border-bottom: none;
 }
 
-.cust0010-inventory-spec-label {
+.cust0020-inventory-spec-label {
   font-size: 13px;
   color: #666;
   font-weight: 500;
@@ -1090,21 +1144,21 @@
   flex-shrink: 0;
 }
 
-.cust0010-inventory-spec-value {
+.cust0020-inventory-spec-value {
   font-size: 13px;
   color: #333;
   font-weight: 500;
   text-align: right;
 }
 
-.cust0010-inventory-spec-client {
+.cust0020-inventory-spec-client {
   font-size: 13px;
   color: #28a745;
   font-weight: 600;
   text-align: right;
 }
 
-.cust0010-no-data {
+.cust0020-no-data {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
@@ -1115,12 +1169,12 @@
   text-align: center;
 }
 
-.cust0010-no-data svg {
+.cust0020-no-data svg {
   margin-bottom: 16px;
   opacity: 0.5;
 }
 
-.cust0010-no-data p {
+.cust0020-no-data p {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 500;
@@ -1128,47 +1182,78 @@
 
 /* 모바일 반응형 - cust0010 스타일을 cust0020에 적용 */
 @media (max-width: 768px) {
-  .cust0010-inventory-image-content {
+  /* 모바일에서는 이미지와 정보를 나란히 배치 */
+  .cust0020-inventory-image-content {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .cust0020-inventory-image-section {
+    flex-shrink: 0;
+    width: 100px;
+    align-items: center;
+  }
+  
+  .cust0020-inventory-image-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .cust0020-inventory-image-info {
+    width: 100px;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
   }
   
-  .cust0010-inventory-image-section {
-    width: 100%;
-    align-items: center;
-  }
-  
-  .cust0010-inventory-image-info {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .cust0010-inventory-option-badge,
-  .cust0010-inventory-unit-badge {
+  .cust0020-inventory-option-badge,
+  .cust0020-inventory-unit-badge {
     flex-shrink: 0;
+    font-size: 9px;
+    padding: 2px 6px;
+    max-width: 90px;
   }
   
-  .cust0010-inventory-item-details {
-    width: 100%;
+  .cust0020-inventory-item-details {
+    flex: 1;
+    min-height: 100px;
+  }
+  
+  .cust0020-inventory-item-specs {
+    gap: 4px;
+  }
+  
+  .cust0020-inventory-spec-row {
+    padding: 4px 0;
+    min-height: 20px;
+  }
+  
+  .cust0020-inventory-spec-label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+  
+  .cust0020-inventory-spec-value,
+  .cust0020-inventory-spec-client {
+    font-size: 11px;
   }
 }
 
 @media (max-width: 480px) {
-  .cust0010-inventory-image-placeholder {
+  .cust0020-inventory-image-placeholder {
     width: 100px;
     height: 100px;
     border: 1px solid #dee2e6;
   }
   
-  .cust0010-inventory-image-info {
+  .cust0020-inventory-image-info {
     width: 100px;
   }
   
-  .cust0010-inventory-option-badge,
-  .cust0010-inventory-unit-badge {
+  .cust0020-inventory-option-badge,
+  .cust0020-inventory-unit-badge {
     font-size: 9px;
     padding: 3px 6px;
   }
@@ -1224,7 +1309,7 @@
 }
 
 /* CUST0010 스타일 이미지 뷰 레이아웃 개선 */
-.cust0010-inventory-image-content {
+.cust0020-inventory-image-content {
   display: flex;
   padding: 15px;
   gap: 15px;
@@ -1232,7 +1317,7 @@
   min-height: 140px; /* 최소 높이 설정 */
 }
 
-.cust0010-inventory-image-section {
+.cust0020-inventory-image-section {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -1241,7 +1326,7 @@
   width: 120px;
 }
 
-.cust0010-inventory-image-placeholder {
+.cust0020-inventory-image-placeholder {
   flex-shrink: 0;
   width: 120px;
   height: 120px;
@@ -1256,7 +1341,7 @@
   overflow: hidden;
 }
 
-.cust0010-inventory-item-details {
+.cust0020-inventory-item-details {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1265,14 +1350,14 @@
   padding-top: 4px;
 }
 
-.cust0010-inventory-item-specs {
+.cust0020-inventory-item-specs {
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1;
 }
 
-.cust0010-inventory-spec-row {
+.cust0020-inventory-spec-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1281,6 +1366,15 @@
   min-height: 24px; /* 일정한 높이 유지 */
 }
 
-.cust0010-inventory-spec-row:last-child {
+.cust0020-inventory-spec-row:last-child {
   border-bottom: none;
+}
+
+/* 모바일에서 상품정보 버튼 스타일 개선 */
+@media (max-width: 768px) {
+  .cust0020-product-info-long-btn {
+    margin: 8px 12px 12px 12px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
 }

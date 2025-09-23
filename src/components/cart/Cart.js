@@ -216,6 +216,7 @@ const Cart = () => {
                 />
               </div>
 
+              {/* 데스크톱용 직접 자식 요소들 */}
               <div className="item-image">
                 <ImageWithFallback
                   src={item.filePath}
@@ -238,9 +239,6 @@ const Cart = () => {
                 <div className="item-price">
                   <span className="price-label">단가:</span>
                   {item.price.toLocaleString()}원
-                </div>
-                <div className="item-total mobile-only">
-                  합계: {item.totalAmount.toLocaleString()}원
                 </div>
               </div>
 
@@ -266,7 +264,7 @@ const Cart = () => {
                 </button>
               </div>
 
-              <div className="item-total desktop-total">
+              <div className="item-total">
                 합계: {item.totalAmount.toLocaleString()}원
               </div>
 
@@ -277,6 +275,71 @@ const Cart = () => {
                 >
                   <Trash2 size={18} />
                 </button>
+              </div>
+
+              {/* 모바일에서 가로 배치를 위한 메인 컨텐츠 래퍼 */}
+              <div className="cart-item-main">
+                <div className="item-image">
+                  <ImageWithFallback
+                    src={item.filePath}
+                    alt={item.itemNm}
+                    width={80}
+                    height={80}
+                  />
+                </div>
+
+                <div className="item-info">
+                  <h4 className="item-name">{item.itemNm}</h4>
+                  <p className="item-code">코드: {item.itemCd}</p>
+                  {item.compNm && <p className="item-company">{item.compNm}</p>}
+                  {item.optValNm && (
+                    <p className="item-option">
+                      <span className="option-label">옵션:</span>
+                      <span className="option-value">{item.optValNm}</span>
+                    </p>
+                  )}
+                  <div className="item-price">
+                    <span className="price-label">단가:</span>
+                    {item.price.toLocaleString()}원
+                  </div>
+                  <div className="item-total mobile-only">
+                    합계: {item.totalAmount.toLocaleString()}원
+                  </div>
+                </div>
+              </div>
+
+              {/* 모바일에서 컨트롤 영역 */}
+              <div className="cart-item-controls">
+                <div className="item-quantity">
+                  <button 
+                    onClick={() => handleQuantityChange(item.itemCd, -1)}
+                    className="quantity-btn"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <input
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) => handleQuantityInput(item.itemCd, e.target.value)}
+                    className="quantity-input"
+                    min="1"
+                  />
+                  <button 
+                    onClick={() => handleQuantityChange(item.itemCd, 1)}
+                    className="quantity-btn"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <div className="item-actions">
+                  <button 
+                    onClick={() => handleRemoveItem(item.itemCd)}
+                    className="remove-btn"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

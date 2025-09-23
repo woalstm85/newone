@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import { useAuth } from '../../context/AuthContext';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import './TopMenu.css';
@@ -10,6 +10,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { globalState } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // 로그인 상태 확인
   const isLoggedIn = !!globalState.G_USER_ID; 
@@ -58,6 +59,45 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isMobileMenuOpen]);
+
+  // 라우트 변경 감지하여 activeTopMenu 자동 업데이트
+  useEffect(() => {
+    const currentPath = location.pathname;
+    let menuCdToSet = null;
+    let menuNmToSet = null;
+
+    // 현재 경로에 맞는 메뉴 찾기
+    if (currentPath === '/dashboard' || currentPath === '/') {
+      menuCdToSet = 'HOME';
+      menuNmToSet = 'HOME';
+    } else if (currentPath === '/surplus') {
+      menuCdToSet = 'SURPLUS';
+      menuNmToSet = '잉여재고거래';
+    } else if (currentPath === '/event') {
+      menuCdToSet = 'EVENT';
+      menuNmToSet = '행사품목';
+    } else if (currentPath === '/cart') {
+      menuCdToSet = 'CART';
+      menuNmToSet = '장바구니';
+    } else {
+      // LEFT 메뉴에서 현재 경로와 일치하는 항목 찾기
+      const matchingMenuItem = topMenuItems.find(item => 
+        item.isLeftMenu && 
+        (item.menuPath === currentPath.substring(1) || 
+         `/${item.top_menuCd.toLowerCase()}` === currentPath)
+      );
+      
+      if (matchingMenuItem) {
+        menuCdToSet = matchingMenuItem.top_menuCd;
+        menuNmToSet = matchingMenuItem.top_menuNm;
+      }
+    }
+
+    // activeTopMenu가 현재 경로와 다르면 업데이트
+    if (menuCdToSet && activeTopMenu !== menuCdToSet) {
+      onTopMenuClick(menuCdToSet, menuNmToSet);
+    }
+  }, [location.pathname, topMenuItems, activeTopMenu, onTopMenuClick]);
 
 // TopMenu.js
   useEffect(() => {
@@ -135,60 +175,64 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       return;
     }
 
+    console.log(`TopMenu: Clicking menu ${menuCd} (${menuNm})`);
+
     // 모바일 메뉴 닫기
     setIsMobileMenuOpen(false);
 
+    // 즉시 상태 업데이트
+    onTopMenuClick(menuCd, menuNm);
+
     // Cart 메뉴인 경우 직접 처리
     if (menuCd === 'CART') {
-      try {
-        navigate('/cart');
-      } catch (error) {
-        console.error('Navigation error:', error);
-        // 대체 방법: window.location 사용
-        window.location.href = '/cart';
-      }
+      // 상태 업데이트 후 네비게이션
+      setTimeout(() => {
+        try {
+          navigate('/cart');
+        } catch (error) {
+          console.error('Navigation error:', error);
+          window.location.href = '/cart';
+        }
+      }, 10);
       return;
     }
 
     // HOME 메뉴 클릭 시 대시보드로 이동
     if (menuCd === 'HOME') {
-      onTopMenuClick(menuCd, menuNm);
-      navigate('/dashboard');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 10);
       return;
     }
 
     // 잉여재고거래 메뉴 클릭 시
     if (menuCd === 'SURPLUS') {
-      onTopMenuClick(menuCd, menuNm);
-      navigate('/surplus');
+      setTimeout(() => {
+        navigate('/surplus');
+      }, 10);
       return;
     }
 
     // 행사품목 메뉴 클릭 시
     if (menuCd === 'EVENT') {
-      onTopMenuClick(menuCd, menuNm);
-      navigate('/event');
+      setTimeout(() => {
+        navigate('/event');
+      }, 10);
       return;
     }
 
     // LEFT 메뉴에서 온 항목인 경우 해당 경로로 직접 이동
     const menuItem = topMenuItems.find(item => item.top_menuCd === menuCd);
     if (menuItem && menuItem.isLeftMenu) {
-      // 먼저 Layout의 onTopMenuClick을 호출하여 탭 상태를 설정
-      onTopMenuClick(menuCd, menuNm);
-      
-      // 그 다음 해당 경로로 바로 이동
-      if (menuItem.menuPath) {
-        navigate(`/${menuItem.menuPath}`);
-      } else {
-        // menuPath가 없는 경우 기본 경로로 이동
-        navigate(`/${menuCd.toLowerCase()}`);
-      }
+      setTimeout(() => {
+        if (menuItem.menuPath) {
+          navigate(`/${menuItem.menuPath}`);
+        } else {
+          navigate(`/${menuCd.toLowerCase()}`);
+        }
+      }, 10);
       return;
     }
-
-    // 기본 처리
-    onTopMenuClick(menuCd, menuNm);
   };
 
   const handleCartClick = (e = null) => {

@@ -206,23 +206,25 @@ const ProductInfoModal = ({
 
               {/* 옵션값 선택 */}
               {product.optCd && (
-                <div className="product-info-option">
-                  <label className="product-info-option-label">옵션:</label>
-                  {loadingOptions ? (
-                    <div className="product-info-option-loading">로딩 중...</div>
-                  ) : (
-                    <select 
-                      value={selectedOptionValue}
-                      onChange={(e) => setSelectedOptionValue(e.target.value)}
-                      className="product-info-option-select"
-                    >
-                      {optionValues.map((option) => (
-                        <option key={option.optValCd} value={option.optValCd}>
-                          {option.optValNm}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                <div className="product-info-option product-info-option-mobile-fix">
+                  <div className="product-info-option-row product-info-option-row-mobile">
+                    <label className="product-info-option-label">옵션:</label>
+                    {loadingOptions ? (
+                      <div className="product-info-option-loading">로딩 중...</div>
+                    ) : (
+                      <select 
+                        value={selectedOptionValue}
+                        onChange={(e) => setSelectedOptionValue(e.target.value)}
+                        className="product-info-option-select"
+                      >
+                        {optionValues.map((option) => (
+                          <option key={option.optValCd} value={option.optValCd}>
+                            {option.optValNm}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
               )}
 

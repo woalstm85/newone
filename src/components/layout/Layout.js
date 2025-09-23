@@ -90,7 +90,7 @@ function Layout() {
             return;
         }
 
-        // 탭 상태 업데이트
+        // 즉시 탭 상태 업데이트 (리액트 상태 동기화)
         setActiveTopMenuCd(menuCd);
         switchTab(menuCd);
         

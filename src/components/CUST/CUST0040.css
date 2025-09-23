@@ -578,3 +578,475 @@
     min-width: 700px;
   }
 }
+
+/* 페이지네이션 정보 스타일 */
+.cust0040-pagination-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cust0040-data-info {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.cust0040-page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.cust0040-page-size-selector label {
+  color: #374151;
+  white-space: nowrap;
+}
+
+.cust0040-page-size-selector select {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+}
+
+/* 모바일에서 페이지네이션 정보 한 줄 표시 */
+@media (max-width: 768px) {
+  .cust0040-pagination-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  
+  .cust0040-data-info {
+    font-size: 0.8rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  
+  .cust0040-page-size-selector {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .cust0040-page-size-selector label {
+    display: none; /* 모바일에서 레이블 숨김 */
+  }
+}
+
+/* 검색 영역 스타일 */
+.cust0040-search-section {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cust0040-mobile-search-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #17a2b8;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.cust0040-mobile-search-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.cust0040-mobile-search-toggle:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.cust0040-mobile-search-toggle:hover {
+  background: #138496;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.cust0040-mobile-search-toggle:active {
+  transform: scale(0.98);
+}
+
+.cust0040-search-container {
+  background: #f8f9fa;
+  border: 1px solid #BFBFBF;
+  padding: 12px;
+  border-radius: 6px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  transform-origin: top;
+}
+
+.cust0040-search-container.hidden {
+  max-height: 0;
+  padding: 0 12px;
+  border: none;
+  margin: 0;
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+.cust0040-search-container.visible {
+  max-height: 200px;
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* 모바일에서 검색 토글 버튼 표시 */
+@media (max-width: 768px) {
+  .cust0040-mobile-search-toggle {
+    display: flex;
+  }
+  
+  .cust0040-pagination-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  
+  .cust0040-data-info {
+    font-size: 0.8rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  
+  .cust0040-page-size-selector {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .cust0040-page-size-selector label {
+    display: none; /* 모바일에서 레이블 숨김 */
+  }
+}
+
+/* 프로그램 헤더 스타일 */
+.cust0040-program-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cust0040-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cust0040-program-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* 뷰 모드 선택 */
+.cust0040-view-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.cust0040-view-btn {
+  padding: 8px 16px;
+  border: 1px solid #BFBFBF;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.cust0040-view-btn:hover {
+  background: #f8f9fa;
+}
+
+.cust0040-view-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* 이미지뷰 스타일 */
+.cust0040-image-container {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  background: white; /* 회색 배경 제거 */
+}
+
+.cust0040-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  max-width: 100%;
+}
+
+.cust0040-image-card {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.cust0040-image-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #007bff;
+}
+
+.cust0040-card-header {
+  background: #3b3b3b;
+  border-bottom: 1px solid #e9ecef;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cust0040-quote-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.cust0040-quote-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 진행상태별 색상 */
+.status-received {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-processing {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-completed {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-default {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.cust0040-card-content {
+  padding: 20px;
+}
+
+.cust0040-quote-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.cust0040-quote-info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.cust0040-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.cust0040-value {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  text-align: right;
+  flex: 1;
+}
+
+.cust0040-address {
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.cust0040-quote-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid #f1f3f4;
+}
+
+.cust0040-item-count {
+  display: flex;
+  align-items: center;
+}
+
+.cust0040-detail-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cust0040-detail-btn:hover {
+  background: #0056b3;
+}
+
+.cust0040-no-data {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.cust0040-no-data-icon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.cust0040-no-data p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .cust0040-mobile-search-toggle {
+    display: flex;
+  }
+  
+  .cust0040-image-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .cust0040-image-card {
+    border-radius: 8px;
+  }
+  
+  .cust0040-card-header {
+    padding: 12px 16px;
+  }
+  
+  .cust0040-quote-number {
+    font-size: 14px;
+  }
+  
+  .cust0040-quote-status {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .cust0040-card-content {
+    padding: 16px;
+  }
+  
+  .cust0040-quote-info-row {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
+  
+  .cust0040-label {
+    font-size: 12px;
+    min-width: 60px;
+  }
+  
+  .cust0040-value {
+    font-size: 13px;
+  }
+  
+  .cust0040-quote-summary {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+  
+  .cust0040-detail-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cust0040-image-container {
+    padding: 12px;
+  }
+  
+  .cust0040-image-grid {
+    gap: 12px;
+  }
+  
+  .cust0040-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .cust0040-quote-summary {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .cust0040-detail-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
