@@ -2,18 +2,18 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Plus, Minus, ShoppingCart, Calculator } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { commonAPI } from '../../services/api';
 import './QuoteModal.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
+import { toast } from 'react-toastify';
 
 const QuoteModal = ({ product, isOpen, onClose }) => {
-  console.log('QuoteModal 렌더링:', { product, isOpen, onClose });
   
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [optionValues, setOptionValues] = useState([]);
   const [selectedOptionValue, setSelectedOptionValue] = useState('');
   const [loadingOptions, setLoadingOptions] = useState(false);
@@ -21,9 +21,10 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   
   // showQuoteRequestModal 상태 변경 모니터링
   useEffect(() => {
-    console.log('showQuoteRequestModal 상태 변경:', showQuoteRequestModal);
+
   }, [showQuoteRequestModal]);
   const { globalState } = useAuth();
+  const navigate = useNavigate();
   
   // 이전에 로드한 optCd를 추적
   const loadedOptCdRef = useRef(null);
@@ -34,18 +35,16 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   const loadOptionValues = useCallback(async (optCd) => {
     // 이미 로딩 중이거나 같은 optCd면 중복 호출 방지
     if (isLoadingRef.current || loadedOptCdRef.current === optCd) {
-      console.log('API 호출 건너뜀:', { 로딩중: isLoadingRef.current, 이미로드됨: loadedOptCdRef.current === optCd });
+
       return;
     }
-    
-    console.log('옵션값 API 호출 시작:', optCd);
+
     isLoadingRef.current = true;
     
     try {
       setLoadingOptions(true);
       const options = await commonAPI.getOptionValues(optCd);
       
-      console.log('옵션값 API 응답:', options);
       
       if (options && Array.isArray(options)) {
         setOptionValues(options);
@@ -68,19 +67,17 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     } finally {
       setLoadingOptions(false);
       isLoadingRef.current = false;
-      console.log('옵션값 API 호출 완료');
+
     }
   }, []);
   
   // 모달 상태 초기화
   useEffect(() => {
     if (isOpen && product) {
-      console.log('모달 열림:', { itemCd: product.itemCd, optCd: product.optCd });
       
       // 기본 상태 초기화
       setQuantity(1);
       setShowLoginModal(false);
-      setShowSuccessModal(false);
       setSelectedOptionValue('');
       
       // 옵션 처리
@@ -88,12 +85,12 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       
       if (currentOptCd && loadedOptCdRef.current !== currentOptCd) {
         // 새로운 옵션 코드 - 로드 필요
-        console.log('새로운 옵션 코드 감지:', currentOptCd);
+
         setOptionValues([]);
         loadOptionValues(currentOptCd);
       } else if (!currentOptCd) {
         // 옵션이 없는 상품
-        console.log('옵션 없는 상품');
+
         setOptionValues([]);
         setSelectedOptionValue('');
         loadedOptCdRef.current = null;
@@ -122,11 +119,10 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
   // 모달이 열려있지 않으면 렌더링하지 않음
   if (!isOpen || !product) {
-    console.log('모달 렌더링 안함:', { isOpen, product: !!product });
+
     return null;
   }
-  
-  console.log('모달 렌더링 시작!');
+
 
   const handleQuantityChange = (delta) => {
     const newQuantity = Math.max(1, quantity + delta);
@@ -141,23 +137,18 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
   // 견적의뢰 버튼 클릭 핸들러
   const handleQuoteRequest = () => {
-    console.log('견적의뢰 버튼 클릭됨');
-    
     // 로그인 체크
     if (!isLoggedIn) {
-      console.log('로그인 필요');
       setShowLoginModal(true);
       return;
     }
 
     // 옵션값 선택 체크
     if (optionValues.length > 0 && !selectedOptionValue) {
-      console.log('옵션 선택 필요');
-      alert('옵션을 선택해주세요.');
+      toast.error('옵션을 선택해주세요.');
       return;
     }
 
-    console.log('견적의뢰 모달 열기');
     // 견적의뢰 모달 열기
     setShowQuoteRequestModal(true);
   };
@@ -171,56 +162,80 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
     // 옵션값 선택 체크
     if (optionValues.length > 0 && !selectedOptionValue) {
-      alert('옵션을 선택해주세요.');
+      toast.error('옵션을 선택해주세요.');
       return;
     }
 
-    // 로그인된 상태에서 장바구니 담기 처리
-    const price = product.disPrice || product.salePrice || 0;
-    const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
-    
-    console.log('대시보드 장바구니 추가 데이터:', {
-      product,
-      selectedOption,
-      selectedOptionValue,
-      price
-    });
-    
-    const cartItem = {
-      itemCd: product.itemCd,
-      itemNm: product.itemNm,
-      optCd: product.optCd || '',
-      optValCd: selectedOptionValue || '',
-      optValNm: selectedOption ? selectedOption.optValNm : '',
-      price: price,
-      outUnitPrice: price, // 동일한 가격 정보
-      quantity: quantity,
-      filePath: product.FILEPATH,
-      totalAmount: price * quantity
-    };
-    
-    console.log('준비된 카트 아이템:', cartItem);
-    
-    // 장바구니에 상품 추가 (localStorage 사용)
-    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItemIndex = existingCart.findIndex(item => 
-      item.itemCd === cartItem.itemCd && item.optValCd === cartItem.optValCd
-    );
-    
-    if (existingItemIndex >= 0) {
-      // 기존 상품이 있으면 수량 업데이트
-      existingCart[existingItemIndex].quantity += cartItem.quantity;
-      existingCart[existingItemIndex].totalAmount = 
-        existingCart[existingItemIndex].price * existingCart[existingItemIndex].quantity;
-    } else {
-      // 새 상품 추가
-      existingCart.push(cartItem);
+    try {
+      // 로그인된 상태에서 장바구니 담기 처리
+      const price = product.disPrice || product.salePrice || 0;
+      const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
+      
+      const cartItem = {
+        itemCd: product.itemCd,
+        itemNm: product.itemNm,
+        optCd: product.optCd || '',
+        optValCd: selectedOptionValue || '',
+        optValNm: selectedOption ? selectedOption.optValNm : '',
+        price: price,
+        outUnitPrice: price, // 동일한 가격 정보
+        quantity: quantity,
+        filePath: product.FILEPATH,
+        totalAmount: price * quantity
+      };
+      
+      // 장바구니에 상품 추가 (localStorage 사용)
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItemIndex = existingCart.findIndex(item => 
+        item.itemCd === cartItem.itemCd && item.optValCd === cartItem.optValCd
+      );
+      
+      let isNewItem = true;
+      if (existingItemIndex >= 0) {
+        // 기존 상품이 있으면 수량 업데이트
+        existingCart[existingItemIndex].quantity += cartItem.quantity;
+        existingCart[existingItemIndex].totalAmount = 
+          existingCart[existingItemIndex].price * existingCart[existingItemIndex].quantity;
+        isNewItem = false;
+      } else {
+        // 새 상품 추가
+        existingCart.push(cartItem);
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(existingCart));
+      
+      // 장바구니 업데이트 이벤트 발생
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      
+      // Toast 성공 알림 표시
+      const optionText = selectedOption ? ` (옵션: ${selectedOption.optValNm})` : '';
+      const actionText = isNewItem ? '추가되었습니다' : '수량이 업데이트되었습니다';
+      
+      toast.success(
+        `🛒 ${product.itemNm}${optionText}\n${quantity}개 ${actionText}\n총 ${existingCart.length}개 상품`, 
+        {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            fontSize: '16px',
+            minWidth: '350px',
+            padding: '16px',
+            fontWeight: '500'
+          }
+        }
+      );
+      
+      // 모달 닫기
+      handleClose();
+      
+    } catch (error) {
+      console.error('장바구니 추가 오류:', error);
+      toast.error('장바구니 추가 중 오류가 발생했습니다.');
     }
-    
-    localStorage.setItem('cart', JSON.stringify(existingCart));
-    
-    // 성공 메시지 모달 표시
-    setShowSuccessModal(true);
   };
 
   const handleClose = () => {
@@ -469,49 +484,28 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
       {/* 로그인 모달 */}
       {showLoginModal && (
-        <Modal onClose={() => setShowLoginModal(false)}>
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h3>로그인이 필요한 서비스입니다</h3>
-            <p>장바구니 및 견적의뢰를 위해서는 로그인이 필요합니다.</p>
-            <button onClick={() => setShowLoginModal(false)}>확인</button>
-          </div>
-        </Modal>
+        <Modal 
+          isOpen={showLoginModal}
+          title="로그인 필요"
+          message={`장바구니 및 견적의뢰를 위해서는 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?`}
+          onConfirm={() => {
+            setShowLoginModal(false);
+            onClose(); // 모달 닫기
+            navigate('/login'); // 로그인 페이지로 이동
+          }}
+          onCancel={() => setShowLoginModal(false)}
+        />
       )}
 
-      {/* 성공 모달 */}
-      {showSuccessModal && (
-        <Modal onClose={() => setShowSuccessModal(false)}>
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h3>장바구니에 담았습니다</h3>
-            <p>상품이 성공적으로 장바구니에 추가되었습니다.</p>
-            <button onClick={() => setShowSuccessModal(false)}>확인</button>
-          </div>
-        </Modal>
-      )}
+
 
       {/* 견적의뢰 모달 */}
       {showQuoteRequestModal && (
         <>
-          {console.log('ProductQuoteModal 렌더링 시도:', {
-            showQuoteRequestModal,
-            product: product?.itemNm,
-            selectedProducts: [{
-              itemCd: product.itemCd,
-              itemNm: product.itemNm,
-              optCd: product.optCd || '',
-              optValCd: selectedOptionValue || '',
-              optValNm: optionValues.find(opt => opt.optValCd === selectedOptionValue)?.optValNm || '',
-              price: product.disPrice || product.salePrice || 0,
-              quantity: quantity,
-              filePath: product.FILEPATH,
-              totalAmount: (product.disPrice || product.salePrice || 0) * quantity
-            }]
-          })}
           <ProductQuoteModal
             product={product}
             isOpen={showQuoteRequestModal}
             onClose={() => {
-              console.log('ProductQuoteModal 닫기');
               setShowQuoteRequestModal(false);
             }}
             selectedProducts={[{

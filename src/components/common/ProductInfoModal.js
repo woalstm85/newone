@@ -167,7 +167,7 @@ const ProductInfoModal = ({
                   </div>
                 )}
                 
-                {product.outUnitPrice && (
+                {product.outUnitPrice !== undefined && product.outUnitPrice !== null && (
                   <div className="product-info-row">
                     <span className="product-info-label">출고단가:</span>
                     <span className="product-info-value price">
@@ -229,7 +229,7 @@ const ProductInfoModal = ({
               )}
 
               {/* 총 금액 */}
-              {product.outUnitPrice && (
+              {product.outUnitPrice !== undefined && product.outUnitPrice !== null && (
                 <div className="product-info-total">
                   <span className="product-info-total-label">총 금액:</span>
                   <span className="product-info-total-price">

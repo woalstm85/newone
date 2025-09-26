@@ -35,8 +35,6 @@ const DynamicRouteComponent = () => {
         
         let module;
 
-        console.log('Loading component for path:', path);
-
         // ✨ 경로별 특별 처리 - 상세 매핑
         if (path === 'dashboard') {
           // dashboard는 Layout에서 처리하므로 빈 컴포넌트
@@ -158,7 +156,7 @@ function App() {
             {/* ToastContainer 추가 */}
             <ToastContainer 
               position="top-center"
-              autoClose={500}
+              autoClose={1500}
               hideProgressBar={false}
               newestOnTop={false}
               closeOnClick
@@ -167,6 +165,12 @@ function App() {
               draggable
               pauseOnHover
               theme="light"
+              toastStyle={{
+                fontSize: '16px',
+                minWidth: '350px',
+                padding: '16px',
+                fontWeight: '500'
+              }}
             />
           </BrowserRouter>
         </TabStateProvider>

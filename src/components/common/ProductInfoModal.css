@@ -117,15 +117,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: #5a9de8; /* 더 연한 파란색으로 변경 */
+  border-bottom: 1px solid #e3f2fd; /* 더 연한 파란색 테두리로 변경 */
 }
 
 .product-info-modal-header h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: white; /* 파란색 배경에 맞는 흰색 텍스트 */
 }
 
 .product-info-modal-close-btn {
@@ -136,15 +136,15 @@
   height: 36px;
   border: none;
   background: transparent;
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.8); /* 파란색 배경에 맞는 흰색 */
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .product-info-modal-close-btn:hover {
-  background: #e9ecef;
-  color: #495057;
+  background: rgba(255, 255, 255, 0.1); /* 파란색 배경에 맞는 호버 효과 */
+  color: white;
 }
 
 .product-info-modal-content {
@@ -413,14 +413,14 @@
 }
 
 .product-info-action-btn.cart-btn {
-  background: #007bff;
+  background: #5a9de8; /* 연한 파란색으로 변경 */
   color: white;
 }
 
 .product-info-action-btn.cart-btn:hover {
-  background: #0056b3;
+  background: #4a8bd6; /* 호버 시 조금 더 진한 연한 파란색 */
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(90, 157, 232, 0.3); /* 연한 파란색에 맞는 샤도우 */
 }
 
 .product-info-action-btn.quote-btn {
@@ -573,6 +573,7 @@
 
   .product-info-modal-header h2 {
     font-size: 16px;
+    color: white; /* 모바일에서도 흰색 유지 */
   }
   
   .product-info-modal-close-btn {

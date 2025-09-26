@@ -7,8 +7,7 @@ import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 
 const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClose, onRemoveProduct, onUpdateQuantity }) => {
-  console.log('ProductQuoteModal 렌더링:', { product, products, selectedProducts, isOpen, onClose });
-  
+
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -48,7 +47,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     currentProducts = [product];
   }
   
-  console.log('ProductQuoteModal 상품 데이터:', { currentProducts, hasSelectedProducts, isMultipleProducts });
   
   const isSingleProduct = !isMultipleProducts && !hasSelectedProducts && product;
   
@@ -303,11 +301,7 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
         })
       };
       
-      console.log('견적 요청 데이터:', quoteData);
-      
-      const result = await quoteAPI.createQuoteRequest(quoteData);
-      console.log('견적 요청 응답:', result);
-      
+
       // 성공 모달 표시
       if (isSingleProduct) {
         setSuccessMessage('견적 의뢰가 성공적으로 전송되었습니다! 견적 의뢰 내역에서 확인하실 수 있습니다.');

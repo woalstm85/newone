@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Package, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, Info } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
 import ProductInfoModal from '../common/ProductInfoModal';
 import { useMenu } from '../../context/MenuContext';
+import { useAuth } from '../../context/AuthContext';
 import { productAPI, commonAPI } from '../../services/api';
 import './CUST0020.css';
 import MySpinner from '../common/MySpinner';
+import { toast } from 'react-toastify';
 
 function CUST0020() {
   // 상태 관리
@@ -53,6 +56,8 @@ function CUST0020() {
   
   // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
+  const { globalState } = useAuth();
+  const navigate = useNavigate();
 
   // 이미지 클릭 핸들러
   const handleImageClick = (imageUrl, itemName, itemCd) => {
@@ -103,10 +108,17 @@ function CUST0020() {
     return categorySData.filter(item => item.catMCd === selectedCategoryM);
   };
 
-  // 장바구니 추가 핸들러 - 실제 장바구니 기능 구현
+  // 장바구니 추가 핸들러 - 로그인 체크 추가
   const handleAddToCart = async (productWithQuantity) => {
+    // 로그인 체크
+    const isLoggedIn = !!globalState.G_USER_ID;
+    if (!isLoggedIn) {
+      setModalMessage('장바구니 기능을 사용하려면 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?');
+      setIsModalOpen(true);
+      return;
+    }
+    
     try {
-      console.log('장바구니에 추가할 데이터:', productWithQuantity);
       
       // 장바구니 데이터 준비
       const cartItem = {
@@ -124,7 +136,6 @@ function CUST0020() {
         totalAmount: (productWithQuantity.outUnitPrice || 0) * productWithQuantity.quantity
       };
 
-      console.log('준비된 장바구니 아이템:', cartItem);
 
       // 로컬 스토리지에 장바구니 데이터 저장
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -136,42 +147,45 @@ function CUST0020() {
         item.optValCd === cartItem.optValCd
       );
       
+      let isNewItem = true;
       if (existingItemIndex > -1) {
         // 이미 있는 상품이면 수량 추가
         existingCart[existingItemIndex].quantity += cartItem.quantity;
         existingCart[existingItemIndex].totalAmount = 
           existingCart[existingItemIndex].quantity * (existingCart[existingItemIndex].price || 0);
+        isNewItem = false;
       } else {
         // 새로운 상품이면 추가
         existingCart.push(cartItem);
       }
       
       localStorage.setItem('cart', JSON.stringify(existingCart));
-      console.log('업데이트된 장바구니:', existingCart);
       
       // 장바구니 업데이트 이벤트 발생
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       
-      // 성공 메시지 표시
+      // Toast 성공 알림 표시 (기존 모달 대신)
       const optionText = productWithQuantity.optValNm ? ` (옵션: ${productWithQuantity.optValNm})` : '';
-      setModalMessage(
-        `${productWithQuantity.itemNm}${optionText} 상품이 장바구니에 추가되었습니다.\n수량: ${productWithQuantity.quantity}개\n총 장바구니 상품: ${existingCart.length}개`
+      const actionText = isNewItem ? '추가되었습니다' : '수량이 업데이트되었습니다';
+      
+      toast.success(
+        `🛒 ${productWithQuantity.itemNm}${optionText}\n${productWithQuantity.quantity}개 ${actionText}\n총 ${existingCart.length}개 상품`
       );
-      setIsModalOpen(true);
-      setIsProductInfoModalOpen(false);
+    
+    // 상품 정보 모달 닫기
+    setIsProductInfoModalOpen(false);
       
     } catch (error) {
       console.error('장바구니 추가 오류:', error);
-      setModalMessage('장바구니 추가 중 오류가 발생했습니다.');
-      setIsModalOpen(true);
+      
+      // Toast 에러 알림 (기존 모달 대신)
+      toast.error('장바구니 추가 중 오류가 발생했습니다.');
     }
   };
 
   // 장바구니 내용 확인 함수 (디버깅용)
   const checkCartContents = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    console.log('현재 장바구니 내용:', cart);
-    console.log('장바구니 상품 수:', cart.length);
     return cart;
   };
 
@@ -179,7 +193,6 @@ function CUST0020() {
   const clearCart = () => {
     localStorage.removeItem('cart');
     window.dispatchEvent(new CustomEvent('cartUpdated'));
-    console.log('장바구니가 초기화되었습니다.');
   };
 
   // 컴포너트 마운트 시 디버깅용 전역 함수 등록
@@ -286,6 +299,25 @@ function CUST0020() {
     }
   }, [itemName, selectedCategoryL, selectedCategoryM, selectedCategoryS]);
 
+  // 초기 데이터 로드 (빈 검색 조건으로 전체 데이터 로드)
+  const fetchInitialData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      const data = await productAPI.getProductList('', '', '', '');
+      
+      setGridData(data);
+      setCurrentPage(1);
+
+    } catch (error) {
+      console.error('⌛ 초기 데이터 로드 실패:', error);
+      setIsModalOpen(true);
+      setModalMessage(`데이터 로드 중 오류가 발생했습니다: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // 검색 버튼 클릭
   const handleSearch = () => {
     fetchData();
@@ -319,8 +351,8 @@ function CUST0020() {
     };
     
     loadCategories();
-    fetchData();
-  }, [fetchData]);
+    fetchInitialData(); // 초기에는 빈 검색으로 전체 데이터 로드
+  }, []); // 빈 배열로 변경하여 마운트 시에만 실행
 
   // 뷰 모드 변경
   const handleViewModeChange = (mode) => {
@@ -329,7 +361,7 @@ function CUST0020() {
 
   // 행 클릭 처리
   const handleRowClick = (item) => {
-    console.log('선택된 아이템:', item);
+
   };
 
   // 페이지 변경
@@ -498,14 +530,14 @@ function CUST0020() {
                   <span className="cust0020-inventory-spec-value">{item.unitNm}</span>
                 </div>
               )}
-              {item.outUnitPrice && (
+              {item.outUnitPrice !== undefined && item.outUnitPrice !== null && (
                 <div className="cust0020-inventory-spec-row">
                   <span className="cust0020-inventory-spec-label">출고단가:</span>
                   <span className="cust0020-inventory-spec-client">{item.outUnitPrice.toLocaleString()}원</span>
                 </div>
               )}
               {/* 데이터가 없을 때 기본 메시지 */}
-              {!item.optCd && !item.unitNm && !item.outUnitPrice && (
+              {!item.optCd && !item.unitNm && (item.outUnitPrice === undefined || item.outUnitPrice === null) && (
                 <div className="cust0020-inventory-spec-row">
                   <span className="cust0020-inventory-spec-label" style={{ color: '#999', fontStyle: 'italic' }}>상세 정보 없음</span>
                   <span className="cust0020-inventory-spec-value">-</span>
@@ -721,7 +753,14 @@ function CUST0020() {
         isOpen={isModalOpen}
         title="알림"
         message={modalMessage}
-        onConfirm={() => setIsModalOpen(false)}
+        onConfirm={() => {
+          setIsModalOpen(false);
+          // 로그인 관련 메시지인 경우 로그인 페이지로 이동
+          if (modalMessage.includes('로그인 페이지로 이동')) {
+            navigate('/login');
+          }
+        }}
+        onCancel={modalMessage.includes('로그인 페이지로 이동') ? () => setIsModalOpen(false) : undefined}
       />
 
       {/* 상품 정보 모달 */}

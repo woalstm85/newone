@@ -4,9 +4,11 @@ import {
   Plus, 
   Minus, 
   Trash2, 
-  Calculator
+  Calculator,
+  ImageOff // Package 대신 ImageOff 아이콘 사용
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './Cart.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
@@ -19,6 +21,7 @@ const Cart = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { globalState } = useAuth();
+  const navigate = useNavigate();
   
   // 성공 모달 메시지 상태 추가
   const [successMessage, setSuccessMessage] = useState('');
@@ -187,28 +190,50 @@ const Cart = () => {
 
   return (
     <div className="cart-container">
-      <div className="cart-header">
-        <h2>
-          <ShoppingCart size={24} className="header-icon" />
-          장바구니 ({cartItems.length})
-        </h2>
-        <div className="cart-actions">
-          <label className="select-all">
+      {/* 상단 흰색 영역 - 타이틀 및 컨트롤 */}
+      <div className="cart-header-section">
+        <div className="cart-title-area">
+          <h2 className="cart-main-title">
+            <ShoppingCart size={28} className="header-icon" />
+            장바구니
+          </h2>
+          <p className="cart-description">
+            선택한 상품들을 확인하고 견적을 요청하세요.
+          </p>
+        </div>
+        
+        <div className="cart-controls">
+          <label className="select-all-control">
             <input
               type="checkbox"
               checked={cartItems.every(item => selectedItems[item.itemCd])}
               onChange={handleSelectAll}
             />
-            전체 선택
+            <span>전체 선택 ({cartItems.length}개)</span>
           </label>
+          
+          <button 
+            className="selected-delete-btn"
+            onClick={() => {
+              const selectedItemCodes = cartItems
+                .filter(item => selectedItems[item.itemCd])
+                .map(item => item.itemCd);
+              selectedItemCodes.forEach(itemCd => handleRemoveItem(itemCd));
+            }}
+            disabled={getSelectedCount() === 0}
+          >
+            선택삭제 ({getSelectedCount()})
+          </button>
         </div>
       </div>
 
-      <div className="cart-content">
-        <div className="cart-list">
+      {/* 상품 목록 영역 - 회색 배경 */}
+      <div className="cart-items-section">
+        <div className="cart-items-list">
           {cartItems.map(item => (
-            <div key={item.itemCd} className="cart-item">
-              <div className="item-select">
+            <div key={item.itemCd} className="cart-item-row">
+              {/* 데스크톱용 체크박스 영역 */}
+              <div className="item-select-area">
                 <input
                   type="checkbox"
                   checked={selectedItems[item.itemCd] || false}
@@ -216,104 +241,114 @@ const Cart = () => {
                 />
               </div>
 
-              {/* 데스크톱용 직접 자식 요소들 */}
-              <div className="item-image">
-                <ImageWithFallback
-                  src={item.filePath}
-                  alt={item.itemNm}
-                  width={80}
-                  height={80}
-                />
-              </div>
-
-              <div className="item-info">
-                <h4 className="item-name">{item.itemNm}</h4>
-                <p className="item-code">코드: {item.itemCd}</p>
-                {item.compNm && <p className="item-company">{item.compNm}</p>}
-                {item.optValNm && (
-                  <p className="item-option">
-                    <span className="option-label">옵션:</span>
-                    <span className="option-value">{item.optValNm}</span>
-                  </p>
-                )}
-                <div className="item-price">
-                  <span className="price-label">단가:</span>
-                  {item.price.toLocaleString()}원
-                </div>
-              </div>
-
-              <div className="item-quantity">
-                <button 
-                  onClick={() => handleQuantityChange(item.itemCd, -1)}
-                  className="quantity-btn"
-                >
-                  <Minus size={16} />
-                </button>
-                <input
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) => handleQuantityInput(item.itemCd, e.target.value)}
-                  className="quantity-input"
-                  min="1"
-                />
-                <button 
-                  onClick={() => handleQuantityChange(item.itemCd, 1)}
-                  className="quantity-btn"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-
-              <div className="item-total">
-                합계: {item.totalAmount.toLocaleString()}원
-              </div>
-
-              <div className="item-actions">
-                <button 
-                  onClick={() => handleRemoveItem(item.itemCd)}
-                  className="remove-btn"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-
-              {/* 모바일에서 가로 배치를 위한 메인 컨텐츠 래퍼 */}
-              <div className="cart-item-main">
-                <div className="item-image">
+              {/* 데스크톱용 이미지 영역 */}
+              <div className="item-image-area">
+                {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
                   <ImageWithFallback
                     src={item.filePath}
                     alt={item.itemNm}
-                    width={80}
-                    height={80}
+                    width={120}
+                    height={120}
+                  />
+                ) : (
+                  <div className="item-image-placeholder">
+                    <ImageOff size={40} color="#adb5bd" strokeWidth={1.0} />
+                  </div>
+                )}
+              </div>
+
+              {/* 모바일용 체크박스와 이미지를 세로 배치 */}
+              <div className="item-checkbox-image-area">
+                <div className="item-select-area">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems[item.itemCd] || false}
+                    onChange={() => handleSelectItem(item.itemCd)}
                   />
                 </div>
 
-                <div className="item-info">
-                  <h4 className="item-name">{item.itemNm}</h4>
-                  <p className="item-code">코드: {item.itemCd}</p>
-                  {item.compNm && <p className="item-company">{item.compNm}</p>}
-                  {item.optValNm && (
-                    <p className="item-option">
-                      <span className="option-label">옵션:</span>
-                      <span className="option-value">{item.optValNm}</span>
-                    </p>
+                <div className="item-image-area">
+                  {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
+                    <ImageWithFallback
+                      src={item.filePath}
+                      alt={item.itemNm}
+                      width={70}
+                      height={70}
+                    />
+                  ) : (
+                    <div className="item-image-placeholder">
+                      <ImageOff size={30} color="#adb5bd" strokeWidth={1.0} />
+                    </div>
                   )}
-                  <div className="item-price">
-                    <span className="price-label">단가:</span>
-                    {item.price.toLocaleString()}원
+                </div>
+              </div>
+
+              <div className="item-info-area">
+                <div className="item-source-badge">
+                  {item.source === 'surplus' ? '잉여재고' : '행사품목'}
+                </div>
+                
+                <h3 className="item-title">{item.itemNm}</h3>
+                
+                <div className="item-details">
+                  <div className="item-detail-row">
+                    <span className="detail-label">코드:</span>
+                    <span className="detail-value code-value">{item.itemCd}</span>
                   </div>
-                  <div className="item-total mobile-only">
-                    합계: {item.totalAmount.toLocaleString()}원
+                  
+                  {item.compNm && (
+                    <div className="item-detail-row">
+                      <span className="detail-label">업체:</span>
+                      <span className="detail-value company-value">{item.compNm}</span>
+                    </div>
+                  )}
+                  
+                  {item.optValNm && (
+                    <div className="item-detail-row">
+                      <span className="detail-label">옵션:</span>
+                      <span className="detail-value option-value">{item.optValNm}</span>
+                    </div>
+                  )}
+                  
+                  <div className="item-detail-row">
+                    <span className="detail-label">단가:</span>
+                    <span className="detail-value price-value">{item.price.toLocaleString()}원</span>
+                  </div>
+                </div>
+                
+                {/* 모바일에서 수량과 합계를 정보 영역 하단에 배치 */}
+                <div className="mobile-quantity-total">
+                  <div className="mobile-quantity">
+                    <span className="mobile-label">수량:</span>
+                    <div className="mobile-quantity-controls">
+                      <button 
+                        onClick={() => handleQuantityChange(item.itemCd, -1)}
+                        className="mobile-quantity-btn"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="mobile-quantity-display">{item.quantity}</span>
+                      <button 
+                        onClick={() => handleQuantityChange(item.itemCd, 1)}
+                        className="mobile-quantity-btn"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mobile-total">
+                    <span className="mobile-label">합계:</span>
+                    <span className="mobile-total-price">{item.totalAmount.toLocaleString()}원</span>
                   </div>
                 </div>
               </div>
 
-              {/* 모바일에서 컨트롤 영역 */}
-              <div className="cart-item-controls">
-                <div className="item-quantity">
+              <div className="item-quantity-area">
+                <span className="quantity-label">수량</span>
+                <div className="quantity-controls">
                   <button 
                     onClick={() => handleQuantityChange(item.itemCd, -1)}
-                    className="quantity-btn"
+                    className="quantity-btn minus"
                   >
                     <Minus size={16} />
                   </button>
@@ -326,41 +361,49 @@ const Cart = () => {
                   />
                   <button 
                     onClick={() => handleQuantityChange(item.itemCd, 1)}
-                    className="quantity-btn"
+                    className="quantity-btn plus"
                   >
                     <Plus size={16} />
                   </button>
                 </div>
+              </div>
 
-                <div className="item-actions">
-                  <button 
-                    onClick={() => handleRemoveItem(item.itemCd)}
-                    className="remove-btn"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
+              <div className="item-total-area">
+                <span className="total-label">합계</span>
+                <div className="total-price">{item.totalAmount.toLocaleString()}원</div>
+              </div>
+
+              <div className="item-actions-area">
+                <button 
+                  onClick={() => handleRemoveItem(item.itemCd)}
+                  className="remove-item-btn"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="cart-summary">
+      {/* 하단 요약 및 액션 영역 */}
+      <div className="cart-summary-section">
+        <div className="summary-content">
           <div className="summary-info">
-            <p>선택된 상품: <strong>{getSelectedCount()}개</strong></p>
-            <p>총 금액: <strong>{calculateSelectedTotal().toLocaleString()}원</strong></p>
+            <span className="summary-text">
+              선택된 상품 <strong>{getSelectedCount()}개</strong> · 
+              총 금액 <strong className="total-amount">{calculateSelectedTotal().toLocaleString()}원</strong>
+            </span>
           </div>
           
-          <div className="summary-actions">
-            <button 
-              className="quote-btn"
-              onClick={handleQuoteRequest}
-              disabled={getSelectedCount() === 0}
-            >
-              <Calculator size={18} />
-              견적 의뢰하기 ({getSelectedCount()})
-            </button>
-          </div>
+          <button 
+            className="quote-request-btn"
+            onClick={handleQuoteRequest}
+            disabled={getSelectedCount() === 0}
+          >
+            <Calculator size={18} />
+            견적 의뢰하기
+          </button>
         </div>
       </div>
 
@@ -371,7 +414,7 @@ const Cart = () => {
         message="견적 의뢰를 하시려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
         onConfirm={() => {
           setShowLoginModal(false);
-          window.location.href = '/login';
+          navigate('/login');
         }}
         onCancel={() => setShowLoginModal(false)}
       />

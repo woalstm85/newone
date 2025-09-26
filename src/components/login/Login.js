@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAuthApi } from '../../hooks'; // 커스텀 훅 사용
@@ -7,6 +7,7 @@ import './Login.css';
 function Login() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberUserId, setRememberUserId] = useState(false); // 아이디 저장 체크박스 상태
   const [errors, setErrors] = useState({
     id: '',
     password: ''
@@ -14,6 +15,17 @@ function Login() {
   const navigate = useNavigate();
   const { updateGlobalState } = useAuth();
   const { login, loading, error } = useAuthApi(); // 커스텀 훅 사용
+
+  // 컴포넌트 마운트 시 저장된 아이디 불러오기
+  useEffect(() => {
+    const savedUserId = localStorage.getItem('savedUserId');
+    const isRememberChecked = localStorage.getItem('rememberUserId') === 'true';
+    
+    if (savedUserId && isRememberChecked) {
+      setId(savedUserId);
+      setRememberUserId(true);
+    }
+  }, []);
 
   const validateForm = () => {
     const newErrors = {
@@ -46,6 +58,15 @@ function Login() {
       const data = await login(id, password);
 
       if (data.logResult === 'S') {
+        // 아이디 저장 처리
+        if (rememberUserId) {
+          localStorage.setItem('savedUserId', id);
+          localStorage.setItem('rememberUserId', 'true');
+        } else {
+          localStorage.removeItem('savedUserId');
+          localStorage.removeItem('rememberUserId');
+        }
+        
         // 로그인 성공
         updateGlobalState({
           G_USER_ID: data.userId,
@@ -119,6 +140,20 @@ function Login() {
                 />
                 {errors.password && <span className="error-message">{errors.password}</span>}
               </div>
+              
+              {/* 아이디 저장 체크박스 */}
+              <div className="remember-userid-section">
+                <label className="remember-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={rememberUserId}
+                    onChange={(e) => setRememberUserId(e.target.checked)}
+                  />
+                  <span className="checkmark"></span>
+                  아이디 저장
+                </label>
+              </div>
+              
               <button type="submit" className="login-button" disabled={loading}>
                 {loading ? 'LOGIN 중...' : 'LOGIN'} <span>→</span>
               </button>

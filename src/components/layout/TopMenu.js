@@ -175,8 +175,6 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       return;
     }
 
-    console.log(`TopMenu: Clicking menu ${menuCd} (${menuNm})`);
-
     // 모바일 메뉴 닫기
     setIsMobileMenuOpen(false);
 
@@ -302,6 +300,18 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
 
       {/* 모바일 메뉴 */}
       <div className="mobile-menu">
+        {/* 햄버거 메뉴 버튼 (HOME 왼쪽에 배치) */}
+        {nonDashboardMenus.length > 0 && (
+          <button 
+            className={`mobile-menu-toggle ${
+              isMobileMenuOpen ? 'active' : ''
+            }`}
+            onClick={toggleMobileMenu}
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
+        
         {/* HOME은 모바일에서도 항상 표시 */}
         {homeMenu && (
           <div
@@ -322,24 +332,11 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
             }`}
             onClick={() => handleTopMenuClick(cartMenu.top_menuCd, cartMenu.top_menuNm)}
           >
-
             {cartMenu.top_menuNm || cartMenu.top_menuCd}
             {cartItemCount > 0 && (
               <span className="cart-count-badge">{cartItemCount}</span>
             )}
           </div>
-        )}
-        
-        {/* 햄버거 메뉴 버튼 (다른 메뉴가 있을 때만 표시) */}
-        {nonDashboardMenus.length > 0 && (
-          <button 
-            className={`mobile-menu-toggle ${
-              isMobileMenuOpen ? 'active' : ''
-            }`}
-            onClick={toggleMobileMenu}
-          >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
         )}
       </div>
       {/* 모바일 드로프다운 메뉴 */}

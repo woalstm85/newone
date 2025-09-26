@@ -220,7 +220,7 @@ function CUST0010() {
 
   // 행 클릭 처리
   const handleRowClick = (item) => {
-    console.log('선택된 아이템:', item);
+
   };
 
   // 페이지 변경
@@ -707,7 +707,7 @@ function CUST0010() {
                 <span className="cust0010-lot-spec-date">{formatDate(item.inpDat)}</span>
               </div>
               <div className="cust0010-lot-spec-row">
-                <span className="cust0010-lot-spec-label">최종활동:</span>
+                <span className="cust0010-lot-spec-label">최종변경:</span>
                 <span className="cust0010-lot-spec-date">{formatDate(item.lastActivityDate)}</span>
               </div>
             </div>

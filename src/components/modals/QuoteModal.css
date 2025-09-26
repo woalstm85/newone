@@ -18,6 +18,10 @@
   animation: productModalFadeIn 0.3s ease-out;
 }
 
+.message {
+  white-space: pre-line;
+}
+
 /* 모달 컨테이너 */
 .quote-modal-container {
   background: white;

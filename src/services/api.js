@@ -67,7 +67,6 @@ export const quoteAPI = {
   getQuoteRequests: async (ym, userId) => {
     try {
       const url = `https://api.newonetotal.co.kr/Comm/CUST0040?ym=${ym}&userId=${userId}`;
-      console.log('CUST0040 API URL:', url);
       
       const response = await apiClient.get(url);
       return response;
@@ -81,8 +80,7 @@ export const quoteAPI = {
   createQuoteRequest: async (requestData) => {
     try {
       const url = 'https://api.newonetotal.co.kr/Comm/MrsQtRequest';
-      console.log('견적의뢰 등록 API URL:', url);
-      console.log('견적의뢰 등록 데이터:', requestData);
+
       
       const response = await apiClient.post(url, requestData);
       return response;
@@ -95,14 +93,14 @@ export const quoteAPI = {
 
 // 제품 관련 API
 export const productAPI = {
-  // 제품 목록 조회 (CUST0020) - 카테고리 파라미터 추가
+  // 제품 목록 조회 (CUST0020) - 올바른 파라미터명 사용
   getProductList: async (itemName = '', itemGroupLCd = '', itemGroupMCd = '', itemGroupSCd = '') => {
     try {
       let url = 'https://api.newonetotal.co.kr/Comm/CUST0020';
       const params = [];
       
       if (itemName.trim()) {
-        params.push(`itemName=${encodeURIComponent(itemName.trim())}`);
+        params.push(`p_itemNm=${encodeURIComponent(itemName.trim())}`);
       }
       if (itemGroupLCd) {
         params.push(`itemGroupLCd=${itemGroupLCd}`);
@@ -118,7 +116,6 @@ export const productAPI = {
         url += '?' + params.join('&');
       }
       
-      console.log('CUST0020 API URL:', url);
       
       const response = await apiClient.get(url);
       return response;

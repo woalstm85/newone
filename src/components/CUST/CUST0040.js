@@ -85,15 +85,11 @@ const CUST0040 = () => {
 
     try {
       setLoading(true);
-      console.log('호출하는 API 매개변수:', { selectedMonth, userId: globalState.G_USER_ID });
       
       const data = await quoteAPI.getQuoteRequests(selectedMonth, globalState.G_USER_ID);
       
-      console.log('반환된 데이터:', data);
-      
       if (data && Array.isArray(data)) {
         setQuotesData(data);
-        console.log(`선택된 월: ${selectedMonth}, 데이터 건수: ${data.length}`);
       } else {
         setQuotesData([]);
         console.warn('예상치 못한 API 응답 형식:', data);
@@ -179,7 +175,6 @@ const CUST0040 = () => {
   // 초기 데이터 로드 - selectedMonth 변경 시마다 자동 호출
   useEffect(() => {
     if (selectedMonth && globalState.G_USER_ID) {
-      console.log('월 변경 감지 - fetchQuotesData 호출:', selectedMonth);
       fetchQuotesData();
     }
   }, [selectedMonth, globalState.G_USER_ID, fetchQuotesData]);
@@ -458,7 +453,6 @@ const CUST0040 = () => {
                 onChange={(e) => {
                   const value = e.target.value; // YYYY-MM 형식
                   const yearMonth = value.replace('-', ''); // YYYYMM 형식으로 변환
-                  console.log('월 선택 변경:', { original: value, converted: yearMonth });
                   setSelectedMonth(yearMonth);
                 }}
               />

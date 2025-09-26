@@ -135,7 +135,6 @@ function CUST0060() {
       setLoading(true);
       
       const url = `https://api.newonetotal.co.kr/Comm/CUST0060?ym=${selectedMonth}&userId=${globalState.G_USER_ID}`;
-      console.log('API 호출 URL:', url);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -196,7 +195,6 @@ function CUST0060() {
 
   // 행 클릭 처리
   const handleRowClick = (item) => {
-    console.log('선택된 아이템:', item);
   };
 
   // 페이지 변경

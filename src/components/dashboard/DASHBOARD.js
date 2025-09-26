@@ -357,10 +357,8 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
         // 로그인한 사용자에게만 자사재고현황 데이터 API로 가져오기
         if (isLoggedIn && globalState.G_USER_ID) {
           try {
-            console.log('자사재고현황 API 호출 시작 - 사용자 ID:', globalState.G_USER_ID);
             const companyInventoryData = await inventoryAPI.getCompanyInventory(globalState.G_USER_ID);
-            console.log('자사재고현황 API 응답:', companyInventoryData);
-            
+
             const processedInventoryData = companyInventoryData.slice(0, 12); // 최대 10개만 표시
             
             formattedData.push({
@@ -414,8 +412,7 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
 
   // 자사재고 클릭 핸들러
   const handleInventoryClick = (inventory) => {
-    console.log('자사재고 클릭:', inventory);
-    // 자사재고 상세 페이지로 이동하거나 모달 열기 등의 로직 추가
+
   };
 
   // 더보기 버튼 클릭 핸들러

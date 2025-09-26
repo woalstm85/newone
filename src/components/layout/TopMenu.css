@@ -21,6 +21,7 @@
     flex: 1;
     align-items: center;
     gap: 8px;
+    position: relative; /* 상대 위치 지정 */
 }
 
 .top-menu-items {
@@ -182,6 +183,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     outline: none;
+    margin-left: 8px; /* 왼쪽 여백 추가 */
 }
 
 .mobile-menu-toggle:hover {
