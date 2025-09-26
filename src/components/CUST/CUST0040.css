@@ -1,7 +1,7 @@
 /* CUST0040 견적의뢰 관리 스타일 */
 
 /* 품목수 배지 */
-.quote-item-count-badge {
+.cust0040-quote-item-count-badge {
   display: inline-block;
   background: #e3f2fd;
   color: #1976d2;
@@ -14,7 +14,7 @@
 }
 
 /* 상세보기 버튼 */
-.quote-detail-btn {
+.cust0040-quote-detail-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -27,25 +27,24 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.quote-detail-btn:hover {
+.cust0040-quote-detail-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.quote-detail-btn:active {
+.cust0040-quote-detail-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 행 호버 효과 */
-.quote-main-row:hover {
-  background-color: #f8f9fa;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+/* 행 호버 효과 - 다른 컴포넌트와 통일 */
+.cust0040-quote-main-row:hover {
+  background-color: #dbeafe;
+  cursor: pointer;
 }
 
-.quote-main-row {
-  transition: all 0.2s ease;
+.cust0040-quote-main-row {
+  transition: background-color 0.2s ease;
 }
 
 /* ===== 1. 기본 레이아웃 ===== */
@@ -54,6 +53,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0 16px; /* 데스크톱 기본 패딩 통일 */
 }
 
 .cust0040-header-left {
@@ -62,24 +62,89 @@
   gap: 0.5rem;
 }
 
+/* ===== 뷰 모드 선택 ===== */
+.cust0040-view-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.cust0040-view-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.cust0040-view-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.cust0040-view-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e3c72;
+  border-color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* ===== 2. 프로그램 헤더 ===== */
 .cust0040-program-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: white;
 }
 
 .cust0040-program-header h1 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: white;
   margin: 0;
 }
 
 /* ===== 3. 검색 영역 ===== */
 .cust0040-search-section {
   margin-bottom: 16px;
+  position: relative;
+}
+
+.cust0040-mobile-search-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #17a2b8;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cust0040-mobile-search-toggle:hover {
+  background: #138496;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(23, 162, 184, 0.25);
 }
 
 .cust0040-search-container {
@@ -87,6 +152,23 @@
   border: 1px solid #d1d5db;
   padding: 16px;
   border-radius: 6px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.cust0040-search-container.hidden {
+  max-height: 0;
+  padding: 0 16px;
+  border-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.cust0040-search-container.visible {
+  max-height: 300px;
+  padding: 16px;
+  opacity: 1;
+  visibility: visible;
 }
 
 .cust0040-search-row {
@@ -148,6 +230,52 @@
 .cust0040-search-btn:hover {
   background: #0056b3;
   border-color: #0056b3;
+}
+
+/* 모바일 반응형 검색 영역 */
+@media (max-width: 768px) {
+  .cust0040-mobile-search-toggle {
+    display: flex;
+  }
+  
+  .cust0040-search-container {
+    max-height: 0;
+    padding: 0 16px;
+    border-color: transparent;
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .cust0040-search-container.visible {
+    max-height: 300px;
+    padding: 16px;
+    border-color: #d1d5db;
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .cust0040-search-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .cust0040-search-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .cust0040-search-field input,
+  .cust0040-search-field select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .cust0040-search-buttons {
+    margin-left: 0;
+    justify-content: center;
+  }
 }
 
 /* ===== 4. 페이지네이션 정보 ===== */
@@ -748,60 +876,6 @@
   }
 }
 
-/* 프로그램 헤더 스타일 */
-.cust0040-program-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding: 16px 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.cust0040-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cust0040-program-header h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: #2c3e50;
-}
-
-/* 뷰 모드 선택 */
-.cust0040-view-toggle {
-  display: flex;
-  gap: 8px;
-}
-
-.cust0040-view-btn {
-  padding: 8px 16px;
-  border: 1px solid #BFBFBF;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.cust0040-view-btn:hover {
-  background: #f8f9fa;
-}
-
-.cust0040-view-btn.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
 /* 이미지뷰 스타일 */
 .cust0040-image-container {
   flex: 1;
@@ -980,6 +1054,11 @@
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
+  /* 컴테이너 모바일 스타일 */
+  .cust0040-container {
+    padding: 0 8px; /* 모바일에서 패딩 축소 */
+  }
+  
   .cust0040-mobile-search-toggle {
     display: flex;
   }
@@ -1036,6 +1115,11 @@
 }
 
 @media (max-width: 480px) {
+  /* 컴테이너 소형 모바일 스타일 */
+  .cust0040-container {
+    padding: 0 6px;
+  }
+  
   .cust0040-image-container {
     padding: 12px;
   }
@@ -1059,5 +1143,11 @@
   .cust0040-detail-btn {
     width: 100%;
     text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .cust0040-container {
+    padding: 0 4px;
   }
 }

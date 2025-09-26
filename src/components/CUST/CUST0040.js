@@ -281,7 +281,7 @@ const CUST0040 = () => {
             currentItems.map((quote, index) => (
               <tr 
                 key={`${quote.reqNo}-${index}`}
-                className="quote-main-row" 
+                className="cust0040-quote-main-row" 
                 onClick={() => handleRowClick(quote)}
                 style={{ cursor: 'pointer' }}
               >
@@ -295,13 +295,13 @@ const CUST0040 = () => {
                 <td className="cust0040-left">{quote.siteNm}</td>
                 <td className="cust0040-center">{formatDate(quote.dueDate)}</td>
                 <td className="cust0040-center">
-                  <span className="quote-item-count-badge">
+                  <span className="cust0040-quote-item-count-badge">
                     {quote.subData?.length || 0}건
                   </span>
                 </td>
                 <td className="cust0040-center">
                   <button 
-                    className="quote-detail-btn"
+                    className="cust0040-quote-detail-btn"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleQuoteDetailClick(quote);
@@ -372,9 +372,9 @@ const CUST0040 = () => {
                 
                 <div className="cust0040-quote-summary">
                   <div className="cust0040-item-count">
-                    <span className="quote-item-count-badge">
-                      {quote.subData?.length || 0}건
-                    </span>
+                  <span className="cust0040-quote-item-count-badge">
+                  {quote.subData?.length || 0}건
+                  </span>
                   </div>
                   
                   <button 

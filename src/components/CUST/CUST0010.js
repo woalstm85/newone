@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Package2, Hash, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, Calendar, User, MapPin, Package, FileText } from 'lucide-react';
+import { Package, Hash, List, ImageIcon, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, FileText } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
@@ -10,45 +10,34 @@ import './CUST0010.css';
 import MySpinner from '../common/MySpinner';
 
 function CUST0010() {
-  // 상태 관리
+  // 1. 상태 관리
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [activeTab, setActiveTab] = useState('normal'); // 'normal', 'serial'
-  const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image' - 기본값을 이미지로 설정
+  const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
-  const [isSearchVisible, setIsSearchVisible] = useState(true); // 검색영역 표시 상태
+  const [isSearchVisible, setIsSearchVisible] = useState(true);
   const [loading, setLoading] = useState(false);
-
-  // 이미지 모달 상태 추가
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState({
-    url: '',
-    title: '',
-    alt: ''
-  });
-
-  // 스와이프 제스처용 ref와 상태
+  const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' });
+  const [expandedLots, setExpandedLots] = useState(new Set());
+  
+  // 2. 참조 및 상수
   const searchToggleRef = useRef(null);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-
-  // 스와이프 최소 거리 (픽셀)
   const minSwipeDistance = 50;
-
-  // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   
-  // 로트 상세 이력 확장 상태
-  const [expandedLots, setExpandedLots] = useState(new Set());
-
-  // 메뉴 컨텍스트에서 현재 메뉴 타이틀 가져오기
   const { currentMenuTitle } = useMenu();
   const { globalState } = useAuth();
 
-  // 이미지 클릭 핸들러
-  const handleImageClick = (imageUrl, itemName, itemCd) => {
+  // 3. 이벤트 핸들러 및 로직
+  
+  // 이미지 확대 보기
+  const handleImageClick = (imageUrl, itemName) => {
     if (imageUrl) {
       setSelectedImage({
         url: imageUrl,
@@ -58,52 +47,31 @@ function CUST0010() {
     }
   };
 
-  // 스와이프 시작
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  // 스와이프 중
-  const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  // 스와이프 종료
+  // 스와이프 제스처 처리
+  const onTouchStart = (e) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientY); };
+  const onTouchMove = (e) => { setTouchEnd(e.targetTouches[0].clientY); };
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
     const distance = touchStart - touchEnd;
     const isUpSwipe = distance > minSwipeDistance;
     const isDownSwipe = distance < -minSwipeDistance;
 
-    // 아래로 스와이프하면 검색영역 열기
     if (isDownSwipe && !isSearchVisible) {
       setIsSearchVisible(true);
     }
-    // 위로 스와이프하면 검색영역 닫기
     else if (isUpSwipe && isSearchVisible) {
       setIsSearchVisible(false);
     }
   };
 
-  // 검색영역 외부 클릭시 닫기
+  // 검색 영역 외부 클릭 시 닫기 (모바일)
   const handleClickOutside = useCallback((event) => {
     if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
-      // 모바일에서만 작동하도록 체크
       if (window.innerWidth <= 768 && isSearchVisible) {
         setIsSearchVisible(false);
       }
     }
   }, [isSearchVisible]);
-
-  // 외부 클릭 이벤트 리스너 등록
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [handleClickOutside]);
 
   // 페이지네이션 계산
   const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
@@ -120,20 +88,21 @@ function CUST0010() {
     };
   }, [gridData, currentPage, itemsPerPage]);
 
-  // 탭 변경 시 페이지 초기화
+  // 탭 변경 시 상태 초기화
   const handleTabChange = (tab) => {
+    if (activeTab === tab) return;
     setActiveTab(tab);
     setCurrentPage(1);
-    setGridData([]); // 데이터 초기화
+    setGridData([]);
   };
 
-  // 검색 초기화
+  // 검색 조건 초기화
   const handleReset = () => {
     setItemName('');
     setCurrentPage(1);
   };
 
-  // 실제 API 호출 함수
+  // API 데이터 조회
   const fetchData = useCallback(async () => {
     if (!globalState.G_USER_ID) {
       setModalMessage('로그인이 필요합니다.');
@@ -145,47 +114,34 @@ function CUST0010() {
       setLoading(true);
 
       let response;
-      // 탭에 따른 적절한 API 호출
       switch (activeTab) {
         case 'normal':
           response = await inventoryAPI.getCompanyInventory(globalState.G_USER_ID);
           break;
         case 'serial':
-          // 시리얼/로트 API 호출
           response = await inventoryAPI.getLotInventory(globalState.G_USER_ID);
           break;
         default:
           response = await inventoryAPI.getCompanyInventory(globalState.G_USER_ID);
       }
 
-      // API 응답 처리
       if (response && Array.isArray(response)) {
-        // itemName 필터링
         let filteredData = response;
         if (itemName.trim()) {
-          if (activeTab === 'normal') {
-            filteredData = response.filter(item =>
-              item.itemNm && item.itemNm.toLowerCase().includes(itemName.trim().toLowerCase())
-            );
-          } else if (activeTab === 'serial') {
-            filteredData = response.filter(item =>
-              (item.itemNm && item.itemNm.toLowerCase().includes(itemName.trim().toLowerCase())) ||
-              (item.lotNo && item.lotNo.toLowerCase().includes(itemName.trim().toLowerCase())) ||
-              (item.itemCd && item.itemCd.toLowerCase().includes(itemName.trim().toLowerCase()))
-            );
-          }
+          const lowerCaseItemName = itemName.trim().toLowerCase();
+          filteredData = response.filter(item =>
+            (item.itemNm && item.itemNm.toLowerCase().includes(lowerCaseItemName)) ||
+            (activeTab === 'serial' && item.lotNo && item.lotNo.toLowerCase().includes(lowerCaseItemName)) ||
+            (activeTab === 'serial' && item.itemCd && item.itemCd.toLowerCase().includes(lowerCaseItemName))
+          );
         }
         setGridData(filteredData);
       } else {
         setGridData([]);
-        console.warn('예상치 못한 API 응답 형식:', response);
       }
-
     } catch (error) {
       console.error('데이터 조회 실패:', error);
       setGridData([]);
-
-      // 에러 메시지 표시
       setModalMessage(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
       setIsModalOpen(true);
     } finally {
@@ -193,17 +149,16 @@ function CUST0010() {
     }
   }, [activeTab, itemName, globalState.G_USER_ID]);
 
-  // 검색 버튼 클릭
+  // 검색 실행
   const handleSearch = () => {
     setCurrentPage(1);
     fetchData();
-    // 모바일에서 검색 후 검색영역 숨기기
     if (window.innerWidth <= 768) {
       setIsSearchVisible(false);
     }
   };
 
-  // 검색영역 토글
+  // 검색 영역 토글
   const toggleSearchArea = () => {
     setIsSearchVisible(!isSearchVisible);
   };
@@ -211,16 +166,6 @@ function CUST0010() {
   // 뷰 모드 변경
   const handleViewModeChange = (mode) => {
     setViewMode(mode);
-  };
-
-  // 컴포넌트 마운트 시 데이터 로드
-  useEffect(() => {
-    fetchData();
-  }, [activeTab, globalState.G_USER_ID]);
-
-  // 행 클릭 처리
-  const handleRowClick = (item) => {
-
   };
 
   // 페이지 변경
@@ -234,7 +179,7 @@ function CUST0010() {
     setCurrentPage(1);
   };
   
-  // 로트 이력 확장/축소 토글
+  // 로트 이력 확장/축소
   const toggleLotExpansion = (lotNo) => {
     const newExpanded = new Set(expandedLots);
     if (newExpanded.has(lotNo)) {
@@ -245,13 +190,12 @@ function CUST0010() {
     setExpandedLots(newExpanded);
   };
   
-  // 날짜 포맷팅 함수
+  // 날짜 포맷팅
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     if (dateString.includes('T')) {
       return new Date(dateString).toLocaleString('ko-KR');
     }
-    // YYYYMMDD 형식인 경우
     if (dateString.length === 8) {
       const year = dateString.substring(0, 4);
       const month = dateString.substring(4, 6);
@@ -261,7 +205,7 @@ function CUST0010() {
     return dateString;
   };
   
-  // 금액 포맷팅 함수
+  // 금액 포맷팅
   const formatAmount = (amount) => {
     if (!amount || amount === 0) return '0';
     return new Intl.NumberFormat('ko-KR').format(amount);
@@ -292,13 +236,26 @@ function CUST0010() {
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-
     return pages;
   };
 
-  // 일반 재고 테이블 (수정된 합계 행)
+  // 4. 라이프사이클 및 렌더링
+  
+  // 외부 클릭 이벤트 리스너 등록
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
+  // 탭 변경 시 데이터 로드
+  useEffect(() => {
+    fetchData();
+  }, [activeTab, globalState.G_USER_ID, fetchData]);
+
+  // 일반 재고 테이블 렌더링
   const renderNormalInventory = () => {
-    // 합계 계산
     const totals = currentItems.reduce((acc, item) => {
       acc.closingQty += item.closingQty || 0;
       acc.closingAmt += item.closingAmt || 0;
@@ -329,7 +286,7 @@ function CUST0010() {
           <tbody>
             {currentItems.length > 0 ? (
               currentItems.map((row, index) => (
-                <tr key={`${row.itemCd}-${index}`} onClick={() => handleRowClick(row)}>
+                <tr key={`${row.itemCd}-${index}`}>
                   <td className="cust0010-center">
                     <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       {row.thFilePath ? (
@@ -381,7 +338,6 @@ function CUST0010() {
               </tr>
             )}
           </tbody>
-          {/* 수정된 합계 행 - 현재고와 현재고금액을 올바른 위치에 표시 */}
           {currentItems.length > 0 && (
             <tfoot>
               <tr className="cust0010-total-row">
@@ -428,7 +384,7 @@ function CUST0010() {
     );
   };
 
-  // 시리얼/로트 재고 테이블
+  // 시리얼/로트 재고 테이블 렌더링
   const renderSerialInventory = () => {
     return (
       <div className="cust0010-table-container">
@@ -452,10 +408,8 @@ function CUST0010() {
             {currentItems.length > 0 ? (
               currentItems.map((row, index) => (
                 <React.Fragment key={`${row.lotNo}-${index}`}>
-                  {/* 메인 로트 행 */}
                   <tr 
                     className="lot-main-row" 
-                    onClick={() => handleRowClick(row)}
                     style={{ cursor: 'pointer' }}
                   >
                     <td className="cust0010-center">
@@ -490,7 +444,6 @@ function CUST0010() {
                     <td className="cust0010-center">{row.locCd || '-'}</td>
                   </tr>
                   
-                  {/* 확장된 상세 이력 행들 */}
                   {expandedLots.has(row.lotNo) && row.subData && row.subData.length > 0 && (
                     <tr>
                       <td colSpan={13} className="lot-details-container">
@@ -554,7 +507,7 @@ function CUST0010() {
     );
   };
 
-  // 이미지 뷰 렌더링 함수들 (이미지 클릭 기능 추가)
+  // 일반 재고 이미지 뷰 렌더링
   const renderNormalInventoryImage = () => {
     const items = currentItems.map((item, index) => (
       <div key={`${item.itemCd}-${index}`} className="cust0010-inventory-image-card" >
@@ -565,7 +518,6 @@ function CUST0010() {
           </span>
         </div>
         <div className="cust0010-inventory-image-content">
-          {/* 이미지 섹션 */}
           <div className="cust0010-inventory-image-section">
             <div className="cust0010-inventory-image-placeholder">
               {item.thFilePath ? (
@@ -595,7 +547,6 @@ function CUST0010() {
               )}
             </div>
             
-            {/* 이미지 아래 옵션/단위 정보 */}
             <div className="cust0010-inventory-image-info">
                 <span className="cust0010-inventory-option-badge">
                   🏷️ {item.optValNm}
@@ -608,7 +559,6 @@ function CUST0010() {
             </div>
           </div>
           
-          {/* 상세 정보 섹션 */}
           <div className="cust0010-inventory-item-details">
             <div className="cust0010-inventory-item-specs">
               <div className="cust0010-inventory-spec-row">
@@ -658,120 +608,121 @@ function CUST0010() {
     );
   };
 
+  // 시리얼 재고 이미지 뷰 렌더링
   const renderSerialInventoryImage = () => {
     const items = currentItems.map((item, index) => (
-      <div key={`${item.lotNo}-${index}`} className="cust0010-lot-image-card" onClick={() => handleRowClick(item)}>
-        <div className="cust0010-lot-image-header">
-          <div className="lot-header-main">
-            <span className="lot-number-badge">{item.lotNo}</span>
+      <div key={`${item.lotNo}-${index}`} className="cust0010-inventory-image-card">
+        <div className="cust0010-inventory-image-header">
+          <div className="cust0010-serial-header-content">
+            <span className="cust0010-inventory-lot-number">{item.lotNo}</span>
             <h4>{item.itemNm}</h4>
           </div>
-          <span className={`lot-status-badge ${item.currentQty > 0 ? 'in-stock' : 'out-of-stock'}`}>
+          <span className={`cust0010-inventory-badge ${item.currentQty > 0 ? 'normal' : 'warning'}`}>
             {item.currentQty > 0 ? '재고있음' : '재고없음'}
           </span>
         </div>
-        <div className="cust0010-lot-image-content">
-          {/* 로트 아이콘 섹션 */}
-          <div className="cust0010-lot-icon-section">
-            <div className="cust0010-lot-icon-placeholder">
+        <div className="cust0010-inventory-image-content">
+          <div className="cust0010-inventory-image-section">
+            <div className="cust0010-inventory-image-placeholder">
               <Package size={40} color="#007bff" />
             </div>
-            <div className="cust0010-lot-code-info">
+            
+            <div className="cust0010-inventory-image-info">
               {item.optValNm && (
-                <span className="lot-option-badge">
+                <span className="cust0010-inventory-option-badge">
                   🏷️ {item.optValNm}
+                </span>
+              )}
+              {item.unitNm && (
+                <span className="cust0010-inventory-unit-badge">
+                  📏 {item.unitNm}
                 </span>
               )}
             </div>
           </div>
           
-          {/* 상세 정보 섹션 */}
-          <div className="cust0010-lot-details">
-            <div className="cust0010-lot-specs">
-              <div className="cust0010-lot-spec-row">
-                <span className="cust0010-lot-spec-label">입고수량:</span>
-                <span className="cust0010-lot-spec-value">{formatAmount(item.inpQty)} {item.unitNm}</span>
+          <div className="cust0010-inventory-item-details">
+            <div className="cust0010-inventory-item-specs">
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고일:</span>
+                <span className="cust0010-inventory-spec-date">{formatDate(item.inpDat)}</span>
               </div>
-              <div className="cust0010-lot-spec-row">
-                <span className="cust0010-lot-spec-label">입고금액:</span>
-                <span className="cust0010-lot-spec-amount">{formatAmount(item.inpAmt)}원</span>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고수량:</span>
+                <span className="cust0010-inventory-spec-value">{formatAmount(item.inpQty)} {item.unitNm}</span>
               </div>
-              <div className="cust0010-lot-spec-row highlight">
-                <span className="cust0010-lot-spec-label">현재고:</span>
-                <span className={`cust0010-lot-spec-current ${item.currentQty > 0 ? 'positive' : 'zero'}`}>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고금액:</span>
+                <span className="cust0010-inventory-spec-client">{formatAmount(item.inpAmt)}원</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">현재고:</span>
+                <span className={`cust0010-inventory-spec-value ${item.currentQty > 0 ? 'positive' : 'zero'}`}>
                   {formatAmount(item.currentQty)} {item.unitNm}
                 </span>
               </div>
-              <div className="cust0010-lot-spec-row">
-                <span className="cust0010-lot-spec-label">입고일:</span>
-                <span className="cust0010-lot-spec-date">{formatDate(item.inpDat)}</span>
-              </div>
-              <div className="cust0010-lot-spec-row">
-                <span className="cust0010-lot-spec-label">최종변경:</span>
-                <span className="cust0010-lot-spec-date">{formatDate(item.lastActivityDate)}</span>
-              </div>
             </div>
             
-            {/* 위치 정보 */}
-            <div className="cust0010-lot-location-info">
-              <div className="lot-warehouse-badge">
-                <MapPin size={12} />
-                {item.whNm || '창고 미지정'}
+            {(item.whNm || item.locCd) ? (
+              <div className="cust0010-inventory-warehouse-location">
+                {item.whNm && item.locCd ? (
+                  <span className="cust0010-inventory-warehouse-location-badge">
+                    {item.whNm} - {item.locCd}
+                  </span>
+                ) : item.whNm ? (
+                  <span className="cust0010-inventory-warehouse-location-badge">
+                    {item.whNm}
+                  </span>
+                ) : (
+                  <span className="cust0010-inventory-warehouse-location-badge">
+                    {item.locCd}
+                  </span>
+                )}
               </div>
-              {item.locCd && (
-                <div className="lot-location-badge">
-                  📦 {item.locCd}
-                </div>
-              )}
-            </div>
+            ) : (
+              <span className="cust0010-inventory-no-location-badge">
+                📍 위치 미지정
+              </span>
+            )}
             
-            {/* 이력 정보 */}
             {item.subData && item.subData.length > 0 && (
-              <div className="cust0010-lot-history-summary">
-                <div className="lot-history-badge">
-                  <FileText size={12} />
-                  입출고 이력 {item.subData.length}건
-                </div>
+              <div className="cust0010-inventory-history-section">
                 <button 
-                  className="lot-expand-details-btn"
+                  className="cust0010-inventory-history-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleLotExpansion(item.lotNo);
                   }}
                 >
-                  {expandedLots.has(item.lotNo) ? '접기' : '상세보기'}
+                  📋 입출고 이력 {item.subData.length}건 {expandedLots.has(item.lotNo) ? '접기' : '보기'}
                 </button>
               </div>
             )}
             
-            {/* 확장된 이력 표시 */}
             {expandedLots.has(item.lotNo) && item.subData && item.subData.length > 0 && (
-              <div className="cust0010-lot-expanded-history">
-                <div className="lot-history-header">
-                  <strong>입출고 이력</strong>
-                </div>
-                <div className="lot-history-list">
+              <div className="cust0010-inventory-expanded-history">
+                <div className="cust0010-inventory-history-list">
                   {item.subData.slice(0, 3).map((detail, detailIndex) => (
-                    <div key={`${item.lotNo}-history-${detailIndex}`} className="lot-history-item">
-                      <div className="lot-history-item-header">
-                        <span className={`lot-history-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
+                    <div key={`${item.lotNo}-history-${detailIndex}`} className="cust0010-inventory-history-item">
+                      <div className="cust0010-inventory-history-header">
+                        <span className={`lot-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
                           {detail.inOutDiv}
                         </span>
-                        <span className="lot-history-date">{formatDate(detail.transDate)}</span>
+                        <span className="cust0010-inventory-history-date">{formatDate(detail.transDate)}</span>
                       </div>
-                      <div className="lot-history-item-details">
+                      <div className="cust0010-inventory-history-details">
                         <span>{detail.transTypeNm}</span>
-                        <span className="lot-history-amount">{formatAmount(detail.qty)} {item.unitNm}</span>
+                        <span className="cust0010-inventory-history-amount">{formatAmount(detail.qty)} {item.unitNm}</span>
                       </div>
                       {detail.remark && (
-                        <div className="lot-history-remark">
+                        <div className="cust0010-inventory-history-remark">
                           {detail.remark}
                         </div>
                       )}
                     </div>
                   ))}
                   {item.subData.length > 3 && (
-                    <div className="lot-history-more">
+                    <div className="cust0010-inventory-history-more">
                       외 {item.subData.length - 3}건 더...
                     </div>
                   )}
@@ -784,7 +735,7 @@ function CUST0010() {
     ));
 
     return (
-      <div className="cust0010-lot-image-grid">
+      <div className="cust0010-inventory-image-grid">
         {items.length > 0 ? items : (
           <div className="cust0010-no-data">
             <Package size={48} color="#ccc" />
@@ -795,35 +746,20 @@ function CUST0010() {
     );
   };
 
-  // 현재 탭에 따른 테이블 렌더링
+  // 현재 탭/뷰 모드에 따른 콘텐츠 렌더링
   const renderCurrentTable = () => {
     if (viewMode === 'image') {
-      switch (activeTab) {
-        case 'normal':
-          return renderNormalInventoryImage();
-        case 'serial':
-          return renderSerialInventoryImage();
-        default:
-          return renderNormalInventoryImage();
-      }
+      return activeTab === 'normal' ? renderNormalInventoryImage() : renderSerialInventoryImage();
     } else {
-      switch (activeTab) {
-        case 'normal':
-          return renderNormalInventory();
-        case 'serial':
-          return renderSerialInventory();
-        default:
-          return renderNormalInventory();
-      }
+      return activeTab === 'normal' ? renderNormalInventory() : renderSerialInventory();
     }
   };
 
   return (
     <div className="cust0010-container">
-      {/* 프로그램 헤더 */}
       <div className="cust0010-program-header">
         <div className="cust0010-header-left">
-          <Package2 className="w-6 h-6" />
+          <Package className="w-6 h-6" />
           <h1>{currentMenuTitle || '재고현황 관리'}</h1>
         </div>
 
@@ -853,7 +789,7 @@ function CUST0010() {
             className={`cust0010-tab ${activeTab === 'normal' ? 'active' : ''}`}
             onClick={() => handleTabChange('normal')}
           >
-            <Package2 size={16} />
+            <Package size={16} />
             일반재고
           </button>
           <button

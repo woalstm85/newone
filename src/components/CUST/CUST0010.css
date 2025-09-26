@@ -61,6 +61,17 @@
   display: flex;
   padding: 15px;
   gap: 15px;
+  align-items: flex-start;
+  min-height: 140px; /* 최소 높이 설정 */
+}
+
+.cust0010-inventory-image-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 120px;
 }
 
 .cust0010-inventory-image-placeholder {
@@ -74,7 +85,8 @@
   justify-content: center;
   position: relative;
   cursor: pointer;
-  border: none; /* 중복 테두리 제거 */
+  border: none;
+  overflow: hidden;
 }
 
 .cust0010-inventory-image {
@@ -83,11 +95,7 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.3s ease;
-  border-radius: 7px; /* 부모 border-radius보다 1px 작게 */
-}
-
-.cust0010-inventory-image-placeholder:hover .cust0010-inventory-image {
-  /* transform 효과 제거 */
+  border-radius: 7px;
 }
 
 .cust0010-inventory-no-image {
@@ -98,30 +106,7 @@
   justify-content: center;
   color: #ccc;
   background-color: #f8f9fa;
-  border-radius: 7px; /* 부모 border-radius와 맞춤 */
-}
-
-.cust0010-inventory-item-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.cust0010-inventory-item-details h5 {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
-}
-
-/* 이미지 섹션 레이아웃 수정 */
-.cust0010-inventory-image-section {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  border-radius: 7px;
 }
 
 /* 이미지 아래 정보 영역 */
@@ -130,7 +115,17 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 120px; /* 이미지와 같은 폭 */
+  width: 120px;
+}
+
+.cust0010-inventory-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px; /* 이미지 높이와 맞춤 */
+  padding-top: 4px;
+  min-width: 0; /* flexbox 오버플로우 방지 */
 }
 
 /* 옵션 배지 스타일 수정 */
@@ -147,6 +142,207 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 로트 번호 배지 스타일 */
+.cust0010-inventory-lot-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #fff3e0;
+  color: #f57c00;
+  font-size: 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 창고 배지 스타일 */
+.cust0010-inventory-warehouse-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #e8f5e8;
+  color: #2e7d32;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* 위치 섹션 */
+.cust0010-inventory-location-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* 이력 섹션 */
+.cust0010-inventory-history-section {
+  margin-top: 8px;
+}
+
+/* 이력 버튼 */
+.cust0010-inventory-history-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.cust0010-inventory-history-btn:hover {
+  background: #fcd34d;
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+/* 확장된 이력 */
+.cust0010-inventory-expanded-history {
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+/* 이력 리스트 */
+.cust0010-inventory-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 이력 아이템 */
+.cust0010-inventory-history-item {
+  padding: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+/* 이력 헤더 */
+.cust0010-inventory-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* 이력 날짜 */
+.cust0010-inventory-history-date {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* 이력 상세 정보 */
+.cust0010-inventory-history-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+/* 이력 수량 */
+.cust0010-inventory-history-amount {
+  font-weight: 600;
+  color: #059669;
+  font-family: 'Courier New', monospace;
+}
+
+/* 이력 비고 */
+.cust0010-inventory-history-remark {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* 이록 더 보기 */
+.cust0010-inventory-history-more {
+  text-align: center;
+  padding: 6px;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* positive/zero 색상 스타일 */
+.cust0010-inventory-spec-value.positive {
+  color: #059669;
+  font-weight: 600;
+}
+
+.cust0010-inventory-spec-value.zero {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* 시리얼 헤더 콘텐츠 - 로트번호와 제품명 */
+.cust0010-serial-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 로트 번호 스타일 */
+.cust0010-inventory-lot-number {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f57c00;
+  background: #fff3e0;
+  padding: 3px 8px;
+  border-radius: 8px;
+  align-self: flex-start;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* 창고-로케이션 통합 스타일 */
+.cust0010-inventory-warehouse-location {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.cust0010-inventory-warehouse-location-badge {
+  display: inline-block;
+  width: 100%;
+  padding: 8px 10px;
+  background: #6f42c1; /* 퍼플 계열로 변경 */
+  color: white;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.3px;
+  box-sizing: border-box;
+}
+
+/* 날짜 스타일 */
+.cust0010-inventory-spec-date {
+  font-size: 12px;
+  color: #6c757d;
+  text-align: right;
 }
 
 /* 새로운 단위 배지 스타일 */
@@ -234,15 +430,17 @@
 .cust0010-inventory-item-specs {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  flex: 1;
 }
 
 .cust0010-inventory-spec-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0;
+  padding: 6px 0;
   border-bottom: 1px solid #f5f5f5;
+  min-height: 24px; /* 일정한 높이 유지 */
 }
 
 .cust0010-inventory-spec-row:last-child {
@@ -384,7 +582,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0 16px; /* 데스크톱 기본 패딩 통일 */
 }
+
+/* ===================================================
+   CUST0010 프로그램 헤더 스타일 (CUST0020 디자인 적용)
+   =================================================== */
 
 .cust0010-header-left {
   display: flex;
@@ -392,53 +595,64 @@
   gap: 0.5rem;
 }
 
-/* ===== 2. 프로그램 헤더 ===== */
+/* ===== 2. 프로그램 헤더 (CUST0020 스타일) ===== */
 .cust0010-program-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: white;
 }
 
 .cust0010-program-header h1 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: white;
+  margin: 0;
 }
 
-/* 뷰 모드 선택 */
+/* ===== 3. 뷰 모드 선택 (CUST0020 스타일) ===== */
 .cust0010-view-toggle {
   display: flex;
   gap: 8px;
 }
 
 .cust0010-view-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border: 1px solid #BFBFBF;
-  background: white;
-  border-radius: 4px;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 40px;
+  gap: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
 }
 
 .cust0010-view-btn:hover {
-  background: #f8f9fa;
-  color: #374151;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
 }
 
 .cust0010-view-btn.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e3c72;
+  border-color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.cust0010-view-btn.active:hover {
-  background: #0056b3;
-}
+/* ===================================================
+   CUST0010 프로그램 헤더 스타일 끝
+   =================================================== */
 
 /* ===== 3. 탭 메뉴 ===== */
 .cust0010-tab-container {
@@ -649,8 +863,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cust0010-data-info {
@@ -667,6 +883,7 @@
 
 .cust0010-page-size-selector label {
   color: #374151;
+  white-space: nowrap;
 }
 
 .cust0010-page-size-selector select {
@@ -1019,6 +1236,11 @@
 }
 
 @media (max-width: 768px) {
+  /* 컴테이너 모바일 스타일 */
+  .cust0010-container {
+    padding: 0 8px; /* 모바일에서 패딩 축소 */
+  }
+  
   /* 모바일 검색 토글 표시 */
   .cust0010-mobile-search-toggle {
     display: flex;
@@ -1061,8 +1283,22 @@
     justify-content: center;
   }
 
-  .cust0010-view-toggle {
+  .cust0010-view-toggle { /* 변경된 클래스 */
     margin-left: auto;
+  }
+
+  .cust0010-view-btn { /* 변경된 클래스 */
+    padding: 6px 10px;
+    min-width: 36px;
+  }
+
+  .cust0010-program-header { /* 추가된 스타일 */
+    margin-bottom: 12px;
+    padding: 12px 16px;
+  }
+
+  .cust0010-program-header h1 { /* 추가된 스타일 */
+    font-size: 1.1rem;
   }
 
   .cust0010-search-row {
@@ -1077,9 +1313,26 @@
   }
 
   .cust0010-pagination-info {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    flex-wrap: nowrap;
+  }
+  
+  .cust0010-data-info {
+    font-size: 0.8rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  
+  .cust0010-page-size-selector {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .cust0010-page-size-selector label {
+    display: none; /* 모바일에서 레이블 숨김 */
   }
 
   .cust0010-pagination {
@@ -1142,7 +1395,7 @@
 
 @media (max-width: 480px) {
   .cust0010-container {
-    padding: 0 8px;
+    padding: 0 6px;
   }
 
   .cust0010-tab {
@@ -1155,9 +1408,13 @@
     height: 14px;
   }
 
-  .cust0010-view-btn {
+  .cust0010-view-btn { /* 변경된 클래스 */
     padding: 6px 10px;
     min-width: 36px;
+  }
+
+  .cust0010-program-header h1 { /* 추가된 스타일 */
+    font-size: 1rem;
   }
 
   .cust0010-search-container {
@@ -1254,51 +1511,112 @@
   }
 }
 
-/* 이미지 뷰 모바일 최적화 추가 */
+/* 이미지 뷰 모바일 최적화 - CUST0020 스타일처럼 가로 배치 유지 */
 @media (max-width: 768px) {
   .cust0010-inventory-image-content {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* 가로 배치 유지 */
+    align-items: flex-start;
     gap: 12px;
+    padding: 12px;
   }
   
   .cust0010-inventory-image-section {
-    width: 100%;
+    flex-shrink: 0;
+    width: 100px;
     align-items: center;
   }
   
+  .cust0010-inventory-image-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+  
   .cust0010-inventory-image-info {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
+    width: 100px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
   
   .cust0010-inventory-option-badge,
-  .cust0010-inventory-unit-badge {
+  .cust0010-inventory-unit-badge,
+  .cust0010-inventory-lot-badge {
     flex-shrink: 0;
+    font-size: 9px;
+    padding: 2px 6px;
+    max-width: 90px;
   }
   
   .cust0010-inventory-item-details {
-    width: 100%;
+    flex: 1;
+    min-height: 100px;
+  }
+  
+  .cust0010-inventory-item-specs {
+    gap: 4px;
+  }
+  
+  .cust0010-inventory-spec-row {
+    padding: 4px 0;
+    min-height: 20px;
+  }
+  
+  .cust0010-inventory-spec-label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+  
+  .cust0010-inventory-spec-value,
+  .cust0010-inventory-spec-client {
+    font-size: 11px;
   }
 }
 
 @media (max-width: 480px) {
+  .cust0010-inventory-image-content {
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .cust0010-inventory-image-section {
+    width: 90px;
+  }
+  
   .cust0010-inventory-image-placeholder {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border: 1px solid #dee2e6;
   }
   
   .cust0010-inventory-image-info {
-    width: 100px;
+    width: 90px;
   }
   
   .cust0010-inventory-option-badge,
-  .cust0010-inventory-unit-badge {
-    font-size: 9px;
-    padding: 3px 6px;
+  .cust0010-inventory-unit-badge,
+  .cust0010-inventory-lot-badge {
+    font-size: 8px;
+    padding: 2px 5px;
+    max-width: 80px;
+  }
+  
+  .cust0010-inventory-item-details {
+    min-height: 90px;
+  }
+  
+  .cust0010-inventory-spec-row {
+    padding: 3px 0;
+    min-height: 18px;
+  }
+  
+  .cust0010-inventory-spec-label {
+    font-size: 10px;
+    min-width: 45px;
+  }
+  
+  .cust0010-inventory-spec-value,
+  .cust0010-inventory-spec-client {
+    font-size: 10px;
   }
 }
 
@@ -1873,7 +2191,7 @@
 
 @media (max-width: 360px) {
   .cust0010-container {
-    padding: 0 8px;
+    padding: 0 4px;
   }
 
   .cust0010-tab {

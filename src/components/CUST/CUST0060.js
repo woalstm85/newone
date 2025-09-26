@@ -5,7 +5,7 @@ import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
 import { useMenu } from '../../context/MenuContext';
 import { useAuth } from '../../context/AuthContext';
-import './CUST0010.css'; // CUST0010과 동일한 스타일 사용
+import './CUST0010.css';
 import MySpinner from '../common/MySpinner';
 
 function CUST0060() {
