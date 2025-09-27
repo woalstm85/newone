@@ -34,6 +34,24 @@
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: productModalSlideIn 0.3s ease-out;
+  position: relative;
+  z-index: 100000;
+}
+
+/* 새로운 스크롤 가능한 콘텐츠 영역 */
+.quote-modal-scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 데스크톱에서는 가로 배치 */
+@media (min-width: 769px) {
+  .quote-modal-scrollable-content {
+    flex-direction: row;
+  }
 }
 
 @keyframes productModalFadeIn {
@@ -101,27 +119,48 @@
 
 /* 이미지 섹션 */
 .quote-modal-image-section {
-  flex: 1;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   background: #f8f9fa;
+  min-height: 200px;
+}
+
+/* 데스크톱에서는 좌측 영역 */
+@media (min-width: 769px) {
+  .quote-modal-image-section {
+    flex: 1;
+    min-height: 300px;
+  }
 }
 
 .quote-modal-image-container {
   position: relative;
   width: 100%;
-  max-width: 300px;
-  aspect-ratio: 1;
+  max-width: 200px;
+  height: 200px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 데스크톱에서는 더 큰 이미지 */
+@media (min-width: 769px) {
+  .quote-modal-image-container {
+    max-width: 300px;
+    height: 300px;
+  }
 }
 
 .quote-modal-product-image {
-  width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   transition: transform 0.3s ease;
@@ -147,17 +186,31 @@
 
 /* 정보 섹션 */
 .quote-modal-details-section {
-  flex: 1;
+  flex: none;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
+/* 데스크톱에서는 우측 영역 */
+@media (min-width: 769px) {
+  .quote-modal-details-section {
+    flex: 1;
+  }
+}
+
 .quote-modal-details {
   flex: 1;
   padding: 24px;
-  overflow-y: auto;
+  overflow: visible;
   padding-bottom: 8px;
+}
+
+/* 데스크톱에서는 스크롤 방지 */
+@media (min-width: 769px) {
+  .quote-modal-details {
+    overflow-y: auto;
+  }
 }
 
 .quote-modal-product-name {
@@ -417,45 +470,30 @@
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  .quote-modal-content {
+  .quote-modal-scrollable-content {
     flex-direction: column;
-    height: calc(100vh - 120px);
+    overflow-y: auto;
   }
 
   .quote-modal-image-section {
     flex: none;
-    min-height: 240px;
-    max-height: 35vh;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 180px;
+    padding: 15px;
   }
 
   .quote-modal-image-container {
-    max-width: 220px;
-    width: 220px;
-    height: auto;
-    min-height: 200px;
-    max-height: 280px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 160px;
+    width: 160px;
+    height: 160px;
   }
   
   .quote-modal-details-section {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    flex: none;
   }
 
   .quote-modal-details {
     padding: 16px;
-    height: 100%;
-    overflow-y: auto;
+    overflow: visible;
     padding-bottom: 4px;
   }
 
@@ -513,6 +551,38 @@
   }
 }
 
+/* 매우 작은 화면용 추가 미디어 쿼리 */
+@media (max-width: 360px) {
+  .quote-modal-image-container {
+    max-width: 100px;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .quote-modal-image-section {
+    padding: 10px;
+    min-height: 120px;
+  }
+  
+  .quote-modal-details {
+    padding: 10px;
+  }
+  
+  .quote-modal-product-name {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  
+  .quote-modal-actions {
+    padding: 6px 10px;
+  }
+  
+  .quote-modal-action-button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 480px) {
   .quote-modal-header {
     padding: 12px 16px;
@@ -526,37 +596,22 @@
     width: 32px;
     height: 32px;
   }
-  
-  .quote-modal-content {
-    height: calc(100vh - 100px);
-  }
 
   .quote-modal-image-section {
-    padding: 16px;
-    min-height: 200px;
-    max-height: 30vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 12px;
+    min-height: 140px;
   }
 
   .quote-modal-image-container {
-    max-width: 180px;
-    width: 180px;
-    height: auto;
-    min-height: 160px;
-    max-height: 240px;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 120px;
+    width: 120px;
+    height: 120px;
   }
 
   .quote-modal-details {
     padding: 12px;
     padding-bottom: 2px;
+    overflow: visible;
   }
 
   .quote-modal-product-name {
@@ -634,6 +689,60 @@
 .quote-modal-calculator-icon {
   width: 14px;
   height: 14px;
+}
+
+/* 이미지가 없을 때 스타일 개선 */
+.quote-modal-no-image {
+  min-height: 120px;
+}
+
+.quote-modal-no-image svg {
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .quote-modal-no-image {
+    min-height: 100px;
+  }
+  
+  .quote-modal-no-image span {
+    font-size: 12px;
+  }
+  
+  .quote-modal-no-image svg {
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .quote-modal-no-image {
+    min-height: 80px;
+  }
+  
+  .quote-modal-no-image span {
+    font-size: 11px;
+  }
+  
+  .quote-modal-no-image svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .quote-modal-no-image {
+    min-height: 60px;
+  }
+  
+  .quote-modal-no-image span {
+    font-size: 10px;
+  }
+  
+  .quote-modal-no-image svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
 }
 
 /* ProductQuoteModal용 큰 모달 스타일 유지 */

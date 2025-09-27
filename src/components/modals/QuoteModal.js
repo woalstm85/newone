@@ -265,41 +265,11 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
   return (
     <>
-      <div className="quote-modal-overlay" onClick={handleBackdropClick} style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 99999
-      }}>
-        <div className="quote-modal-container updated" style={{
-          background: 'white',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          maxWidth: '800px',
-          width: '95vw',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-          position: 'relative',
-          zIndex: 100000
-        }}>
+      <div className="quote-modal-overlay" onClick={handleBackdropClick}>
+        <div className="quote-modal-container updated">
           {/* 모달 헤더 */}
-          <div className="quote-modal-header" style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '20px 24px',
-            background: '#f8f9fa',
-            borderBottom: '1px solid #e9ecef'
-          }}>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#333' }}>상품 정보</h2>
+          <div className="quote-modal-header">
+            <h2>상품 정보</h2>
             <button 
               onClick={(e) => {
                 e.preventDefault();
@@ -309,59 +279,26 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
               className="quote-modal-close-button"
               type="button"
               aria-label="모달 닫기"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '36px',
-                height: '36px',
-                border: 'none',
-                background: 'transparent',
-                color: '#6c757d',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
             >
               <X size={20} />
             </button>
           </div>
 
-          {/* 모달 콘텐츠 */}
-          <div className="quote-modal-content" style={{
-            display: 'flex',
-            flex: 1,
-            overflow: 'hidden'
-          }}>
+          {/* 모달 콘텐츠 - 전체 스크롤 */}
+          <div className="quote-modal-scrollable-content">
             {/* 이미지 섹션 */}
-            <div className="quote-modal-image-section" style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '24px',
-              background: '#f8f9fa'
-            }}>
-              <div className="quote-modal-image-container" style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '300px',
-                height: 'auto',
-                minHeight: '200px',
-                maxHeight: '280px',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+            <div className="quote-modal-image-section">
+              <div className="quote-modal-image-container">
                 {product.FILEPATH ? (
                   <ImageWithFallback
                     src={product.FILEPATH}
                     alt={product.itemNm}
                     className="quote-modal-product-image"
-                    width={300}
-                    height={300}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain'
+                    }}
                   />
                 ) : (
                   <div className="quote-modal-no-image">
@@ -468,7 +405,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* 모달 푸터 */}
+          {/* 모달 푸터 - 고정 */}
           <div className="quote-modal-actions">
             <button onClick={handleAddToCart} className="quote-modal-action-button quote-modal-cart-button">
               <ShoppingCart size={18} />
