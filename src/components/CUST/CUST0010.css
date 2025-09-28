@@ -711,7 +711,7 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 8px 12px; /* 패딩 줄임: 12px 16px -> 8px 12px */
   background: #17a2b8; /* 틸 블루로 변경 */
   color: white;
   border-radius: 6px;
@@ -721,6 +721,9 @@
   user-select: none;
   position: relative;
   overflow: hidden;
+  min-height: 32px; /* 최소 높이 추가: 32px */
+  box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2); /* 그림자 추가 */
+  font-size: 14px; /* 폰트 사이즈 명시적 지정 */
 }
 
 /* 터치 피드백 효과 */
@@ -755,17 +758,17 @@
 /* 검색 컨테이너 애니메이션 개선 */
 .cust0010-search-container {
   background: #f8f9fa;
-  border: 1px solid #d1d5db;
-  padding: 16px;
+  border: 1px solid #BFBFBF; /* 테두리 색상 통일 */
+  padding: 12px; /* 패딩 줄임: 16px -> 12px */
   border-radius: 6px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 전환 시간 단축 */
   overflow: hidden;
   transform-origin: top;
 }
 
 .cust0010-search-container.hidden {
   max-height: 0;
-  padding: 0 16px;
+  padding: 0; /* 패딩 완전 제거 */
   border: none;
   margin: 0;
   opacity: 0;
@@ -773,7 +776,7 @@
 }
 
 .cust0010-search-container.visible {
-  max-height: 300px;
+  max-height: 280px; /* 최대 높이 조정: 300px -> 280px */
   opacity: 1;
   transform: scaleY(1);
 }
@@ -823,14 +826,15 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 16px;
+  padding: 6px 12px; /* 패딩 줄임: 8px 16px -> 6px 12px */
   border: 1px solid #007bff;
   background: #007bff;
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* 폰트 사이즈 조정: 0.9rem -> 0.85rem */
   transition: all 0.2s;
+  min-height: 32px; /* 최소 높이 명시 */
 }
 
 .cust0010-search-btn:hover {
@@ -842,19 +846,19 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 16px;
-  border: 1px solid #6b7280;
-  background: #6b7280;
+  padding: 6px 12px; /* 패딩 줄임: 8px 16px -> 6px 12px */
+  border: 1px solid #6c757d;
+  background: #6c757d;
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* 폰트 사이즈 조정: 0.9rem -> 0.85rem */
   transition: all 0.2s;
+  min-height: 32px; /* 최소 높이 명시 */
 }
 
 .cust0010-reset-btn:hover {
-  background: #4b5563;
-  border-color: #4b5563;
+  background: #545b62; /* 호버 색상 업데이트 */
 }
 
 /* ===== 5. 페이지네이션 정보 ===== */

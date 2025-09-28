@@ -3,7 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto; /* hidden에서 auto로 변경 */
   padding: 0 16px; /* 데스크톱 기본 패딩 */
 }
 
@@ -78,16 +78,19 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 8px 12px; /* 패딩 유지 */
   background: #17a2b8;
   color: white;
   border-radius: 6px;
   cursor: pointer;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   transition: all 0.3s ease;
   user-select: none;
   position: relative;
   overflow: hidden;
+  min-height: 32px; /* 최소 높이 줄임 36px -> 32px */
+  box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+  font-size: 14px; /* 폰트 사이즈 명시적 지정 */
 }
 
 .cust0020-mobile-search-toggle::before {
@@ -123,15 +126,14 @@
   border: 1px solid #BFBFBF;
   padding: 12px;
   border-radius: 6px;
-
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 전환 시간 단축 */
   overflow: hidden;
   transform-origin: top;
 }
 
 .cust0020-search-container.hidden {
   max-height: 0;
-  padding: 0 12px;
+  padding: 0; /* 패딩 완전 제거 */
   border: none;
   margin: 0;
   opacity: 0;
@@ -184,14 +186,18 @@
 }
 
 .cust0020-search-btn {
-  padding: 6px 12px;
+  padding: 6px 12px; /* 이미 적절한 사이즈 */
   border: 1px solid #007bff;
   background: #007bff;
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* 조금 작게 */
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px; /* 최소 높이 명시 */
 }
 
 .cust0020-search-btn:hover {
@@ -199,14 +205,18 @@
 }
 
 .cust0020-reset-btn {
-  padding: 6px 12px;
+  padding: 6px 12px; /* 이미 적절한 사이즈 */
   border: 1px solid #6c757d;
   background: #6c757d;
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* 조금 작게 */
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px; /* 최소 높이 명시 */
 }
 
 .cust0020-reset-btn:hover {

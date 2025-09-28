@@ -10,7 +10,24 @@ import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
 import { toast } from 'react-toastify';
 
+// 모바일 감지 훅
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  return isMobile;
+};
+
 const QuoteModal = ({ product, isOpen, onClose }) => {
+  const isMobile = useIsMobile(); // 모바일 감지 훅 사용
   
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -245,12 +262,24 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   const formatShipDate = (dateString) => {
     if (!dateString) return '';
     
-    // YYYYMMDD 형식을 YYYY.MM.DD 형식으로 변환
+    // YYYYMMDD 형식을 MM.DD (요일) 형식으로 변환
     if (dateString.length === 8) {
-      const year = dateString.substr(0, 4);
-      const month = dateString.substr(4, 2);
-      const day = dateString.substr(6, 2);
-      return `${year}.${month}.${day}`;
+      const year = parseInt(dateString.substr(0, 4));
+      const month = parseInt(dateString.substr(4, 2));
+      const day = parseInt(dateString.substr(6, 2));
+      
+      // Date 객체 생성
+      const date = new Date(year, month - 1, day);
+      
+      // 요일 배열 (한국어)
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      const weekday = weekdays[date.getDay()];
+      
+      // MM.DD (요일) 형식으로 반환
+      const formattedMonth = month.toString().padStart(2, '0');
+      const formattedDay = day.toString().padStart(2, '0');
+      
+      return `${formattedMonth}.${formattedDay} (${weekday})`;
     }
     
     return dateString;
@@ -284,34 +313,159 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* 모달 콘텐츠 - 전체 스크롤 */}
-          <div className="quote-modal-scrollable-content">
-            {/* 이미지 섹션 */}
-            <div className="quote-modal-image-section">
-              <div className="quote-modal-image-container">
-                {product.FILEPATH ? (
-                  <ImageWithFallback
-                    src={product.FILEPATH}
-                    alt={product.itemNm}
-                    className="quote-modal-product-image"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain'
-                    }}
-                  />
-                ) : (
-                  <div className="quote-modal-no-image">
-                    <CiImageOff size={64} color="#ccc" />
-                    <span>이미지 없음</span>
+          {/* 모달 콘텐츠 - 조건부 렌더링 */}
+          {isMobile ? (
+            // 모바일 레이아웃: 상단(이미지+기본정보) + 하단(옵션/수량/총금액)
+            <div className="quote-modal-scrollable-content">
+              {/* 상단 영역: 이미지(왼쪽) + 기본정보(오른쪽) */}
+              <div className="quote-modal-top-section">
+                {/* 이미지 섹션 */}
+                <div className="quote-modal-image-section">
+                  <div className="quote-modal-image-container">
+                    {product.FILEPATH ? (
+                      <ImageWithFallback
+                        src={product.FILEPATH}
+                        alt={product.itemNm}
+                        className="quote-modal-product-image"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    ) : (
+                      <div className="quote-modal-no-image">
+                        <CiImageOff size={48} color="#ccc" />
+                        <span>이미지 없음</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 기본 정보 섹션 */}
+                <div className="quote-modal-basic-info-section">
+                  <h3 className="quote-modal-product-name">{product.itemNm}</h3>
+                  
+                  {/* 기본 정보 */}
+                  <div className="quote-modal-product-basic">
+                    {product.compNm && (
+                      <div className="quote-modal-product-row">
+                        <span className="quote-modal-product-label">회사명:</span>
+                        <span className="quote-modal-product-value">{product.compNm}</span>
+                      </div>
+                    )}
+                    
+                    {product.shipAvDate && (
+                      <div className="quote-modal-product-row quote-modal-delivery-row">
+                        <span className="quote-modal-delivery-badge">🚚 {formatShipDate(product.shipAvDate)} 출하가능</span>
+                      </div>
+                    )}
+                    
+                    <div className="quote-modal-product-row">
+                      <span className="quote-modal-product-label">가격:</span>
+                      <span className="quote-modal-product-value price">
+                        {Number(product.disPrice || product.salePrice || 0).toLocaleString()}원
+                      </span>
+                    </div>
+                    
+                    {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && (
+                      <div className="quote-modal-product-row">
+                        <span className="quote-modal-product-label">정가:</span>
+                        <span className="quote-modal-product-value">{Number(product.salePrice).toLocaleString()}원</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 하단 영역: 옵션/수량/총금액 */}
+              <div className="quote-modal-bottom-section">
+                {/* 옵션 선택 */}
+                {optionValues.length > 0 && (
+                  <div className="quote-modal-option-section">
+                    <span className="quote-modal-option-label">옵션:</span>
+                    {loadingOptions ? (
+                      <div className="quote-modal-option-loading">옵션 로드 중...</div>
+                    ) : (
+                      <select 
+                        value={selectedOptionValue}
+                        onChange={(e) => setSelectedOptionValue(e.target.value)}
+                        className="quote-modal-option-select"
+                      >
+                        {optionValues.map((option) => (
+                          <option key={option.optValCd} value={option.optValCd}>
+                            {option.optValNm}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 )}
+
+                {/* 수량 선택 */}
+                <div className="quote-modal-quantity-section">
+                  <label className="quote-modal-quantity-label">수량:</label>
+                  <div className="quote-modal-quantity-controls">
+                    <button 
+                      className="quote-modal-quantity-button"
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <input 
+                      type="number" 
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="quote-modal-quantity-input"
+                      min="1"
+                    />
+                    <button 
+                      className="quote-modal-quantity-button"
+                      onClick={() => handleQuantityChange(1)}
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 총 금액 */}
+                <div className="quote-modal-total-amount">
+                  <span className="quote-modal-total-label">총 금액:</span>
+                  <span className="quote-modal-total-price">
+                    {calculateTotal()} 원
+                  </span>
+                </div>
               </div>
             </div>
+          ) : (
+            // 데스크톱 레이아웃: 기존 가로 배치
+            <div className="quote-modal-scrollable-content">
+              {/* 이미지 섹션 */}
+              <div className="quote-modal-image-section">
+                <div className="quote-modal-image-container">
+                  {product.FILEPATH ? (
+                    <ImageWithFallback
+                      src={product.FILEPATH}
+                      alt={product.itemNm}
+                      className="quote-modal-product-image"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  ) : (
+                    <div className="quote-modal-no-image">
+                      <CiImageOff size={64} color="#ccc" />
+                      <span>이미지 없음</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-            {/* 정보 섹션 */}
-            <div className="quote-modal-details-section">
-              <div className="quote-modal-details">
+              {/* 정보 섹션 */}
+              <div className="quote-modal-details-section">
                 <h3 className="quote-modal-product-name">{product.itemNm}</h3>
                 
                 {/* 기본 정보 */}
@@ -324,9 +478,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                   )}
                   
                   {product.shipAvDate && (
-                    <div className="quote-modal-product-row">
-                      <span className="quote-modal-product-label">출하일:</span>
-                      <span className="quote-modal-product-value">{formatShipDate(product.shipAvDate)}</span>
+                    <div className="quote-modal-product-row quote-modal-delivery-row">
+                      <span className="quote-modal-delivery-badge">🚚 {formatShipDate(product.shipAvDate)} 출하가능</span>
                     </div>
                   )}
                   
@@ -403,7 +556,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* 모달 푸터 - 고정 */}
           <div className="quote-modal-actions">
