@@ -267,6 +267,7 @@
 @media (max-width: 768px) {
     .top-menu-container {
         padding: 0;
+        display: none; /* 모바일에서 TopMenu 완전히 숨김 */
     }
     
     /* 데스크톱 메뉴 숨기기 */
@@ -274,9 +275,9 @@
         display: none;
     }
     
-    /* 모바일 메뉴 보이기 */
+    /* 모바일 메뉴 숨기기 - Layout의 새 메뉴 사용 */
     .mobile-menu {
-        display: flex;
+        display: none;
     }
     
     .cart-button-container {
@@ -314,6 +315,10 @@
         height: 16px;
         font-size: 10px;
     }
+
+    .cart-count-badge {
+        right: -10px;
+    }    
     
     .mobile-menu-item {
         padding: 14px 16px;

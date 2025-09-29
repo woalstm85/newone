@@ -550,36 +550,45 @@
 
 @media (max-width: 480px) {
   .dash-inventory-image-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    flex-direction: row; /* 수평 방향 유지 */
+    align-items: flex-start; /* 상단 정렬 */
+    text-align: left; /* 왼쪽 정렬 */
+    gap: 12px;
   }
 
   .dash-inventory-image-placeholder {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 10px;
+    width: 100px; /* 모바일에서 이미지 크기 */
+    height: 100px;
+    margin-bottom: 0; /* 마진 제거 */
+    flex-shrink: 0; /* 이미지 크기 고정 */
+  }
+
+  .dash-inventory-item-details {
+    flex: 1; /* 나머지 공간 차지 */
   }
 
   .dash-inventory-spec-row {
-    flex-direction: column;
+    flex-direction: row; /* 수평 방향 유지 */
+    justify-content: space-between;
     align-items: center;
-    gap: 2px;
-    text-align: center;
-  }
-
-  .dash-inventory-spec-label,
-  .dash-inventory-spec-value,
-  .dash-inventory-spec-client,
-  .dash-inventory-spec-date {
-    text-align: center;
-    width: 100%;
+    gap: 8px;
+    text-align: left;
   }
 
   .dash-inventory-spec-label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 2px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 0;
+    text-align: left;
+    width: auto;
+  }
+  
+  .dash-inventory-spec-value,
+  .dash-inventory-spec-client,
+  .dash-inventory-spec-date {
+    text-align: right;
+    width: auto;
+    flex-shrink: 0;
   }
 }
 
@@ -693,11 +702,25 @@
 
 @media (max-width: 480px) {
   .dash-products-grid {
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .dash-product-image-wrapper {
     height: 150px;
+  }
+  
+  .dash-product-info {
+    padding: 10px;
+  }
+  
+  .dash-product-name {
+    font-size: 12px;
+    height: 36px;
+  }
+  
+  .dash-current-price {
+    font-size: 16px;
   }
 
   .dash-inventory-grid {

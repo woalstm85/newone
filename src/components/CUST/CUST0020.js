@@ -20,7 +20,7 @@ function CUST0020() {
   const [viewMode, setViewMode] = useState('image');
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
-  const [isSearchVisible, setIsSearchVisible] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(window.innerWidth > 768); // 모바일에서는 기본 숨김
   
   // 카테고리 관련 상태
   const [categoryLData, setCategoryLData] = useState([]); // 대분류

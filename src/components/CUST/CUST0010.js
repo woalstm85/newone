@@ -17,7 +17,7 @@ function CUST0010() {
   const [viewMode, setViewMode] = useState('image'); // 'list' 또는 'image'
   const [itemName, setItemName] = useState('');
   const [gridData, setGridData] = useState([]);
-  const [isSearchVisible, setIsSearchVisible] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(window.innerWidth > 768); // 모바일에서는 기본 숨김
   const [loading, setLoading] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' });

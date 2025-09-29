@@ -402,6 +402,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  touch-action: manipulation; /* 터치 이벤트 최적화 */
+  -webkit-tap-highlight-color: transparent; /* iOS 터치 하이라이트 제거 */
+  user-select: none; /* 텍스트 선택 방지 */
 }
 
 .product-info-action-btn.cart-btn {
@@ -664,11 +667,16 @@
   /* 액션 버튼 */
   .product-info-modal-actions {
     padding: 16px 20px; /* QuoteModal과 유사하게 조정 */
+    position: relative;
+    z-index: 100; /* z-index 추가 */
   }
   
   .product-info-action-btn {
     padding: 14px 20px;
     font-size: 16px;
+    position: relative;
+    z-index: 101; /* 버튼 z-index 추가 */
+    touch-action: manipulation; /* 터치 이벤트 최적화 */
   }
 }
 
@@ -762,10 +770,16 @@
   /* 액션 버튼 */
   .product-info-modal-actions {
     padding: 12px 16px;
+    position: relative;
+    z-index: 100;
   }
   
   .product-info-action-btn {
     padding: 12px 16px;
     font-size: 15px;
+    position: relative;
+    z-index: 101;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
   }
 }

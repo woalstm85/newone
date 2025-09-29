@@ -19,9 +19,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+
   margin-bottom: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -32,7 +32,7 @@
   font-weight: 600;
   color: white;
   margin: 0;
-  font-size: 1.1rem;  
+  font-size: 1.0rem;  
 }
 
 /* 뷰 모드 선택 토글 */
@@ -176,7 +176,7 @@
   padding: 8px 15px; /* 패딩을 늘려서 높이 증가 */
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  min-width: 250px; /* 데스크톱에서 제품명 입력창을 더욱 넓게 */
+  min-width: 200px; /* 데스크톱에서 제품명 입력창을 더욱 넓게 */
   font-size: 0.9rem;
   min-height: 25px; /* 최소 높이 명시적 지정 */
 }
@@ -1050,6 +1050,10 @@
     padding: 0 6px;
   }
 
+.cust0020-program-header {
+  margin-top: 4px;
+}  
+
   .cust0020-program-header h1 {
     font-size: 1rem;
   }  
@@ -1110,7 +1114,7 @@
 
   .cust0020-product-info-long-btn {
     font-size: 11px;
-    padding: 5px 8px;
+    padding: 8px 8px;
   }
 }
 

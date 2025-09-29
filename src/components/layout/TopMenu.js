@@ -63,6 +63,14 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
   // 라우트 변경 감지하여 activeTopMenu 자동 업데이트
   useEffect(() => {
     const currentPath = location.pathname;
+    
+    // 특수 케이스: activeTopMenu가 SURPLUS/EVENT인데 경로가 아직 /dashboard면 navigate 중이므로 무시
+    if ((currentPath === '/dashboard' || currentPath === '/') && 
+        (activeTopMenu === 'SURPLUS' || activeTopMenu === 'EVENT')) {
+
+      return;
+    }
+    
     let menuCdToSet = null;
     let menuNmToSet = null;
 
@@ -81,20 +89,33 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       menuNmToSet = '장바구니';
     } else {
       // LEFT 메뉴에서 현재 경로와 일치하는 항목 찾기
-      const matchingMenuItem = topMenuItems.find(item => 
-        item.isLeftMenu && 
-        (item.menuPath === currentPath.substring(1) || 
-         `/${item.top_menuCd.toLowerCase()}` === currentPath)
-      );
+      const matchingMenuItem = topMenuItems.find(item => {
+        if (!item.isLeftMenu) return false;
+        
+        // menuPath로 비교 (CUST/CUST0010 형태)
+        if (item.menuPath) {
+          return currentPath === `/${item.menuPath}` || currentPath.includes(item.menuPath);
+        }
+        
+        // top_menuCd로 비교
+        return currentPath === `/${item.top_menuCd}` || 
+               `/${item.top_menuCd.toLowerCase()}` === currentPath;
+      });
       
       if (matchingMenuItem) {
+
         menuCdToSet = matchingMenuItem.top_menuCd;
         menuNmToSet = matchingMenuItem.top_menuNm;
+      } else {
+
+        // 매칭되는 메뉴가 없으면 아무것도 하지 않음 (HOME으로 강제 이동 X)
+        return;
       }
     }
 
     // activeTopMenu가 현재 경로와 다르면 업데이트
     if (menuCdToSet && activeTopMenu !== menuCdToSet) {
+
       onTopMenuClick(menuCdToSet, menuNmToSet);
     }
   }, [location.pathname, topMenuItems, activeTopMenu, onTopMenuClick]);

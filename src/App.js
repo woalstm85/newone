@@ -46,6 +46,10 @@ const DynamicRouteComponent = () => {
           module = await import('./components/CUST/CUST0010');
         } else if (path === 'CUST0020' || path === 'CUST/CUST0020') {
           module = await import('./components/CUST/CUST0020');
+        } else if (path === 'CUST0040' || path === 'CUST/CUST0040') {
+          module = await import('./components/CUST/CUST0040');
+        } else if (path === 'CUST0060' || path === 'CUST/CUST0060') {
+          module = await import('./components/CUST/CUST0060');
         } else {
           // 기존 동적 임포트 로직 - 여러 방식 시도
           try {

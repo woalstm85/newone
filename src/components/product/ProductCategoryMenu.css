@@ -296,25 +296,26 @@
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
   .cat-menu-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    height: 100vh;
+    /* Layout.css에서 제어하므로 여기서는 기본 스타일만 유지 */
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-right: none;
+    box-shadow: none;
   }
 
   .cat-menu-container.closed {
-    transform: translateX(-100%);
+    transform: none; /* Layout.css에서 제어 */
   }
 
   .cat-menu-container.open {
-    transform: translateX(0);
+    transform: none; /* Layout.css에서 제어 */
   }
 }
 
 @media (max-width: 768px) {
   .cat-menu-container {
     width: 100%;
-    max-width: 320px;
+    max-width: none; /* Layout.css에서 제어 */
   }
 }

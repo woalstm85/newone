@@ -19,9 +19,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+
   margin-bottom: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -32,7 +32,7 @@
   font-weight: 600;
   color: white;
   margin: 0;
-  font-size: 1.1rem;  
+  font-size: 1.0rem;  
 }
 
 /* 뷰 모드 선택 토글 */
@@ -612,6 +612,35 @@
   color: #6b7280;
 }
 
+/* 입출고 구분 배지 - 더 선명하고 잘 보이는 파스텔 톤 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.badge.in-badge {
+  background: linear-gradient(135deg, #d1f4e0 0%, #bef0d4 100%);
+  color: #059669;
+}
+
+.badge.out-badge {
+  background: linear-gradient(135deg, #ffd4d4 0%, #ffc5c5 100%);
+  color: #dc2626;
+}
+
+.badge.default-badge {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #6b7280;
+}
+
 /* ===================================================================
    6. 이미지 뷰 (Card) 스타일 - 일반 재고
    =================================================================== */
@@ -877,6 +906,21 @@
   text-align: center;
   border: 1px solid #dee2e6;
   box-sizing: border-box;
+}
+
+/* 로케이션 배지 스타일 - 대시보드 보라색 계열 */
+.cust0060-location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #7c3aed;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 /* 이미지 오버레이 (확대 버튼) */
@@ -1600,6 +1644,10 @@
     width: 14px;
     height: 14px;
   }
+
+  .cust0060-program-header {
+    margin-top: 4px;
+  }    
 
   .cust0060-program-header h1 {
     font-size: 1rem;
