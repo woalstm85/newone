@@ -803,15 +803,17 @@ function CUST0010() {
       </div>
 
       {/* 검색 영역 */}
-      <div className="cust0010-search-section">
+      <div 
+        className="cust0010-search-section"
+        ref={searchToggleRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {/* 모바일 검색 토글 버튼 */}
         <div
-          ref={searchToggleRef}
           className="cust0010-mobile-search-toggle"
           onClick={toggleSearchArea}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
         >
           <span>검색 옵션</span>
           {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
