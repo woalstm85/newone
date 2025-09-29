@@ -5,7 +5,7 @@ import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
 import { useMenu } from '../../context/MenuContext';
 import { useAuth } from '../../context/AuthContext';
-import './CUST0010.css';
+import './CUST0060.css';
 import MySpinner from '../common/MySpinner';
 
 function CUST0060() {
@@ -256,8 +256,8 @@ function CUST0060() {
 
   // 리스트 뷰 렌더링
   const renderListView = () => (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
+    <div className="cust0060-table-container">
+      <table className="cust0060-table">
         <thead>
           <tr>
             <th style={{ width: '80px' }}>이미지</th>
@@ -277,18 +277,18 @@ function CUST0060() {
         <tbody>
           {currentItems.length > 0 ? currentItems.map((row, index) => (
             <tr key={`${row.hisId}-${index}`} onClick={() => handleRowClick(row)}>
-              <td className="cust0010-center">
-                <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <td className="cust0060-center">
+                <div className="cust0060-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   {row.filePath || row.thFilePath ? (
-                    <div className="cust0010-table-image-container">
+                    <div className="cust0060-table-image-container">
                       <img
                         src={row.filePath || row.thFilePath}
                         alt={row.itemNm}
-                        className="cust0010-table-image-item"
+                        className="cust0060-table-image-item"
                       />
-                      <div className="cust0010-table-image-overlay">
+                      <div className="cust0060-table-image-overlay">
                         <button
-                          className="cust0010-table-overlay-btn"
+                          className="cust0060-table-overlay-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleImageClick(row.filePath || row.thFilePath, row.itemNm, row.itemCd);
@@ -299,38 +299,38 @@ function CUST0060() {
                       </div>
                     </div>
                   ) : (
-                    <div className="cust0010-table-no-image">
+                    <div className="cust0060-table-no-image">
                       <CiImageOff size={20} color="#ccc" />
                     </div>
                   )}
                 </div>
               </td>
-              <td className="cust0010-center">{formatDate(row.transDate)}</td>
-              <td className="cust0010-center">{row.transTypeNm}</td>
-              <td className="cust0010-center">
+              <td className="cust0060-center">{formatDate(row.transDate)}</td>
+              <td className="cust0060-center">{row.transTypeNm}</td>
+              <td className="cust0060-center">
                 <span className={`badge ${getInOutBadgeClass(row.inOutDiv)}`}>
                   {row.inOutDiv === '입고' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                   {row.inOutDiv}
                 </span>
               </td>
-              <td className="cust0010-left">{row.itemNm}</td>
-              <td className="cust0010-center">{row.optValNm || '-'}</td>
-              <td className="cust0010-right">{formatAmount(row.qty)}</td>
-              <td className="cust0010-right">{formatAmount(row.amount)}</td>
-              <td className="cust0010-center">{row.whNm || '-'}</td>
-              <td className="cust0010-center">
+              <td className="cust0060-left">{row.itemNm}</td>
+              <td className="cust0060-center">{row.optValNm || '-'}</td>
+              <td className="cust0060-right">{formatAmount(row.qty)}</td>
+              <td className="cust0060-right">{formatAmount(row.amount)}</td>
+              <td className="cust0060-center">{row.whNm || '-'}</td>
+              <td className="cust0060-center">
                 {row.locCd &&
-                  <span className="cust0010-location-badge">
+                  <span className="cust0060-location-badge">
                     📍 {row.locCd}
                   </span>
 }
               </td>              
-              <td className="cust0010-center">{row.userNm}</td>
-              <td className="cust0010-left">{row.remark || '-'}</td>
+              <td className="cust0060-center">{row.userNm}</td>
+              <td className="cust0060-left">{row.remark || '-'}</td>
             </tr>
           )) : (
             <tr>
-              <td colSpan={12} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+              <td colSpan={12} className="cust0060-center" style={{ padding: '40px', color: '#666' }}>
                 데이터가 없습니다.
               </td>
             </tr>
@@ -341,21 +341,21 @@ function CUST0060() {
   );
 
   return (
-    <div className="cust0010-container">
+    <div className="cust0060-container">
       {/* 프로그램 헤더 */}
-      <div className="cust0010-program-header">
-        <div className="cust0010-header-left">
+      <div className="cust0060-program-header">
+        <div className="cust0060-header-left">
           <Package className="w-6 h-6" />
           <h1>{currentMenuTitle || '품목 입출고현황'}</h1>
         </div>
       </div>
 
       {/* 검색 영역 */}
-      <div className="cust0010-search-section">
+      <div className="cust0060-search-section">
         {/* 모바일 검색 토글 버튼 */}
         <div
           ref={searchToggleRef}
-          className="cust0010-mobile-search-toggle"
+          className="cust0060-mobile-search-toggle"
           onClick={toggleSearchArea}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
@@ -365,9 +365,9 @@ function CUST0060() {
           {isSearchVisible ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
 
-        <div className={`cust0010-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
-          <div className="cust0010-search-row">
-            <div className="cust0010-search-field">
+        <div className={`cust0060-search-container ${isSearchVisible ? 'visible' : 'hidden'}`}>
+          <div className="cust0060-search-row">
+            <div className="cust0060-search-field">
               <label>조회월</label>
               <input
                 type="month"
@@ -379,7 +379,7 @@ function CUST0060() {
               />
             </div>
 
-            <div className="cust0010-search-field">
+            <div className="cust0060-search-field">
               <label>품목명</label>
               <input
                 type="text"
@@ -390,12 +390,12 @@ function CUST0060() {
               />
             </div>
 
-            <div className="cust0010-search-buttons">
-              <button className="cust0010-search-btn" onClick={handleSearch}>
+            <div className="cust0060-search-buttons">
+              <button className="cust0060-search-btn" onClick={handleSearch}>
                 <Search size={16} />
                 검색
               </button>
-              <button className="cust0010-reset-btn" onClick={handleReset}>
+              <button className="cust0060-reset-btn" onClick={handleReset}>
                 <RotateCcw size={16} />
                 초기화
               </button>
@@ -405,11 +405,11 @@ function CUST0060() {
       </div>
 
       {/* 페이지네이션 정보 및 설정 */}
-      <div className="cust0010-pagination-info">
-        <div className="cust0010-data-info">
+      <div className="cust0060-pagination-info">
+        <div className="cust0060-data-info">
           전체 {gridData.length.toLocaleString()}건 중 {gridData.length > 0 ? startIndex.toLocaleString() : 0}-{endIndex.toLocaleString()}건 표시
         </div>
-        <div className="cust0010-page-size-selector">
+        <div className="cust0060-page-size-selector">
           <label>페이지당 표시:</label>
           <select
             value={itemsPerPage}
@@ -425,17 +425,17 @@ function CUST0060() {
       </div>
 
       {/* 콘텐츠 영역 */}
-      <div className="cust0010-grid-container">
-        <div className="cust0010-grid-wrapper">
+      <div className="cust0060-grid-container">
+        <div className="cust0060-grid-wrapper">
           {renderListView()}
         </div>
       </div>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (
-        <div className="cust0010-pagination">
+        <div className="cust0060-pagination">
           <button
-            className="cust0010-page-btn"
+            className="cust0060-page-btn"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
@@ -446,7 +446,7 @@ function CUST0060() {
           {getPageNumbers().map(page => (
             <button
               key={page}
-              className={`cust0010-page-number ${currentPage === page ? 'active' : ''}`}
+              className={`cust0060-page-number ${currentPage === page ? 'active' : ''}`}
               onClick={() => handlePageChange(page)}
             >
               {page}
@@ -454,7 +454,7 @@ function CUST0060() {
           ))}
 
           <button
-            className="cust0010-page-btn"
+            className="cust0060-page-btn"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

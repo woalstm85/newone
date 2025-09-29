@@ -561,13 +561,15 @@ function CUST0020() {
     ));
 
     return (
-      <div className="cust0020-inventory-image-grid">
-        {items.length > 0 ? items : (
-          <div className="cust0020-no-data">
-            <CiImageOff size={48} color="#ccc" />
-            <p>데이터가 없습니다.</p>
-          </div>
-        )}
+      <div className="cust0020-image-view-container">
+        <div className="cust0020-inventory-image-grid">
+          {items.length > 0 ? items : (
+            <div className="cust0020-no-data">
+              <CiImageOff size={48} color="#ccc" />
+              <p>데이터가 없습니다.</p>
+            </div>
+          )}
+        </div>
       </div>
     );
   };

@@ -1,89 +1,9 @@
-/* 모바일 수정용 강제 클래스 */
-.product-info-option-mobile-fix {
-  margin: 16px 0 !important;
-  padding: 12px 16px !important;
-  background: #f8f9fa !important;
-  border-radius: 8px !important;
-  border: 1px solid #e9ecef !important;
-}
-
-.product-info-option-row-mobile {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  flex-direction: row !important;
-  width: 100% !important;
-}
-
-/* 옵션값 선택 */
-.product-info-option {
-  margin: 16px 0;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.product-info-option-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  flex-direction: row !important;
-}
-
-.product-info-option-label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 14px;
-  min-width: 50px;
-  flex-shrink: 0;
-}
-
-.product-info-option-select {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  background-color: white;
-  color: #495057;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.product-info-option-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.product-info-option-select:hover {
-  border-color: #adb5bd;
-}
-
-.product-info-option-loading {
-  flex: 1;
-  padding: 8px 12px;
-  color: #6c757d;
-  font-style: italic;
-  text-align: center;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-}
-
-/* 옵션이 없을 때 */
-.product-info-option-none {
-  padding: 10px 12px;
-  color: #6c757d;
-  font-style: italic;
-  text-align: center;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-}
-
 /* ProductInfoModal.css */
+
+/* ===============================================
+   데스크톱 (기존 스타일 유지)
+=============================================== */
+
 .product-info-modal-overlay {
   position: fixed;
   top: 0;
@@ -119,6 +39,7 @@
   padding: 20px 24px;
   background: #5a9de8; /* 더 연한 파란색으로 변경 */
   border-bottom: 1px solid #e3f2fd; /* 더 연한 파란색 테두리로 변경 */
+  flex-shrink: 0;
 }
 
 .product-info-modal-header h2 {
@@ -147,10 +68,13 @@
   color: white;
 }
 
+/* 데스크톱 컨텐츠 영역 */
 .product-info-modal-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  flex-direction: row; /* 데스크톱 기본: 가로 배치 */
+  min-height: 0;
 }
 
 /* 이미지 섹션 */
@@ -161,6 +85,7 @@
   justify-content: center;
   padding: 24px;
   background: #f8f9fa;
+  min-height: 300px;
 }
 
 .product-info-image-container {
@@ -230,7 +155,6 @@
   gap: 12px;
   background: #f8f9fa;
   color: #adb5bd;
-  /* 점선 제거 */
   border: none;
 }
 
@@ -293,6 +217,73 @@
   font-weight: 700;
   font-size: 16px;
 }
+
+/* 옵션 선택 */
+.product-info-option {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-direction: row !important;
+}
+
+.product-info-option-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.product-info-option-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background-color: white;
+  color: #495057;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.product-info-option-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.product-info-option-select:hover {
+  border-color: #adb5bd;
+}
+
+.product-info-option-loading {
+  flex: 1;
+  padding: 8px 12px;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+/* 옵션이 없을 때 */
+.product-info-option-none {
+  padding: 10px 12px;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
 
 /* 수량 선택 */
 .product-info-quantity {
@@ -395,6 +386,7 @@
   padding: 20px 24px;
   background: #f8f9fa;
   border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
 }
 
 .product-info-action-btn {
@@ -455,68 +447,166 @@
   }
 }
 
-/* 모바일 반응형 */
+@keyframes productModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===============================================
+   모바일 반응형 (768px 이하) - X 버튼 문제 해결 포함
+=============================================== */
 @media (max-width: 768px) {
   .product-info-modal-overlay {
-    padding: 0;
+    padding: 0 16px;
     align-items: flex-start;
+    background-color: rgba(0, 0, 0, 0.6); 
   }
   
   .product-info-modal-container {
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    max-height: none;
-    border-radius: 0;
-    /* 모바일 브라우저 UI 고려 */
-    padding-top: env(safe-area-inset-top, 0);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh; 
+    border-radius: 12px; 
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-top: 20px; 
+    height: auto;
+    animation: productModalSlideUp 0.3s ease-out; 
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
   }
 
-  .product-info-modal-content {
-    flex-direction: column;
-    height: calc(100vh - 100px); /* 헤더와 버튼 영역 제외, 더 타이트하게 */
+  .product-info-modal-header {
+    background: #5a9de8;
+    z-index: 10001; /* ✅ z-index를 높여서 항상 최상위에 위치하도록 보장 */
+    position: sticky; /* ✅ 스크롤 되어도 헤더가 고정되도록 sticky 추가 */
+    top: 0;
   }
 
-  .product-info-image-section {
-    flex: none;
-    min-height: 120px; /* 160px에서 120px로 줄임 */
-    max-height: 20vh; /* 25vh에서 20vh로 줄임 */
-    padding: 8px; /* 12px에서 8px로 줄임 */
+  .product-info-modal-close-btn {
+    width: 36px;
+    height: 36px;
+    z-index: 10002; /* ✅ 버튼 z-index를 헤더보다 더 높게 설정 */
   }
 
-  .product-info-image-container {
-    max-width: 100px; /* 150px에서 100px로 대폭 줄임 */
-    height: 100px; /* 150px에서 100px로 대폭 줄임 */
-  }
-  
-  .product-info-details-section {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .product-info-details {
-    padding: 16px;
-    height: 100%;
+  /* 모바일 스크롤 가능한 콘텐츠 영역 */
+  .product-info-modal-content.mobile-scrollable-content {
+    flex-direction: column; 
     overflow-y: auto;
-    padding-bottom: 4px;
+    max-height: calc(85vh - 100px); /* 헤더(sticky)로 인해 높이 재조정 */
+    height: auto;
+    padding: 0;
+    min-height: 0;
   }
 
-  .product-info-title {
-    font-size: 18px;
-    margin-bottom: 16px;
-    line-height: 1.3;
+  /* --- 상단 영역: 이미지 + 기본정보 --- */
+  .product-info-mobile-top-section {
+    display: flex;
+    flex-direction: row; /* 가로 배치 */
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9ecef;
+    flex-shrink: 0;
+  }
+
+  /* 이미지 섹션 */
+  .product-info-image-section-mobile {
+    flex: none;
+    width: 120px; 
+    min-height: 120px;
+    padding: 0;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-info-image-container-mobile {
+    max-width: 120px;
+    width: 120px;
+    height: 120px;
+    border-radius: 8px; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
-  /* 모바일에서 옵션 영역 최적화 */
-  .product-info-option {
-    margin: 12px 0;
-    padding: 10px 12px;
-  }
-  
-  .product-info-option-row {
+  .product-info-no-image-mobile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
+    background: #f8f9fa;
+    color: #adb5bd;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  /* 기본 정보 섹션 */
+  .product-info-basic-section-mobile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-top: 4px;
+  }
+
+  .product-info-title-mobile {
+    font-size: 16px; 
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.3;
+    margin: 0 0 12px 0;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  
+  .product-info-basic {
+    margin-bottom: 0;
+  }
+
+  .product-info-row {
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: none; /* 모바일 상단에서는 행 구분선 제거 */
+  }
+  
+  .product-info-row:first-child {
+    padding-top: 0;
+  }
+
+  .product-info-label {
+    min-width: 60px;
+  }
+
+  .product-info-value.price {
+    font-size: 15px; 
+  }
+  
+  /* --- 하단 영역: 옵션/수량/총금액 --- */
+  .product-info-mobile-bottom-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; 
+    padding: 0 20px 16px 20px; /* 상단 패딩 제거, 하단만 유지 */
+    flex-shrink: 0;
+  }
+  
+  /* 옵션 선택 */
+  .product-info-option {
+    margin: 0; 
+    padding: 10px 12px;
   }
   
   .product-info-option-label {
@@ -525,95 +615,125 @@
   }
   
   .product-info-option-select {
-    padding: 6px 10px;
+    padding: 8px 10px; 
     font-size: 13px;
   }
   
-  /* 수량 선택 최적화 */
+  .product-info-option-none-mobile {
+    padding: 10px 12px;
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  /* 수량 선택 */
   .product-info-quantity {
-    margin-bottom: 16px;
-    padding: 12px;
+    margin-bottom: 0; 
+    padding: 10px 12px;
     gap: 8px;
-  }
-  
-  .product-info-quantity-label {
     font-size: 13px;
   }
   
-  /* 총 금액 한 줄로 최적화 */
+  /* 총 금액 */
   .product-info-total {
     padding: 10px 16px;
-    margin-bottom: 4px;
+    margin-bottom: 0; 
     border-radius: 6px;
   }
   
   .product-info-total-label {
-    font-size: 14px;
+    font-size: 15px; 
   }
   
   .product-info-total-price {
-    font-size: 18px;
+    font-size: 18px; 
   }
 
+  /* 모바일에서 데스크톱 레이아웃 숨김 처리 */
+  .product-info-image-section,
+  .product-info-details-section,
+  .product-info-details {
+    display: none;
+  }
+
+  /* 액션 버튼 */
   .product-info-modal-actions {
-    padding: 8px 16px;
-    flex-shrink: 0;
+    padding: 16px 20px; /* QuoteModal과 유사하게 조정 */
   }
-
+  
   .product-info-action-btn {
-    padding: 12px 16px;
-    font-size: 15px;
+    padding: 14px 20px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
+  /* 헤더 */
   .product-info-modal-header {
     padding: 12px 16px;
   }
 
   .product-info-modal-header h2 {
     font-size: 16px;
-    color: white; /* 모바일에서도 흰색 유지 */
   }
   
-  .product-info-modal-close-btn {
-    width: 32px;
-    height: 32px;
+  /* 상단 영역 */
+  .product-info-mobile-top-section {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .product-info-image-section-mobile {
+    width: 90px;
+    min-height: 90px;
   }
   
-  .product-info-modal-content {
-    height: calc(100vh - 80px); /* 더 작은 헤더 */
+  .product-info-image-container-mobile {
+    max-width: 90px;
+    width: 90px;
+    height: 90px;
   }
 
-  .product-info-image-section {
-    padding: 6px; /* 8px에서 6px로 줄임 */
-    min-height: 90px; /* 130px에서 90px로 대폭 줄임 */
-    max-height: 15vh; /* 20vh에서 15vh로 줄임 */
-  }
-
-  .product-info-image-container {
-    max-width: 80px; /* 120px에서 80px로 대폭 줄임 */
-    height: 80px; /* 120px에서 80px로 대폭 줄임 */
-  }
-
-  .product-info-details {
-    padding: 12px;
-    padding-bottom: 2px;
-  }
-
-  .product-info-title {
-    font-size: 16px;
-    margin-bottom: 12px;
+  .product-info-title-mobile {
+    font-size: 15px;
   }
   
-  /* 옵션 영역 더 작게 */
-  .product-info-option {
-    margin: 8px 0;
+  .product-info-row {
+    padding: 4px 0;
+    font-size: 12px;
+  }
+
+  .product-info-label {
+    min-width: 50px;
+  }
+  
+  .product-info-value.price {
+    font-size: 14px;
+  }
+  
+  /* 하단 영역 */
+  .product-info-mobile-bottom-section {
+    padding: 0 16px 12px 16px;
+    gap: 6px;
+  }
+
+  .product-info-modal-overlay {
+    padding: 0 12px; /* 👈 480px 이하에서는 12px로 살짝 줄임 */
+  } 
+
+  /* 옵션/수량 */
+  .product-info-option,
+  .product-info-quantity {
     padding: 8px 10px;
   }
   
-  .product-info-option-label {
-    min-width: 40px;
+  .product-info-option-label,
+  .product-info-quantity-label {
     font-size: 12px;
   }
   
@@ -622,36 +742,30 @@
     font-size: 12px;
   }
   
-  /* 수량 선택 더 작게 */
-  .product-info-quantity {
-    padding: 10px;
-    margin-bottom: 12px;
+  .product-info-quantity-input {
+    width: 50px;
   }
-  
-  .product-info-quantity-label {
-    font-size: 12px;
-  }
-  
-  /* 총 금액 더 작게 */
+
+  /* 총 금액 */
   .product-info-total {
     padding: 8px 12px;
-    margin-bottom: 2px;
   }
   
   .product-info-total-label {
-    font-size: 13px;
+    font-size: 14px;
   }
   
   .product-info-total-price {
-    font-size: 16px;
+    font-size: 17px;
   }
 
+  /* 액션 버튼 */
   .product-info-modal-actions {
-    padding: 6px 12px;
+    padding: 12px 16px;
   }
   
   .product-info-action-btn {
-    padding: 10px 12px;
-    font-size: 14px;
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }

@@ -28,8 +28,10 @@ const CUST0040 = () => {
   const [isQuoteDetailModalOpen, setIsQuoteDetailModalOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
 
-  // 검색 영역 표시 상태 추가
-  const [isSearchVisible, setIsSearchVisible] = useState(true);
+  // 검색 영역 표시 상태 추가 - 모바일에서는 기본 닫혀있도록
+  const [isSearchVisible, setIsSearchVisible] = useState(() => {
+    return window.innerWidth > 768; // 768px 초과시 열림, 이하는 닫힘
+  });
   
   // 스와이프 제스처용 ref와 상태 추가
   const searchToggleRef = useRef(null);
