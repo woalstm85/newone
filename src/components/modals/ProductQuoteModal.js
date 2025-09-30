@@ -1,3 +1,16 @@
+/**
+ * ProductQuoteModal.js
+ * 제품 견적 의뢰 입력 모달 컴포넌트
+ * 
+ * 주요 기능:
+ * - 단일/다중 제품 견적 의뢰 지원
+ * - 제품 정보 및 옵션 표시
+ * - 수량 조절 및 총액 계산
+ * - 견적 요청 정보 입력 폼
+ * - 유효성 검증
+ * - 반응형 디자인 (모바일/데스크톱)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { X, Calculator, Plus, Minus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -6,8 +19,20 @@ import './ProductQuoteModal.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 
+/**
+ * ProductQuoteModal 컴포넌트
+ * 
+ * @param {Object} product - 단일 제품 정보
+ * @param {Array} products - 여러 제품 목록
+ * @param {Array} selectedProducts - 선택된 제품 목록 (장바구니에서)
+ * @param {boolean} isOpen - 모달 열림/닫힘 상태
+ * @param {Function} onClose - 모달 닫기 콜백
+ * @param {Function} onRemoveProduct - 제품 삭제 콜백
+ * @param {Function} onUpdateQuantity - 수량 업데이트 콜백
+ */
 const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClose, onRemoveProduct, onUpdateQuantity }) => {
 
+  // 상태 관리
   const [quantity, setQuantity] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -17,27 +42,18 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
   const [successMessage, setSuccessMessage] = useState('');
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
-  
-  // 모바일에서 제품 목록 표시/숨김 상태
   const [showProductsOnMobile, setShowProductsOnMobile] = useState(false);
-  
-  // 모바일 제품 목록 표시 텍스트 생성
-  const getMobileProductsText = () => {
-    if (currentProducts.length === 0) return '상품 없음';
-    if (currentProducts.length === 1) return currentProducts[0].itemNm;
-    
-    const firstProduct = currentProducts[0].itemNm;
-    const otherCount = currentProducts.length - 1;
-    return `${firstProduct} 외 ${otherCount}개`;
-  };
   
   const { globalState } = useAuth();
   
-  // 단일 상품인지 여러 상품인지 판별
+  // 제품 타입 판별
   const isMultipleProducts = products && products.length > 0;
   const hasSelectedProducts = selectedProducts && selectedProducts.length > 0;
   
-  // 우선순위: selectedProducts > products > product
+  /**
+   * 현재 제품 목록 결정
+   * 우선순위: selectedProducts > products > product
+   */
   let currentProducts = [];
   if (hasSelectedProducts) {
     currentProducts = selectedProducts;
@@ -47,18 +63,31 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     currentProducts = [product];
   }
   
-  
   const isSingleProduct = !isMultipleProducts && !hasSelectedProducts && product;
+  
+  /**
+   * 모바일 제품 목록 표시 텍스트 생성
+   * 
+   * @returns {string} 표시할 텍스트
+   */
+  const getMobileProductsText = () => {
+    if (currentProducts.length === 0) return '상품 없음';
+    if (currentProducts.length === 1) return currentProducts[0].itemNm;
+    
+    const firstProduct = currentProducts[0].itemNm;
+    const otherCount = currentProducts.length - 1;
+    return `${firstProduct} 외 ${otherCount}개`;
+  };
   
   // 견적 의뢰 폼 상태
   const [quoteForm, setQuoteForm] = useState({
-    custNm: '',           // 업체명
-    managerName: '',      // 담당자명
-    contact: '',          // 연락처
-    email: '',            // 이메일
-    address: '',          // 주소
-    requestContent: '',   // 요청사항
-    deliveryDate: ''      // 희망 납기일
+    custNm: '',
+    managerName: '',
+    contact: '',
+    email: '',
+    address: '',
+    requestContent: '',
+    deliveryDate: ''
   });
   
   // 유효성 검증 오류 상태
@@ -67,7 +96,9 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
   // 로그인 상태 확인
   const isLoggedIn = !!globalState.G_USER_ID;
 
-  // 모달이 열릴 때마다 상태 초기화 및 ESC 키 이벤트 추가
+  /**
+   * 모달이 열릴 때마다 상태 초기화 및 ESC 키 이벤트 추가
+   */
   useEffect(() => {
     if (isOpen && currentProducts.length > 0) {
       setQuantity(1);
@@ -116,14 +147,17 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
       
       document.addEventListener('keydown', handleEscKey);
       
-      // 모달이 닫힐 때 이벤트 리스너 제거
       return () => {
         document.removeEventListener('keydown', handleEscKey);
       };
     }
   }, [isOpen, currentProducts, isLoggedIn, globalState, isSingleProduct, product]);
 
-  // 옵션값 로드 함수
+  /**
+   * 옵션값 로드 함수
+   * 
+   * @param {string} optCd - 옵션 코드
+   */
   const loadOptionValues = async (optCd) => {
     try {
       setLoadingOptions(true);
@@ -131,7 +165,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
       
       if (options && Array.isArray(options)) {
         setOptionValues(options);
-        // 첫 번째 옵션을 기본값으로 선택
         if (options.length > 0) {
           setSelectedOptionValue(options[0].optValCd);
         }
@@ -149,49 +182,65 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
   // 모달이 열려있지 않으면 렌더링하지 않음
   if (!isOpen || currentProducts.length === 0) return null;
 
+  /**
+   * 수량 변경 핸들러
+   * 
+   * @param {number} delta - 변경할 수량
+   * @param {string} productItemCd - 제품 코드
+   */
   const handleQuantityChange = (delta, productItemCd = null) => {
     if (isSingleProduct) {
-      // 단일 상품 모드
       const newQuantity = Math.max(1, quantity + delta);
       setQuantity(newQuantity);
     } else {
-      // 여러 상품 모드 - Cart에서 호출된 함수 사용
       if (onUpdateQuantity && productItemCd) {
         onUpdateQuantity(productItemCd, delta);
       }
     }
   };
 
+  /**
+   * 총액 계산 함수
+   * 
+   * @param {Object} productItem - 제품 아이템
+   * @returns {string} 천단위 구분된 총액 문자열
+   */
   const calculateTotal = (productItem = null) => {
     if (isSingleProduct) {
-      // 단일 상품 모드
       const price = product.disPrice || product.salePrice || 0;
       return (price * quantity).toLocaleString();
     } else if (productItem) {
-      // 여러 상품 모드 - 개별 상품 총액
       return (productItem.price * productItem.quantity).toLocaleString();
     }
     return '0';
   };
   
+  /**
+   * 전체 합계 계산 함수
+   * 
+   * @returns {string} 천단위 구분된 전체 합계 문자열
+   */
   const calculateGrandTotal = () => {
     if (isSingleProduct) {
       return calculateTotal();
     } else {
-      // 여러 상품의 총 합계
       const total = currentProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       return total.toLocaleString();
     }
   };
 
-  // 폼 입력 핸들러
+  /**
+   * 폼 입력 핸들러
+   * 
+   * @param {string} field - 필드명
+   * @param {string} value - 입력값
+   */
   const handleFormChange = (field, value) => {
     setQuoteForm(prev => ({
       ...prev,
       [field]: value
     }));
     
-    // 해당 필드의 에러 상태 초기화
     if (validationErrors[field]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -200,12 +249,15 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     }
   };
 
-  // 유효성 검증
+  /**
+   * 유효성 검증 함수
+   * 
+   * @returns {boolean} 유효성 검증 통과 여부
+   */
   const validateForm = () => {
     const errors = {};
     let firstErrorField = null;
 
-    // 필수 항목 검증
     if (!quoteForm.custNm.trim()) {
       errors.custNm = true;
       if (!firstErrorField) firstErrorField = 'custNm';
@@ -222,7 +274,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     setValidationErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      // 첫 번째 에러 필드에 따른 메시지
       const errorMessages = {
         custNm: '업체명을 입력해주세요.',
         managerName: '담당자명을 입력해주세요.',
@@ -237,33 +288,37 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     return true;
   };
 
-  // 날짜 포맷 함수
+  /**
+   * 날짜 포맷 함수
+   * 
+   * @param {string} dateString - 날짜 문자열
+   * @returns {string|null} 포맷된 날짜 문자열
+   */
   const formatDate = (dateString) => {
     if (!dateString) return null;
     return dateString.replace(/-/g, '');
   };
 
+  /**
+   * 견적 의뢰 제출 핸들러
+   */
   const handleQuoteRequest = async () => {
-    // 로그인 체크
     if (!isLoggedIn) {
       setShowLoginModal(true);
       return;
     }
 
-    // 단일 상품인 경우 옵션값 선택 체크
     if (isSingleProduct && optionValues.length > 0 && !selectedOptionValue) {
       setValidationMessage('옵션을 선택해주세요.');
       setShowValidationModal(true);
       return;
     }
 
-    // 유효성 검증
     if (!validateForm()) {
       return;
     }
 
     try {
-      // API 형식에 맞게 데이터 변환
       const quoteData = {
         reqDate: new Date().toISOString().split('T')[0].replace(/-/g, ''),
         custCd: globalState.G_CUST_ID || globalState.G_USER_ID,
@@ -275,7 +330,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
         reqDesc: quoteForm.requestContent,
         mrsQtRequestSubs: currentProducts.map(item => {
           if (isSingleProduct) {
-            // 단일 상품 처리
             const price = product.disPrice || product.salePrice || 0;
             return {
               itemCd: product.itemCd,
@@ -287,7 +341,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
               remark: ''
             };
           } else {
-            // 여러 상품 처리 (장바구니에서 온 데이터)
             return {
               itemCd: item.itemCd,
               optCd: item.optCd || '',
@@ -301,12 +354,13 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
         })
       };
       
-
-      // 성공 모달 표시
+      // API 호출하여 견적 의뢰 전송
+      await quoteAPI.createQuoteRequest(quoteData);
+      
       if (isSingleProduct) {
         setSuccessMessage('견적 의뢰가 성공적으로 전송되었습니다! 견적 의뢰 내역에서 확인하실 수 있습니다.');
       } else {
-        setSuccessMessage(`선택된 상품들의 견적 의뢰가 성공적으로 전송되었습니다! (총 ${currentProducts.length}개 상품)`);
+        setSuccessMessage(`선택된 상품들의 견적 의뢰가 성공적으로 전송되었습니다.\n(총 ${currentProducts.length}개 상품)`);
       }
       setShowSuccessModal(true);
       
@@ -317,27 +371,44 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     }
   };
 
-  const handleClose = (e) => {
-    // 이벤트 전파 중지
+  /**
+   * 모달 닫기 핸들러
+   * 
+   * @param {Event} e - 이벤트 객체
+   * @param {boolean} isSuccess - 성공 여부 (장바구니 업데이트 필요 여부)
+   */
+  const handleClose = (e, isSuccess = false) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
-    // 모달 닫을 때 상태 초기화
+    // 견적 의뢰 성공 시 장바구니에서 상품 제거
+    if (isSuccess && !isSingleProduct) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = cart.filter(cartItem => 
+        !currentProducts.some(reqItem => reqItem.itemCd === cartItem.itemCd)
+      );
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      window.dispatchEvent(new Event('cartUpdated'));
+    }
+    
     setQuantity(1);
     setShowLoginModal(false);
     setShowSuccessModal(false);
     setSuccessMessage('');
     setValidationErrors({});
     
-    // 부모 컴포넌트의 onClose 호출
     if (onClose) {
       onClose();
     }
   };
 
-  // 백드롭 클릭 시 모달 닫기
+  /**
+   * 백드롭 클릭 시 모달 닫기
+   * 
+   * @param {Event} e - 클릭 이벤트
+   */
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       e.preventDefault();
@@ -346,7 +417,12 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     }
   };
 
-  // 개선된 날짜 포맷팅 함수
+  /**
+   * 출하 가능일 포맷팅 함수
+   * 
+   * @param {string} dateString - 날짜 문자열
+   * @returns {string} 포맷된 날짜 문자열
+   */
   const formatShipDate = (dateString) => {
     if (!dateString) return '';
     
@@ -419,7 +495,7 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
           </div>
 
           <div className={`product-quote-modal-body ${showProductsOnMobile ? 'mobile-products-visible' : ''}`}>
-            {/* 왼쪽: 상품 정보 */}
+            {/* 왼쪽: 상품 정보 섹션 */}
             <div className="product-quote-products-section">
               <div className="product-quote-products-header">
                 <h4>선택된 상품 ({currentProducts.length}개)</h4>
@@ -428,6 +504,7 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
                 </div>
               </div>
               
+              {/* 제품 목록 */}
               <div className="product-quote-products-list">
                 {currentProducts.map((item, index) => {
                   const currentProduct = isSingleProduct ? product : item;
@@ -467,7 +544,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
                                 <span className="product-quote-detail-value">{formatShipDate(currentProduct.shipAvDate)}</span>
                               </p>
                             )}
-                            {/* 여러 상품 모드에서 옵션 표시 */}
                             {!isSingleProduct && item.optValNm && (
                               <p className="product-quote-item-option">
                                 <span className="product-quote-detail-label">옵션:</span>
@@ -577,7 +653,7 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
               )}
             </div>
 
-            {/* 오른쪽: 견적 의뢰 폼 */}
+            {/* 오른쪽: 견적 의뢰 폼 섹션 */}
             <div className="product-quote-form-section">
               <h4>견적 요청 정보</h4>
               <div className="product-quote-form">
@@ -695,7 +771,7 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
         message={successMessage}
         onConfirm={() => {
           setShowSuccessModal(false);
-          handleClose();
+          handleClose(null, true); // 성공 플래그를 true로 전달
         }}
       />
       

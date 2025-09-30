@@ -27,7 +27,7 @@
  *   optCd: 옵션코드,
  *   optValCd: 옵션값코드,
  *   optValNm: 옵션값명,
- *   source: 출처 (surplus/event)
+ *   source: 출처 (surplus/event/general)
  * }
  */
 
@@ -63,9 +63,21 @@ const Cart = () => {
 
   /**
    * 컴포넌트 마운트 시 장바구니 데이터 로드
+   * 및 cartUpdated 이벤트 리스너 추가
    */
   useEffect(() => {
     loadCartItems();
+    
+    // 장바구니 업데이트 이벤트 리스너
+    const handleCartUpdate = () => {
+      loadCartItems();
+    };
+    
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
   }, []);
 
   /**
@@ -105,7 +117,6 @@ const Cart = () => {
     
     setCartItems(updatedItems);
     localStorage.setItem('cart', JSON.stringify(updatedItems));
-    // 장바구니 업데이트 이벤트 발생 (다른 컴포넌트에서 감지)
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
@@ -219,6 +230,58 @@ const Cart = () => {
   };
 
   /**
+   * source별로 상품 그룹화
+   * 
+   * @returns {Object} source별로 분류된 상품 목록
+   */
+  const getGroupedItems = () => {
+    const grouped = {
+      surplus: [],
+      event: [],
+      general: []
+    };
+
+    cartItems.forEach(item => {
+      if (item.source === 'surplus') {
+        grouped.surplus.push(item);
+      } else if (item.source === 'event') {
+        grouped.event.push(item);
+      } else {
+        grouped.general.push(item);
+      }
+    });
+
+    return grouped;
+  };
+
+  /**
+   * source 타이틀 및 아이콘 반환
+   * 
+   * @param {string} source - 출처 타입
+   * @returns {Object} {title, icon, className}
+   */
+  const getSourceInfo = (source) => {
+    const sourceMap = {
+      surplus: {
+        title: '잉여재고',
+        icon: '📦',
+        className: 'surplus'
+      },
+      event: {
+        title: '행사품목',
+        icon: '🎉',
+        className: 'event'
+      },
+      general: {
+        title: '일반상품',
+        icon: '🛍️',
+        className: 'general'
+      }
+    };
+    return sourceMap[source] || sourceMap.general;
+  };
+
+  /**
    * 견적 모달에서 상품 수량 업데이트 (델타 방식)
    * ProductQuoteModal의 콜백으로 사용
    * 
@@ -244,13 +307,11 @@ const Cart = () => {
    * 로그인 체크 및 선택 항목 확인 후 견적 모달 표시
    */
   const handleQuoteRequest = () => {
-    // 로그인 체크
     if (!isLoggedIn) {
       setShowLoginModal(true);
       return;
     }
 
-    // 선택된 항목이 있는지 확인
     const selectedItemsList = Object.keys(selectedItems).filter(itemCd => selectedItems[itemCd]);
     if (selectedItemsList.length === 0) {
       setSuccessMessage('견적 의뢰할 상품을 선택해주세요.');
@@ -270,7 +331,7 @@ const Cart = () => {
         <div className="empty-cart">
           <ShoppingCart size={48} className="empty-icon" />
           <h3>장바구니가 비어있습니다</h3>
-          <p>잉여재고나 행사품목에서 상품을 추가해보세요.</p>
+          <p>잉여재고 / 행사품목 / 제품정보에서 상품을 추가해보세요.</p>
         </div>
       </div>
     );
@@ -305,10 +366,19 @@ const Cart = () => {
           <button 
             className="selected-delete-btn"
             onClick={() => {
-              const selectedItemCodes = cartItems
-                .filter(item => selectedItems[item.itemCd])
-                .map(item => item.itemCd);
-              selectedItemCodes.forEach(itemCd => handleRemoveItem(itemCd));
+              // 선택되지 않은 상품들만 남김
+              const updatedItems = cartItems.filter(item => !selectedItems[item.itemCd]);
+              
+              setCartItems(updatedItems);
+              localStorage.setItem('cart', JSON.stringify(updatedItems));
+              window.dispatchEvent(new Event('cartUpdated'));
+              
+              // 선택 상태 초기화
+              const newSelectedState = {};
+              updatedItems.forEach(item => {
+                newSelectedState[item.itemCd] = true;
+              });
+              setSelectedItems(newSelectedState);
             }}
             disabled={getSelectedCount() === 0}
           >
@@ -319,165 +389,179 @@ const Cart = () => {
 
       {/* ========== 상품 목록 영역 ========== */}
       <div className="cart-items-section">
-        <div className="cart-items-list">
-          {cartItems.map(item => (
-            <div key={item.itemCd} className="cart-item-row">
-              {/* 데스크톱용 체크박스 */}
-              <div className="item-select-area">
-                <input
-                  type="checkbox"
-                  checked={selectedItems[item.itemCd] || false}
-                  onChange={() => handleSelectItem(item.itemCd)}
-                />
+        {Object.entries(getGroupedItems()).map(([source, items]) => {
+          if (items.length === 0) return null;
+          
+          const sourceInfo = getSourceInfo(source);
+          
+          return (
+            <div key={source} className={`cart-group cart-group-${sourceInfo.className}`}>
+              {/* 그룹 헤더 */}
+              <div className="cart-group-header">
+                <span className="cart-group-icon">{sourceInfo.icon}</span>
+                <h3 className="cart-group-title">{sourceInfo.title}</h3>
+                <span className="cart-group-count">({items.length}개)</span>
               </div>
-
-              {/* 데스크톱용 이미지 */}
-              <div className="item-image-area">
-                {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
-                  <ImageWithFallback
-                    src={item.filePath}
-                    alt={item.itemNm}
-                    width={120}
-                    height={120}
-                  />
-                ) : (
-                  <div className="item-image-placeholder">
-                    <ImageOff size={40} color="#adb5bd" strokeWidth={1.0} />
-                  </div>
-                )}
-              </div>
-
-              {/* 모바일용 체크박스와 이미지 (세로 배치) */}
-              <div className="item-checkbox-image-area">
-                <div className="item-select-area">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems[item.itemCd] || false}
-                    onChange={() => handleSelectItem(item.itemCd)}
-                  />
-                </div>
-
-                <div className="item-image-area">
-                  {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
-                    <ImageWithFallback
-                      src={item.filePath}
-                      alt={item.itemNm}
-                      width={70}
-                      height={70}
-                    />
-                  ) : (
-                    <div className="item-image-placeholder">
-                      <ImageOff size={30} color="#adb5bd" strokeWidth={1.0} />
+              
+              {/* 상품 목록 */}
+              <div className="cart-items-list">
+                {items.map(item => (
+                  <div key={item.itemCd} className="cart-item-row">
+                    {/* 데스크톱용 체크박스 */}
+                    <div className="item-select-area">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems[item.itemCd] || false}
+                        onChange={() => handleSelectItem(item.itemCd)}
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
 
-              {/* 상품 정보 영역 */}
-              <div className="item-info-area">
-                <div className="item-source-badge">
-                  {item.source === 'surplus' ? '잉여재고' : '행사품목'}
-                </div>
-                
-                <h3 className="item-title">{item.itemNm}</h3>
-                
-                <div className="item-details">
-                  <div className="item-detail-row">
-                    <span className="detail-label">코드:</span>
-                    <span className="detail-value code-value">{item.itemCd}</span>
-                  </div>
-                  
-                  {item.compNm && (
-                    <div className="item-detail-row">
-                      <span className="detail-label">업체:</span>
-                      <span className="detail-value company-value">{item.compNm}</span>
+                    {/* 데스크톱용 이미지 */}
+                    <div className="item-image-area">
+                      {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
+                        <ImageWithFallback
+                          src={item.filePath}
+                          alt={item.itemNm}
+                          width={120}
+                          height={120}
+                        />
+                      ) : (
+                        <div className="item-image-placeholder">
+                          <ImageOff size={40} color="#adb5bd" strokeWidth={1.0} />
+                        </div>
+                      )}
                     </div>
-                  )}
-                  
-                  {item.optValNm && (
-                    <div className="item-detail-row">
-                      <span className="detail-label">옵션:</span>
-                      <span className="detail-value option-value">{item.optValNm}</span>
+
+                    {/* 모바일용 체크박스와 이미지 */}
+                    <div className="item-checkbox-image-area">
+                      <div className="item-select-area">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems[item.itemCd] || false}
+                          onChange={() => handleSelectItem(item.itemCd)}
+                        />
+                      </div>
+
+                      <div className="item-image-area">
+                        {item.filePath && item.filePath !== 'null' && item.filePath !== '' ? (
+                          <ImageWithFallback
+                            src={item.filePath}
+                            alt={item.itemNm}
+                            width={70}
+                            height={70}
+                          />
+                        ) : (
+                          <div className="item-image-placeholder">
+                            <ImageOff size={30} color="#adb5bd" strokeWidth={1.0} />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  
-                  <div className="item-detail-row">
-                    <span className="detail-label">단가:</span>
-                    <span className="detail-value price-value">{item.price.toLocaleString()}원</span>
-                  </div>
-                </div>
-                
-                {/* 모바일용 수량과 합계 */}
-                <div className="mobile-quantity-total">
-                  <div className="mobile-quantity">
-                    <span className="mobile-label">수량:</span>
-                    <div className="mobile-quantity-controls">
+
+                    {/* 상품 정보 영역 */}
+                    <div className="item-info-area">
+                      <h3 className="item-title">{item.itemNm}</h3>
+                      
+                      <div className="item-details">
+                        <div className="item-detail-row">
+                          <span className="detail-label">코드:</span>
+                          <span className="detail-value code-value">{item.itemCd}</span>
+                        </div>
+                        
+                        {item.compNm && (
+                          <div className="item-detail-row">
+                            <span className="detail-label">업체:</span>
+                            <span className="detail-value company-value">{item.compNm}</span>
+                          </div>
+                        )}
+                        
+                        {item.optValNm && (
+                          <div className="item-detail-row">
+                            <span className="detail-label">옵션:</span>
+                            <span className="detail-value option-value">{item.optValNm}</span>
+                          </div>
+                        )}
+                        
+                        <div className="item-detail-row">
+                          <span className="detail-label">단가:</span>
+                          <span className="detail-value price-value">{item.price.toLocaleString()}원</span>
+                        </div>
+                      </div>
+                      
+                      {/* 모바일용 수량과 합계 */}
+                      <div className="mobile-quantity-total">
+                        <div className="mobile-quantity">
+                          <span className="mobile-label">수량:</span>
+                          <div className="mobile-quantity-controls">
+                            <button 
+                              onClick={() => handleQuantityChange(item.itemCd, -1)}
+                              className="mobile-quantity-btn"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="mobile-quantity-display">{item.quantity}</span>
+                            <button 
+                              onClick={() => handleQuantityChange(item.itemCd, 1)}
+                              className="mobile-quantity-btn"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="mobile-total">
+                          <span className="mobile-label">합계:</span>
+                          <span className="mobile-total-price">{item.totalAmount.toLocaleString()}원</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 데스크톱용 수량 조절 */}
+                    <div className="item-quantity-area">
+                      <span className="quantity-label">수량</span>
+                      <div className="quantity-controls">
+                        <button 
+                          onClick={() => handleQuantityChange(item.itemCd, -1)}
+                          className="quantity-btn minus"
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => handleQuantityInput(item.itemCd, e.target.value)}
+                          className="quantity-input"
+                          min="1"
+                        />
+                        <button 
+                          onClick={() => handleQuantityChange(item.itemCd, 1)}
+                          className="quantity-btn plus"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 데스크톱용 합계 */}
+                    <div className="item-total-area">
+                      <span className="total-label">합계</span>
+                      <div className="total-price">{item.totalAmount.toLocaleString()}원</div>
+                    </div>
+
+                    {/* 삭제 버튼 */}
+                    <div className="item-actions-area">
                       <button 
-                        onClick={() => handleQuantityChange(item.itemCd, -1)}
-                        className="mobile-quantity-btn"
+                        onClick={() => handleRemoveItem(item.itemCd)}
+                        className="remove-item-btn"
                       >
-                        <Minus size={14} />
-                      </button>
-                      <span className="mobile-quantity-display">{item.quantity}</span>
-                      <button 
-                        onClick={() => handleQuantityChange(item.itemCd, 1)}
-                        className="mobile-quantity-btn"
-                      >
-                        <Plus size={14} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
-                  <div className="mobile-total">
-                    <span className="mobile-label">합계:</span>
-                    <span className="mobile-total-price">{item.totalAmount.toLocaleString()}원</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 데스크톱용 수량 조절 */}
-              <div className="item-quantity-area">
-                <span className="quantity-label">수량</span>
-                <div className="quantity-controls">
-                  <button 
-                    onClick={() => handleQuantityChange(item.itemCd, -1)}
-                    className="quantity-btn minus"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleQuantityInput(item.itemCd, e.target.value)}
-                    className="quantity-input"
-                    min="1"
-                  />
-                  <button 
-                    onClick={() => handleQuantityChange(item.itemCd, 1)}
-                    className="quantity-btn plus"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-
-              {/* 데스크톱용 합계 */}
-              <div className="item-total-area">
-                <span className="total-label">합계</span>
-                <div className="total-price">{item.totalAmount.toLocaleString()}원</div>
-              </div>
-
-              {/* 삭제 버튼 */}
-              <div className="item-actions-area">
-                <button 
-                  onClick={() => handleRemoveItem(item.itemCd)}
-                  className="remove-item-btn"
-                >
-                  <Trash2 size={18} />
-                </button>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
       {/* ========== 하단 요약 및 액션 영역 ========== */}
@@ -517,7 +601,7 @@ const Cart = () => {
       
       {/* 견적 의뢰 모달 */}
       <ProductQuoteModal 
-        products={getSelectedItemsForQuote()}
+        selectedProducts={getSelectedItemsForQuote()}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
         onRemoveProduct={handleQuoteRemoveProduct}

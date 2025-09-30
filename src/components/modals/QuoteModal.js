@@ -238,7 +238,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
         outUnitPrice: price,
         quantity: quantity,
         filePath: product.FILEPATH,
-        totalAmount: price * quantity
+        totalAmount: price * quantity,
+        source: product.isSurplus ? 'surplus' : (product.isEvent ? 'event' : 'general')
       };
       
       // 장바구니에 상품 추가 (localStorage 사용)
