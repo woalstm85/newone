@@ -1,3 +1,22 @@
+/**
+ * ImageModal.js - 이미지 확대/축소/회전 모달
+ * 
+ * 주요 기능:
+ * 1. 이미지 확대 보기 모달
+ * 2. 줌 인/아웃 (25% ~ 300%)
+ * 3. 90도 단위 회전
+ * 4. 로딩 및 에러 처리
+ * 5. ESC 키 및 배경 클릭으로 닫기
+ * 
+ * Props:
+ * - isOpen: 모달 열림 상태
+ * - onClose: 닫기 콜백
+ * - imageUrl: 이미지 URL
+ * - altText: 대체 텍스트
+ * - title: 모달 제목
+ * - showControls: 컨트롤 표시 여부 (기본: true)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import './ImageModal.css';
@@ -10,19 +29,25 @@ const ImageModal = ({
   title = '',
   showControls = true,
 }) => {
-  const [scale, setScale] = useState(1);
-  const [rotation, setRotation] = useState(0);
+  // 이미지 변환 상태
+  const [scale, setScale] = useState(1);           // 확대/축소 비율
+  const [rotation, setRotation] = useState(0);     // 회전 각도
+  
+  // 로딩 및 에러 상태
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // 모달이 열릴 때마다 초기화
+  /**
+   * 모달 열릴 때마다 상태 초기화
+   * body 스크롤 제어
+   */
   useEffect(() => {
     if (isOpen) {
       setScale(1);
       setRotation(0);
       setIsLoading(true);
       setHasError(false);
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';  // 배경 스크롤 방지
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -32,7 +57,9 @@ const ImageModal = ({
     };
   }, [isOpen]);
 
-  // ESC 키로 모달 닫기
+  /**
+   * ESC 키로 모달 닫기
+   */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -44,40 +71,54 @@ const ImageModal = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 이미지 로드 완료 핸들러
+  /**
+   * 이미지 로드 완료 핸들러
+   */
   const handleImageLoad = () => {
     setIsLoading(false);
     setHasError(false);
   };
 
-  // 이미지 로드 에러 핸들러
+  /**
+   * 이미지 로드 에러 핸들러
+   */
   const handleImageError = () => {
     setIsLoading(false);
     setHasError(true);
   };
 
-  // 확대
+  /**
+   * 확대 (최대 300%)
+   */
   const handleZoomIn = () => {
     setScale(prev => Math.min(prev + 0.25, 3));
   };
 
-  // 축소
+  /**
+   * 축소 (최소 25%)
+   */
   const handleZoomOut = () => {
     setScale(prev => Math.max(prev - 0.25, 0.25));
   };
 
-  // 회전
+  /**
+   * 90도 회전
+   */
   const handleRotate = () => {
     setRotation(prev => (prev + 90) % 360);
   };
 
-  // 리셋
+  /**
+   * 원본 크기로 리셋
+   */
   const handleReset = () => {
     setScale(1);
     setRotation(0);
   };
 
-  // 배경 클릭으로 모달 닫기
+  /**
+   * 배경 클릭으로 모달 닫기
+   */
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       e.stopPropagation();
@@ -85,7 +126,9 @@ const ImageModal = ({
     }
   };
 
-  // 닫기 버튼 클릭 핸들러
+  /**
+   * 닫기 버튼 클릭 핸들러
+   */
   const handleCloseClick = (e) => {
     e.stopPropagation();
     onClose(e);
@@ -151,6 +194,7 @@ const ImageModal = ({
 
         {/* 이미지 컨테이너 */}
         <div className="image-modal-content">
+          {/* 로딩 스피너 */}
           {isLoading && (
             <div className="image-modal-loading">
               <div className="image-modal-spinner"></div>
@@ -158,6 +202,7 @@ const ImageModal = ({
             </div>
           )}
           
+          {/* 에러 메시지 */}
           {hasError && (
             <div className="image-modal-error">
               <p>이미지를 불러올 수 없습니다.</p>
@@ -167,6 +212,7 @@ const ImageModal = ({
             </div>
           )}
 
+          {/* 이미지 */}
           {imageUrl && !hasError && (
             <div className="image-modal-image-container">
               <img

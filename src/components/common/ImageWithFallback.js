@@ -1,6 +1,38 @@
+/**
+ * ImageWithFallback.js - 이미지 로드 실패 시 대체 이미지 표시
+ * 
+ * 주요 기능:
+ * 1. 이미지 로드 실패 시 자동으로 대체 이미지 표시
+ * 2. 로딩 중 상태 표시
+ * 3. SVG 기반 "이미지 없음" 플레이스홀더 생성
+ * 4. API URL 자동 처리
+ * 
+ * Props:
+ * - src: 이미지 URL
+ * - alt: 대체 텍스트
+ * - className: CSS 클래스
+ * - width: 너비
+ * - height: 높이
+ * - style: 추가 스타일
+ * 
+ * 사용 예:
+ * <ImageWithFallback 
+ *   src="/images/product.jpg"
+ *   alt="상품 이미지"
+ *   width={120}
+ *   height={120}
+ * />
+ */
+
 import React, { useState } from 'react';
 
-// 기본 "이미지 없음" SVG를 인라인으로 생성
+/**
+ * "이미지 없음" SVG 생성
+ * 
+ * @param {number} width - SVG 너비
+ * @param {number} height - SVG 높이
+ * @returns {string} Base64 인코딩된 SVG 데이터 URL
+ */
 const createNoImageSvg = (width = 120, height = 120) => {
   const svg = `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -29,17 +61,28 @@ const ImageWithFallback = ({
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * 이미지 로드 에러 핸들러
+   */
   const handleError = () => {
     setHasError(true);
     setIsLoading(false);
   };
 
+  /**
+   * 이미지 로드 완료 핸들러
+   */
   const handleLoad = () => {
     setIsLoading(false);
     setHasError(false);
   };
 
-  // 이미지 경로 정리 함수
+  /**
+   * 이미지 경로 정리 및 API URL 추가
+   * 
+   * @param {string} imageSrc - 원본 이미지 경로
+   * @returns {string|null} 처리된 이미지 URL
+   */
   const getCleanImageSrc = (imageSrc) => {
     if (!imageSrc) return null;
     
@@ -73,6 +116,7 @@ const ImageWithFallback = ({
 
   return (
     <>
+      {/* 로딩 중 표시 */}
       {isLoading && (
         <div 
           className={className}
@@ -89,6 +133,8 @@ const ImageWithFallback = ({
           <div style={{ color: '#6c757d', fontSize: '12px' }}>로딩중...</div>
         </div>
       )}
+      
+      {/* 실제 이미지 */}
       <img
         src={cleanSrc}
         alt={alt}

@@ -1,15 +1,57 @@
-// PDF 생성 유틸리티 (jsPDF 라이브러리 사용)
+/**
+ * pdfGenerator.js - 견적서 PDF/HTML 생성 유틸리티
+ * 
+ * 주요 기능:
+ * 1. jsPDF를 사용한 PDF 견적서 생성
+ * 2. jsPDF 미사용 시 HTML 템플릿으로 대체
+ * 3. 견적 정보 포맷팅 및 레이아웃 구성
+ * 
+ * 의존성:
+ * - jsPDF 라이브러리 (CDN 또는 npm 설치 필요)
+ * 
+ * 견적 데이터 구조:
+ * {
+ *   quoteNumber: '견적번호',
+ *   status: '진행상태',
+ *   validUntil: '유효기한',
+ *   customerInfo: { 고객정보 },
+ *   product: { 제품정보 },
+ *   quantity: 수량,
+ *   quoteDetails: { 견적상세 },
+ *   supplierInfo: { 공급업체정보 }
+ * }
+ */
+
+/**
+ * PDF 견적서 생성
+ * jsPDF 라이브러리를 사용하여 견적서를 PDF로 생성하고 다운로드
+ * 
+ * @param {Object} quote - 견적 데이터 객체
+ * 
+ * 견적 데이터 필수 필드:
+ * - quoteNumber: 견적번호
+ * - status: 상태 (예: "승인대기", "승인완료")
+ * - validUntil: 유효기한 (Date 형식)
+ * - customerInfo: { companyName, contactPerson, phone, email, address }
+ * - product: { itemNm, itemCd, unitPrice }
+ * - quantity: 수량
+ * - quoteDetails: { subtotal, discountRate, discountAmount, taxRate, taxAmount, 
+ *                   shippingCost, totalAmount, paymentTerms, deliveryTerms, warranty }
+ * - supplierInfo: { companyName, contactPerson, phone, email }
+ * 
+ * 사용 예:
+ * generateQuotePDF(quoteData);
+ */
 export const generateQuotePDF = (quote) => {
-  // jsPDF 라이브러리가 없는 경우 폴백 처리
+  // jsPDF 라이브러리 확인
   if (typeof window.jsPDF === 'undefined') {
-    console.warn('jsPDF 라이브러리가 로드되지 않았습니다. HTML 템플릿으로 대체합니다.');
     return generateQuoteHTML(quote);
   }
 
   const { jsPDF } = window.jsPDF;
   const doc = new jsPDF('p', 'mm', 'a4');
   
-  // 한글 폰트 설정 (웹폰트 또는 기본 폰트 사용)
+  // 폰트 설정
   doc.setFont('helvetica');
   
   let y = 20;
@@ -17,13 +59,13 @@ export const generateQuotePDF = (quote) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
 
-  // 제목
+  // ========== 제목 ==========
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.text('견적서', pageWidth / 2, y, { align: 'center' });
   y += lineHeight * 2;
 
-  // 견적 기본 정보
+  // ========== 견적 기본 정보 ==========
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(`견적번호: ${quote.quoteNumber}`, margin, y);
@@ -33,12 +75,12 @@ export const generateQuotePDF = (quote) => {
   doc.text(`유효기한: ${new Date(quote.validUntil).toLocaleDateString('ko-KR')}`, pageWidth - margin, y, { align: 'right' });
   y += lineHeight * 2;
 
-  // 구분선
+  // ========== 구분선 ==========
   doc.setLineWidth(0.5);
   doc.line(margin, y, pageWidth - margin, y);
   y += lineHeight;
 
-  // 고객 정보
+  // ========== 고객 정보 ==========
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('고객 정보', margin, y);
@@ -57,7 +99,7 @@ export const generateQuotePDF = (quote) => {
   doc.text(`주소: ${quote.customerInfo.address}`, margin, y);
   y += lineHeight * 2;
 
-  // 상품 정보
+  // ========== 상품 정보 ==========
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('상품 정보', margin, y);
@@ -74,7 +116,7 @@ export const generateQuotePDF = (quote) => {
   doc.text(`수량: ${quote.quantity.toLocaleString()}개`, margin, y);
   y += lineHeight * 2;
 
-  // 견적 상세 - 간단한 테이블 형태
+  // ========== 견적 상세 ==========
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('견적 상세', margin, y);
@@ -96,7 +138,7 @@ export const generateQuotePDF = (quote) => {
     y += lineHeight;
   });
 
-  // 총 금액
+  // ========== 총 금액 ==========
   y += lineHeight;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -104,7 +146,7 @@ export const generateQuotePDF = (quote) => {
   doc.text(`${quote.quoteDetails.totalAmount.toLocaleString()}원`, pageWidth - margin, y, { align: 'right' });
   y += lineHeight * 2;
 
-  // 거래 조건
+  // ========== 거래 조건 ==========
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('거래 조건', margin, y);
@@ -119,7 +161,7 @@ export const generateQuotePDF = (quote) => {
   doc.text(`보증 조건: ${quote.quoteDetails.warranty}`, margin, y);
   y += lineHeight * 2;
 
-  // 공급업체 정보
+  // ========== 공급업체 정보 ==========
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('공급업체 정보', margin, y);
@@ -135,11 +177,21 @@ export const generateQuotePDF = (quote) => {
   y += lineHeight;
   doc.text(`이메일: ${quote.supplierInfo.email}`, margin, y);
 
-  // PDF 저장
+  // PDF 파일 저장
   doc.save(`${quote.quoteNumber}.pdf`);
 };
 
-// HTML 템플릿으로 견적서 생성 (PDF 라이브러리가 없을 때 사용)
+/**
+ * HTML 템플릿 견적서 생성
+ * jsPDF가 없을 때 사용하는 대체 방법
+ * 새 창에 HTML 견적서를 열어 인쇄 가능
+ * 
+ * @param {Object} quote - 견적 데이터 객체
+ * @returns {Window} 새로 열린 창의 Window 객체
+ * 
+ * 사용 예:
+ * const printWindow = generateQuoteHTML(quoteData);
+ */
 export const generateQuoteHTML = (quote) => {
   const htmlContent = `
     <!DOCTYPE html>
@@ -246,10 +298,12 @@ export const generateQuoteHTML = (quote) => {
     </head>
     <body>
       <div class="container">
+        <!-- 헤더 -->
         <div class="header">
           <h1 class="title">견적서</h1>
         </div>
 
+        <!-- 견적 기본 정보 -->
         <div class="quote-info">
           <div>
             <strong>견적번호:</strong> ${quote.quoteNumber}<br>
@@ -261,6 +315,7 @@ export const generateQuoteHTML = (quote) => {
           </div>
         </div>
 
+        <!-- 고객 정보 -->
         <div class="section">
           <h2 class="section-title">고객 정보</h2>
           <div class="info-grid">
@@ -287,6 +342,7 @@ export const generateQuoteHTML = (quote) => {
           </div>
         </div>
 
+        <!-- 상품 정보 -->
         <div class="section">
           <h2 class="section-title">상품 정보</h2>
           <div class="info-grid">
@@ -309,6 +365,7 @@ export const generateQuoteHTML = (quote) => {
           </div>
         </div>
 
+        <!-- 견적 상세 -->
         <div class="section">
           <h2 class="section-title">견적 상세</h2>
           <table class="table">
@@ -343,6 +400,7 @@ export const generateQuoteHTML = (quote) => {
           </table>
         </div>
 
+        <!-- 거래 조건 -->
         <div class="section">
           <h2 class="section-title">거래 조건</h2>
           <div class="info-grid">
@@ -361,6 +419,7 @@ export const generateQuoteHTML = (quote) => {
           </div>
         </div>
 
+        <!-- 공급업체 정보 -->
         <div class="section">
           <h2 class="section-title">공급업체 정보</h2>
           <div class="info-grid">
@@ -383,16 +442,12 @@ export const generateQuoteHTML = (quote) => {
           </div>
         </div>
 
+        <!-- 푸터 -->
         <div class="footer">
           <p>본 견적서는 ${new Date(quote.validUntil).toLocaleDateString('ko-KR')}까지 유효합니다.</p>
           <p>문의사항이 있으시면 언제든지 연락주시기 바랍니다.</p>
         </div>
       </div>
-
-      <script>
-        // 자동으로 인쇄 대화상자 표시 (선택사항)
-        // window.print();
-      </script>
     </body>
     </html>
   `;

@@ -1,29 +1,64 @@
+/**
+ * TableSkeleton.js - 테이블 로딩 스켈레톤
+ * 
+ * 주요 기능:
+ * 1. 데이터 로딩 중 테이블 구조 미리보기
+ * 2. 동적인 컬럼 및 행 개수 지원
+ * 3. react-loading-skeleton 라이브러리 사용
+ * 
+ * Props:
+ * - columns: 컬럼 정의 배열 (각 항목에 Header, style 포함)
+ * - rows: 표시할 행 개수 (기본값: 10)
+ * 
+ * columns 구조:
+ * [
+ *   { Header: '제품코드', style: { width: '120px' } },
+ *   { Header: '제품명', style: { width: '200px' } },
+ *   ...
+ * ]
+ * 
+ * 사용 예:
+ * {loading ? (
+ *   <TableSkeleton 
+ *     columns={tableColumns} 
+ *     rows={10} 
+ *   />
+ * ) : (
+ *   <Table data={data} />
+ * )}
+ */
+
 import React from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-// ✨ columns와 rows를 props로 받도록 변경 (rows는 기본값 10으로 설정)
 function TableSkeleton({ columns, rows = 10 }) {
 
-  // ✨ 전달받은 rows 개수만큼 스켈레톤 행 생성
+  /**
+   * 스켈레톤 행 생성
+   * 지정된 rows 개수만큼 행을 생성하고
+   * 각 행은 columns 개수만큼 셀을 포함
+   */
   const skeletonRows = Array.from({ length: rows }).map((_, rowIndex) => (
     <tr key={rowIndex}>
-      {/* ✨ 전달받은 columns 개수만큼 스켈레톤 셀 생성 */}
       {columns.map((_, colIndex) => (
-        <td key={colIndex}><Skeleton height={20} /></td>
+        <td key={colIndex}>
+          <Skeleton height={20} />
+        </td>
       ))}
     </tr>
   ));
 
   return (
     <SkeletonTheme baseColor="#e9ecef" highlightColor="#f8f9fa">
-      {/* cust0010-table 클래스는 그대로 사용하거나 더 범용적인 이름으로 변경 가능 */}
       <table className="cust0010-table">
         <thead>
           <tr>
-            {/* ✨ 전달받은 columns 정보로 헤더를 동적으로 생성 */}
+            {/* 전달받은 columns 정보로 헤더 동적 생성 */}
             {columns.map((col, index) => (
-              <th key={index} style={col.style}>{col.Header}</th>
+              <th key={index} style={col.style}>
+                {col.Header}
+              </th>
             ))}
           </tr>
         </thead>

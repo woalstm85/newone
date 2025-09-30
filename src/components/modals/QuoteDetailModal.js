@@ -1,3 +1,15 @@
+/**
+ * QuoteDetailModal.js
+ * 견적 의뢰 상세 정보를 표시하는 모달 컴포넌트
+ * 
+ * 주요 기능:
+ * - 견적 의뢰 기본 정보 표시 (요청일자, 희망납기, 고객 정보 등)
+ * - 견적 품목 목록 및 이미지 표시
+ * - 금액 계산 및 표시
+ * - 이미지 확대 보기
+ * - PDF 다운로드 및 인쇄 (현재 비활성화)
+ */
+
 import React, { useState } from 'react';
 import { X, Calendar, User, MapPin, Phone, Building, FileText, Eye, Package, Printer, Download, Mail } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
@@ -5,13 +17,28 @@ import ImageModal from '../common/ImageModal';
 import { generateQuotePDF, generateQuoteHTML } from '../utils/pdfGenerator';
 import './QuoteDetailModal.css';
 
+/**
+ * QuoteDetailModal 컴포넌트
+ * 
+ * @param {boolean} isOpen - 모달 열림/닫힘 상태
+ * @param {Function} onClose - 모달 닫기 콜백 함수
+ * @param {Object} quote - 견적 정보 객체
+ */
 const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
+  // 이미지 모달 상태 관리
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' });
 
+  // 모달이 열려있지 않거나 견적 데이터가 없으면 렌더링하지 않음
   if (!isOpen || !quote) return null;
 
-  // 이미지 클릭 핸들러
+  /**
+   * 이미지 클릭 핸들러
+   * 이미지를 확대하여 볼 수 있는 모달 열기
+   * 
+   * @param {string} imageUrl - 이미지 URL
+   * @param {string} itemName - 품목명
+   */
   const handleImageClick = (imageUrl, itemName) => {
     if (imageUrl) {
       setSelectedImage({
@@ -23,7 +50,13 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
     }
   };
 
-  // 날짜 포맷팅
+  /**
+   * 날짜 포맷팅 함수
+   * YYYYMMDD 형식을 YYYY-MM-DD 형식으로 변환
+   * 
+   * @param {string} dateString - 날짜 문자열 (YYYYMMDD 형식)
+   * @returns {string} 포맷된 날짜 문자열 (YYYY-MM-DD)
+   */
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     if (dateString.length === 8) {
@@ -35,18 +68,31 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
     return dateString;
   };
 
-  // 금액 포맷팅
+  /**
+   * 금액 포맷팅 함수
+   * 숫자를 천단위 구분 형식으로 변환
+   * 
+   * @param {number} amount - 금액
+   * @returns {string} 포맷된 금액 문자열
+   */
   const formatAmount = (amount) => {
     if (!amount || amount === 0) return '0';
     return new Intl.NumberFormat('ko-KR').format(amount);
   };
 
-  // 전체 견적 금액 계산
+  /**
+   * 전체 견적 금액 계산
+   * 모든 품목의 총액을 합산
+   */
   const totalQuoteAmount = quote.subData?.reduce((sum, item) => sum + (item.reqAmount || 0), 0) || 0;
 
-  // PDF 출력 핸들러
+  /**
+   * PDF 출력 핸들러
+   * 견적서를 PDF 파일로 다운로드
+   */
   const handlePrintPDF = () => {
     try {
+      // PDF 생성에 필요한 데이터 구성
       const pdfData = {
         quoteNumber: quote.reqNo,
         status: '청구',
@@ -85,7 +131,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
         }
       };
       
-      // PDF 생성 시도
+      // PDF 생성
       generateQuotePDF(pdfData);
     } catch (error) {
       console.error('PDF 생성 오류:', error);
@@ -93,9 +139,13 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
     }
   };
 
-  // HTML 출력 핸들러 (인쇄용)
+  /**
+   * HTML 출력 핸들러
+   * 견적서를 브라우저 인쇄 기능으로 출력
+   */
   const handlePrintHTML = () => {
     try {
+      // 인쇄용 데이터 구성
       const pdfData = {
         quoteNumber: quote.reqNo,
         status: '청구',
@@ -134,7 +184,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
         }
       };
       
-      // HTML 생성 및 인쇄
+      // HTML 생성 및 인쇄 실행
       const printWindow = generateQuoteHTML(pdfData);
       setTimeout(() => {
         printWindow.print();
@@ -145,7 +195,12 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
     }
   };
 
-  // 배경 클릭으로 모달 닫기
+  /**
+   * 배경 클릭 시 모달 닫기
+   * 모달 외부를 클릭하면 모달 닫힌다
+   * 
+   * @param {Event} e - 클릭 이벤트
+   */
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -177,6 +232,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
               <h3>기본 정보</h3>
             </div>
             <div className="quote-detail-info-grid">
+              {/* 요청일자 */}
               <div className="quote-detail-info-item">
                 <Calendar size={16} />
                 <div className="quote-detail-info-content">
@@ -184,6 +240,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{formatDate(quote.reqDate)}</span>
                 </div>
               </div>
+              
+              {/* 희망납기 */}
               <div className="quote-detail-info-item">
                 <Calendar size={16} />
                 <div className="quote-detail-info-content">
@@ -191,6 +249,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{formatDate(quote.dueDate)}</span>
                 </div>
               </div>
+              
+              {/* 고객사 */}
               <div className="quote-detail-info-item">
                 <Building size={16} />
                 <div className="quote-detail-info-content">
@@ -198,6 +258,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{quote.custNm}</span>
                 </div>
               </div>
+              
+              {/* 담당자 */}
               <div className="quote-detail-info-item">
                 <User size={16} />
                 <div className="quote-detail-info-content">
@@ -205,6 +267,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{quote.contactNm}</span>
                 </div>
               </div>
+              
+              {/* 연락처 */}
               <div className="quote-detail-info-item">
                 <Phone size={16} />
                 <div className="quote-detail-info-content">
@@ -212,6 +276,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{quote.contactTel}</span>
                 </div>
               </div>
+              
+              {/* 이메일 */}
               <div className="quote-detail-info-item">
                 <Mail size={16} />
                 <div className="quote-detail-info-content">
@@ -219,6 +285,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                   <span className="quote-detail-info-value">{quote.contactEmail || quote.email || '-'}</span>
                 </div>
               </div>
+              
+              {/* 주소 */}
               <div className="quote-detail-info-item">
                 <MapPin size={16} />
                 <div className="quote-detail-info-content">
@@ -264,6 +332,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                           alt={item.itemNm}
                           className="quote-detail-image"
                         />
+                        {/* 이미지 확대 버튼 */}
                         <div className="quote-detail-image-overlay">
                           <button
                             className="quote-detail-image-btn"
@@ -274,6 +343,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                         </div>
                       </div>
                     ) : (
+                      // 이미지가 없는 경우
                       <div className="quote-detail-no-image">
                         <Package size={24} color="#ccc" />
                       </div>
@@ -317,7 +387,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
             <strong>총 {quote.subData?.length || 0}개 품목 | 총 견적금액: {formatAmount(totalQuoteAmount)}원</strong>
           </div>
           <div className="quote-detail-footer-actions">
-            {/* PDF 및 인쇄 버튼 - 임시 비활성화 */}
+            {/* PDF 및 인쇄 버튼 - 현재 임시 비활성화 */}
             {false && (
               <>
                 <button 
@@ -343,7 +413,7 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
         </div>
       </div>
 
-      {/* 이미지 모달 */}
+      {/* 이미지 확대 모달 */}
       <ImageModal
         isOpen={isImageModalOpen}
         onClose={(e) => {

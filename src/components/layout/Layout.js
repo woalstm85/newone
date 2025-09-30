@@ -1,3 +1,32 @@
+/**
+ * Layout.js - 메인 레이아웃 컴포넌트
+ * 
+ * 주요 기능:
+ * 1. 전체 레이아웃 구조 관리 (상단바, 메뉴, 컨텐츠 영역)
+ * 2. 로그인/비로그인 상태에 따른 UI 분기
+ * 3. 탭 기반 네비게이션 시스템
+ * 4. 반응형 디자인 (데스크톱/모바일)
+ * 5. 모바일 햄버거 메뉴
+ * 6. 제품 카테고리 메뉴 및 제품 목록 표시
+ * 7. 장바구니 개수 실시간 업데이트
+ * 8. LEFT 메뉴 API 연동
+ * 
+ * 주요 상태:
+ * - activeTopMenuCd: 현재 활성화된 탭
+ * - isProductCategoryMenuOpen: 카테고리 메뉴 열림 상태
+ * - isProductListOpen: 제품 목록 표시 상태
+ * - selectedCategory: 선택된 카테고리
+ * - isMobile: 모바일 여부 (768px 이하)
+ * - isMobileMenuOpen: 모바일 메뉴 열림 상태
+ * 
+ * 라우팅 구조:
+ * - /dashboard (HOME): 대시보드
+ * - /surplus: 잉여재고거래
+ * - /event: 행사품목
+ * - /cart: 장바구니
+ * - /CUST0010, /CUST0020 등: LEFT 메뉴 화면들
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom'; 
@@ -14,17 +43,18 @@ import ProductCategoryMenu from '../product/ProductCategoryMenu';
 import ProductList from '../product/ProductList';
 
 function Layout() {
+    // ========== 상태 관리 ==========
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTopMenuCd, setActiveTopMenuCd] = useState('HOME');
     const [isProductCategoryMenuOpen, setIsProductCategoryMenuOpen] = useState(false);
     const [isProductListOpen, setIsProductListOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [currentListType, setCurrentListType] = useState('all');
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // 768px 이하를 모바일로 처리
-    const [productCount, setProductCount] = useState(0); // 상품 개수 상태 추가
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // 모바일 메뉴 상태 추가
-    const [menuItems, setMenuItems] = useState([]); // 메뉴 아이템 목록
-    const [cartCount, setCartCount] = useState(0); // 장바구니 개수 상태 추가
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [productCount, setProductCount] = useState(0);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [menuItems, setMenuItems] = useState([]);
+    const [cartCount, setCartCount] = useState(0);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,17 +73,17 @@ function Layout() {
     // 로그인 상태 확인
     const isLoggedIn = !!globalState.G_USER_ID;
 
-    // 장바구니 개수 업데이트
+    /**
+     * 장바구니 개수 업데이트
+     * localStorage 및 커스텀 이벤트를 통한 실시간 동기화
+     */
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
             setCartCount(cart.length);
         };
         
-        // 초기 로드
         updateCartCount();
-        
-        // 장바구니 업데이트 이벤트 리스너
         window.addEventListener('cartUpdated', updateCartCount);
         
         return () => {
@@ -61,7 +91,10 @@ function Layout() {
         };
     }, []);
     
-    // 로그인하지 않은 상태에서는 dashboard와 cart, surplus, event만 허용
+    /**
+     * 로그인 체크
+     * 비로그인 시 특정 페이지만 접근 가능
+     */
     useEffect(() => {
         const allowedPaths = ['/dashboard', '/', '/cart', '/surplus', '/event'];
         if (!isLoggedIn && !allowedPaths.includes(location.pathname)) {
@@ -69,11 +102,15 @@ function Layout() {
         }
     }, [isLoggedIn, location.pathname, navigate]);
     
-    // 메뉴 데이터 가져오기
+    /**
+     * 메뉴 데이터 로드
+     * 로그인 상태에 따라 다른 메뉴 표시
+     * - 비로그인: 기본 메뉴 (HOME, 잉여재고, 행사품목, 장바구니)
+     * - 로그인: 기본 메뉴 + LEFT 메뉴 API (LEVEL=2)
+     */
     useEffect(() => {
         const fetchMenuItems = async () => {
             if (!isLoggedIn) {
-                // 비로그인 상태 - 기본 메뉴만
                 setMenuItems([
                     { menuCd: 'HOME', menuNm: 'HOME', icon: '🏠' },
                     { menuCd: 'SURPLUS', menuNm: '잉여재고거래', icon: '📦' },
@@ -84,14 +121,11 @@ function Layout() {
             }
             
             try {
-                // LEFT 메뉴 API 호출
                 const response = await fetch(`${process.env.REACT_APP_API_URL}/Comm/leftmenu?userId=${globalState.G_USER_ID}&upMenuCd=CUST`);
                 const leftMenuData = await response.json();
                 
-                // LEVEL=2인 항목들만 필터링
                 const level2Menus = leftMenuData.filter(item => item.LEVEL === 2);
                 
-                // 기본 메뉴 + API 메뉴 합치기
                 const combinedMenus = [
                     { menuCd: 'HOME', menuNm: 'HOME', icon: '🏠' },
                     { menuCd: 'SURPLUS', menuNm: '잉여재고거래', icon: '📦' },
@@ -108,8 +142,6 @@ function Layout() {
                 
                 setMenuItems(combinedMenus);
             } catch (error) {
-                console.error('Menu fetch error:', error);
-                // 에러 시 기본 메뉴만 표시
                 setMenuItems([
                     { menuCd: 'HOME', menuNm: 'HOME', icon: '🏠' },
                     { menuCd: 'SURPLUS', menuNm: '잉여재고거래', icon: '📦' },
@@ -122,13 +154,15 @@ function Layout() {
         fetchMenuItems();
     }, [isLoggedIn, globalState.G_USER_ID]);
     
-    // 화면 크기 변화 감지
+    /**
+     * 화면 크기 변화 감지 (반응형)
+     * 데스크톱으로 전환 시 잉여재고/행사품목 메뉴 자동 열기
+     */
     useEffect(() => {
         const handleResize = () => {
             const newIsMobile = window.innerWidth <= 768;
             setIsMobile(newIsMobile);
             
-            // 화면 크기가 데스크탑으로 변경되고 잉여재고/행사품목 탭에 있을 때 메뉴 자동 열기
             if (window.innerWidth > 1024 && (activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT')) {
                 setIsProductCategoryMenuOpen(true);
             }
@@ -153,23 +187,22 @@ function Layout() {
         navigate('/login');
     };
 
+    /**
+     * 탑 메뉴 클릭 핸들러
+     * 각 메뉴별로 다른 동작 수행
+     */
     const handleTopMenuClick = async (menuCd, menuNm) => {
         if (!menuCd) {
-            console.error('Layout: menuCd is undefined');
             return;
         }
 
-
-        // 로그인하지 않은 상태에서는 home, surplus, event, cart만 허용
         if (!isLoggedIn && !['HOME', 'SURPLUS', 'EVENT', 'CART'].includes(menuCd)) {
             return;
         }
 
-        // 즉시 탭 상태 업데이트 (리액트 상태 동기화)
         setActiveTopMenuCd(menuCd);
         switchTab(menuCd);
         
-        // 새로운 탭을 렌더링 목록에 추가
         if (!renderedTabs[menuCd]) {
             setRenderedTabs(prev => ({
                 ...prev,
@@ -177,7 +210,6 @@ function Layout() {
             }));
         }
         
-        // 잉여재고거래 메뉴인 경우
         if (menuCd === 'SURPLUS') {
             setCurrentListType('surplus');
             setIsProductListOpen(true);
@@ -186,7 +218,6 @@ function Layout() {
             navigate('/surplus');
             return;
         }
-        // 행사품목 메뉴인 경우
         else if (menuCd === 'EVENT') {
             setCurrentListType('event');
             setIsProductListOpen(true);
@@ -195,7 +226,6 @@ function Layout() {
             navigate('/event');
             return;
         }
-        // HOME 메뉴인 경우
         else if (menuCd === 'HOME') {
             setIsProductListOpen(false);
             setIsProductCategoryMenuOpen(false);
@@ -203,7 +233,6 @@ function Layout() {
             navigate('/dashboard');
             return;
         }
-        // CART 메뉴인 경우
         else if (menuCd === 'CART') {
             setIsProductListOpen(false);
             setIsProductCategoryMenuOpen(false);
@@ -211,22 +240,17 @@ function Layout() {
             navigate('/cart');
             return;
         }
-        // LEFT 메뉴 처리 - menuItems에서 찾아서 menuPath 사용
         else {
             setIsProductListOpen(false);
             setIsProductCategoryMenuOpen(false);
             setSelectedCategory(null);
             
-            // menuItems에서 해당 메뉴 찾기
             const menuItem = menuItems.find(item => item.menuCd === menuCd);
             
             if (menuItem && menuItem.isLeftMenu) {
-                // LEFT 메뉴는 menuPath 사용
                 if (menuItem.menuPath) {
-
                     navigate(`/${menuItem.menuPath}`);
                 } else {
-
                     navigate(`/${menuCd}`);
                 }
                 
@@ -234,7 +258,6 @@ function Layout() {
                     setCurrentMenu(menuNm || menuCd, menuCd);
                 }
             } else {
-                // 기타 메뉴
                 if (isLoggedIn) {
                     setCurrentMenu(menuNm || menuCd, menuCd);
                 }
@@ -242,10 +265,11 @@ function Layout() {
         }
     };
 
-    // URL 경로에 따라 TopMenu 상태 동기화
+    /**
+     * URL 경로에 따라 TopMenu 상태 동기화
+     */
     useEffect(() => {
         const currentPath = location.pathname;
-
         
         if (currentPath === '/cart') {
             setActiveTopMenuCd('CART');
@@ -270,7 +294,6 @@ function Layout() {
             setIsProductListOpen(false);
             setSelectedCategory(null);
         } else {
-            // menuItems에서 현재 경로와 일치하는 메뉴 찾기
             const matchingMenu = menuItems.find(item => {
                 if (item.menuPath) {
                     return currentPath === `/${item.menuPath}` || currentPath.includes(item.menuPath);
@@ -279,7 +302,6 @@ function Layout() {
             });
             
             if (matchingMenu) {
-
                 setActiveTopMenuCd(matchingMenu.menuCd);
                 setIsProductCategoryMenuOpen(false);
                 setIsProductListOpen(false);
@@ -289,8 +311,6 @@ function Layout() {
                     setCurrentMenu(matchingMenu.menuNm, matchingMenu.menuCd);
                 }
             } else {
-
-                // 매칭되는 메뉴가 없으면 왼쪽 메뉴만 닫기 (HOME으로 강제 이동하지 않음)
                 setIsProductCategoryMenuOpen(false);
                 setIsProductListOpen(false);
                 setSelectedCategory(null);
@@ -298,22 +318,18 @@ function Layout() {
         }
     }, [location.pathname, isLoggedIn, setCurrentMenu, menuItems]);
 
-    // 더보기 버튼 클릭 시 TopMenu로 이동
+    /**
+     * 더보기 버튼 클릭 핸들러 (대시보드에서 사용)
+     */
     const handleMoreClick = (targetMenuCd) => {
-
-        
-        // CUST0010으로 직접 이동
         if (targetMenuCd === 'CUST0010') {
-            // TopMenu 상태도 업데이트
             setActiveTopMenuCd('CUST0010');
             switchTab('CUST0010');
             
-            // 선택된 상태 초기화
             setIsProductListOpen(false);
             setIsProductCategoryMenuOpen(false);
             setSelectedCategory(null);
             
-            // 로그인된 상태에서만 메뉴 설정
             if (isLoggedIn) {
                 setCurrentMenu('재고현황 관리', 'CUST0010');
             }
@@ -322,7 +338,6 @@ function Layout() {
             return;
         }
         
-        // 잉여재고거래 또는 행사품목
         if (targetMenuCd === 'SURPLUS') {
             handleTopMenuClick('SURPLUS', '잉여재고거래');
         } else if (targetMenuCd === 'EVENT') {
@@ -334,26 +349,24 @@ function Layout() {
         setIsProductListOpen(false);
         setIsProductCategoryMenuOpen(false);
         setSelectedCategory(null);
-        // HOME으로 이동
         handleTopMenuClick('HOME', 'HOME');
         navigate('/dashboard');
     };
 
-    // 상품 개수 업데이트 함수
     const handleProductCountUpdate = (count) => {
         setProductCount(count);
     };
 
-    // 카테고리 선택 시 제품 리스트로 전환
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
-        setIsProductCategoryMenuOpen(true); // 카테고리 메뉴는 유지
+        setIsProductCategoryMenuOpen(true);
     };
 
-    // 로그인 전 상단바 렌더링
+    /**
+     * 비로그인 상단바 렌더링
+     */
     const renderGuestTopBar = () => (
         <div className="top-bar guest-mode">
-            {/* 모바일 햄버거 버튼 - 비로그인 상태에서도 표시 */}
             {isMobile && (
                 <button 
                     className={`mobile-hamburger-btn ${isMobileMenuOpen ? 'active' : ''}`}
@@ -368,7 +381,6 @@ function Layout() {
                 <span></span>
             </div>
             <div className="top-bar-right">
-                {/* 데스크탑에서만 로그인 버튼 표시 */}
                 {!isMobile && (
                     <button className="login-btn" onClick={handleLoginClick}>
                         <LogIn size={18} />
@@ -379,10 +391,11 @@ function Layout() {
         </div>
     );
 
-    // 로그인 후 상단바 렌더링
+    /**
+     * 로그인 후 상단바 렌더링
+     */
     const renderUserTopBar = () => (
         <div className="top-bar">
-            {/* 모바일 햄버거 버튼 */}
             {isMobile && (
                 <button 
                     className={`mobile-hamburger-btn ${isMobileMenuOpen ? 'active' : ''}`}
@@ -399,7 +412,6 @@ function Layout() {
             <div className="top-bar-right">
                 <UserInfo />
                 <div className="separator"></div>
-                {/* 모바일에서는 로그아웃 버튼 숨김 */}
                 {!isMobile && (
                     <button className="logout-btn" onClick={handleLogoutClick}>
                         <img src="/images/icon_logout.png" alt="로그아웃" />
@@ -411,21 +423,17 @@ function Layout() {
 
     return (
         <>
-            {/* 로그인 상태에 따른 상단바 렌더링 */}
             {isLoggedIn ? renderUserTopBar() : renderGuestTopBar()}
 
             {/* 모바일 메뉴 슬라이드 - 로그인 상태 */}
             {isMobile && isLoggedIn && (
                 <>
-                    {/* 오버레이 */}
                     <div 
                         className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
                     
-                    {/* 모바일 메뉴 슬라이드 */}
                     <div className={`mobile-menu-slide ${isMobileMenuOpen ? 'active' : ''}`}>
-                        {/* 메뉴 상단 - 업체명 */}
                         <div className="mobile-menu-header">
                             <div className="mobile-menu-user-info">
                                 <div className="mobile-menu-welcome">
@@ -434,7 +442,6 @@ function Layout() {
                             </div>
                         </div>
                         
-                        {/* 메뉴 목록 */}
                         <div className="mobile-menu-list">
                             {menuItems.map((menu) => (
                                 <div 
@@ -443,14 +450,12 @@ function Layout() {
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
-
                                         setIsMobileMenuOpen(false);
                                         handleTopMenuClick(menu.menuCd, menu.menuNm);
                                     }}
                                 >
                                     <span className="menu-icon">{menu.icon}</span>
                                     <span>{menu.menuNm}</span>
-                                    {/* 장바구니 메뉴일 때 카운트 표시 */}
                                     {menu.menuCd === 'CART' && cartCount > 0 && (
                                         <span className="mobile-cart-count-badge">{cartCount}</span>
                                     )}
@@ -458,7 +463,6 @@ function Layout() {
                             ))}
                         </div>
                         
-                        {/* 메뉴 하단 - 로그아웃 */}
                         <div className="mobile-menu-footer">
                             <button className="mobile-menu-logout-btn" onClick={() => {
                                 setIsMobileMenuOpen(false);
@@ -475,15 +479,12 @@ function Layout() {
             {/* 모바일 메뉴 슬라이드 - 비로그인 상태 */}
             {isMobile && !isLoggedIn && (
                 <>
-                    {/* 오버레이 */}
                     <div 
                         className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
                     
-                    {/* 모바일 메뉴 슬라이드 */}
                     <div className={`mobile-menu-slide ${isMobileMenuOpen ? 'active' : ''}`}>
-                        {/* 메뉴 상단 - 비로그인 */}
                         <div className="mobile-menu-header mobile-menu-header-guest">
                             <div className="mobile-menu-user-info">
                                 <div className="mobile-menu-welcome">
@@ -492,7 +493,6 @@ function Layout() {
                             </div>
                         </div>
                         
-                        {/* 메뉴 목록 */}
                         <div className="mobile-menu-list">
                             {menuItems.map((menu) => (
                                 <div 
@@ -501,14 +501,12 @@ function Layout() {
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
-
                                         setIsMobileMenuOpen(false);
                                         handleTopMenuClick(menu.menuCd, menu.menuNm);
                                     }}
                                 >
                                     <span className="menu-icon">{menu.icon}</span>
                                     <span>{menu.menuNm}</span>
-                                    {/* 장바구니 메뉴일 때 카운트 표시 */}
                                     {menu.menuCd === 'CART' && cartCount > 0 && (
                                         <span className="mobile-cart-count-badge">{cartCount}</span>
                                     )}
@@ -516,7 +514,6 @@ function Layout() {
                             ))}
                         </div>
                         
-                        {/* 메뉴 하단 - 로그인 버튼 */}
                         <div className="mobile-menu-footer">
                             <button className="mobile-menu-login-btn" onClick={() => {
                                 setIsMobileMenuOpen(false);
@@ -539,7 +536,6 @@ function Layout() {
             />
 
             <div className="layout-container">
-                {/* 탑 메뉴 (데스크탑에서만 표시) */}
                 {!isMobile && (
                     <TopMenu 
                         onTopMenuClick={handleTopMenuClick}
@@ -547,9 +543,7 @@ function Layout() {
                     />
                 )}
                 
-                {/* 메인 컨테이너 */}
                 <div className="main-container">
-                    {/* 왼쪽 카테고리 메뉴 (잉여재고/행사품목일 때만) */}
                     {(activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
                         <div className={`left-menu-container ${
                             !isProductCategoryMenuOpen ? 'hidden' : ''
@@ -559,14 +553,12 @@ function Layout() {
                                 onClose={() => setIsProductCategoryMenuOpen(false)}
                                 onCategorySelect={handleCategorySelect}
                                 menuTitle={activeTopMenuCd === 'SURPLUS' ? '잉여재고거래' : '행사품목'}
-                                showCloseButton={true} // 모든 화면 크기에서 X 버튼 표시
+                                showCloseButton={true}
                             />
                         </div>
                     )}
 
-                    {/* 메인 컨텐츠 영역 */}
                     <div className="main-content">
-                        {/* 잉여재고/행사품목 탭에서 햄버거 메뉴 버튼 */}
                         {(activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
                             <div className={`content-header ${
                                 isProductCategoryMenuOpen && isMobile ? 'menu-open' : ''
@@ -589,7 +581,6 @@ function Layout() {
                                     </button>
                                 </div>
                                 
-                                {/* 선택된 카테고리 표시 - 오른쪽 끝 */}
                                 {selectedCategory && (
                                     <div className="selected-category-display">
                                         <Filter size={14} />
@@ -601,7 +592,6 @@ function Layout() {
                             </div>
                         )}
                         
-                        {/* HOME 탭 - 대시보드 */}
                         {isDashboardActive && (
                             <DASHBOARD 
                                 onMoreClick={handleMoreClick} 
@@ -609,7 +599,6 @@ function Layout() {
                             />
                         )}
 
-                        {/* 잉여재고/행사품목 - ProductList */}
                         {isProductListOpen && (activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
                             <ProductList 
                                 selectedCategory={selectedCategory}
@@ -619,7 +608,6 @@ function Layout() {
                             />
                         )}
                         
-                        {/* API 메뉴들과 기타 경로들 - 항상 Outlet 렌더링 */}
                         {!isDashboardActive && (
                             <Outlet />
                         )}

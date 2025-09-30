@@ -1,3 +1,16 @@
+/**
+ * QuoteModal.js
+ * 제품 상세 정보 및 견적/장바구니 기능을 제공하는 모달 컴포넌트
+ * 
+ * 주요 기능:
+ * - 제품 상세 정보 표시 (이미지, 가격, 옵션 등)
+ * - 수량 조절
+ * - 옵션 선택
+ * - 장바구니 담기
+ * - 견적 의뢰
+ * - 반응형 레이아웃 (모바일/데스크톱)
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Plus, Minus, ShoppingCart, Calculator } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
@@ -10,7 +23,12 @@ import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
 import { toast } from 'react-toastify';
 
-// 모바일 감지 훅
+/**
+ * 모바일 환경 감지 커스텀 훅
+ * 화면 크기가 768px 이하일 경우 모바일로 판단
+ * 
+ * @returns {boolean} 모바일 여부
+ */
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   
@@ -26,33 +44,41 @@ const useIsMobile = () => {
   return isMobile;
 };
 
+/**
+ * QuoteModal 컴포넌트
+ * 
+ * @param {Object} product - 표시할 제품 정보
+ * @param {boolean} isOpen - 모달 열림/닫힘 상태
+ * @param {Function} onClose - 모달 닫기 콜백 함수
+ */
 const QuoteModal = ({ product, isOpen, onClose }) => {
-  const isMobile = useIsMobile(); // 모바일 감지 훅 사용
+  const isMobile = useIsMobile(); // 모바일 감지
   
-  const [quantity, setQuantity] = useState(1);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [optionValues, setOptionValues] = useState([]);
-  const [selectedOptionValue, setSelectedOptionValue] = useState('');
-  const [loadingOptions, setLoadingOptions] = useState(false);
-  const [showQuoteRequestModal, setShowQuoteRequestModal] = useState(false);
+  // 상태 관리
+  const [quantity, setQuantity] = useState(1); // 선택 수량
+  const [showLoginModal, setShowLoginModal] = useState(false); // 로그인 모달 표시 여부
+  const [optionValues, setOptionValues] = useState([]); // 옵션 목록
+  const [selectedOptionValue, setSelectedOptionValue] = useState(''); // 선택된 옵션
+  const [loadingOptions, setLoadingOptions] = useState(false); // 옵션 로딩 상태
+  const [showQuoteRequestModal, setShowQuoteRequestModal] = useState(false); // 견적의뢰 모달 표시 여부
   
-  // showQuoteRequestModal 상태 변경 모니터링
-  useEffect(() => {
-
-  }, [showQuoteRequestModal]);
+  // 전역 상태 및 네비게이션
   const { globalState } = useAuth();
   const navigate = useNavigate();
   
-  // 이전에 로드한 optCd를 추적
-  const loadedOptCdRef = useRef(null);
-  // API 호출 중복 방지
-  const isLoadingRef = useRef(false);
+  // 중복 로딩 방지를 위한 ref
+  const loadedOptCdRef = useRef(null); // 이전에 로드한 옵션 코드
+  const isLoadingRef = useRef(false); // API 호출 중복 방지 플래그
   
-  // 옵션값 로드 함수
+  /**
+   * 옵션값 로드 함수
+   * 중복 API 호출을 방지하고 제품의 옵션 목록을 가져옴
+   * 
+   * @param {string} optCd - 옵션 코드
+   */
   const loadOptionValues = useCallback(async (optCd) => {
     // 이미 로딩 중이거나 같은 optCd면 중복 호출 방지
     if (isLoadingRef.current || loadedOptCdRef.current === optCd) {
-
       return;
     }
 
@@ -61,7 +87,6 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     try {
       setLoadingOptions(true);
       const options = await commonAPI.getOptionValues(optCd);
-      
       
       if (options && Array.isArray(options)) {
         setOptionValues(options);
@@ -84,14 +109,14 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     } finally {
       setLoadingOptions(false);
       isLoadingRef.current = false;
-
     }
   }, []);
   
-  // 모달 상태 초기화
+  /**
+   * 모달이 열릴 때마다 상태 초기화 및 옵션 로드
+   */
   useEffect(() => {
     if (isOpen && product) {
-      
       // 기본 상태 초기화
       setQuantity(1);
       setShowLoginModal(false);
@@ -102,18 +127,16 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       
       if (currentOptCd && loadedOptCdRef.current !== currentOptCd) {
         // 새로운 옵션 코드 - 로드 필요
-
         setOptionValues([]);
         loadOptionValues(currentOptCd);
       } else if (!currentOptCd) {
         // 옵션이 없는 상품
-
         setOptionValues([]);
         setSelectedOptionValue('');
         loadedOptCdRef.current = null;
       }
       
-      // ESC 키 이벤트
+      // ESC 키로 모달 닫기 이벤트
       const handleEscKey = (e) => {
         if (e.key === 'Escape') {
           handleClose();
@@ -124,8 +147,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       return () => document.removeEventListener('keydown', handleEscKey);
     }
     
+    // 모달이 닫히면 초기화
     if (!isOpen) {
-      // 모달이 닫히면 초기화
       loadedOptCdRef.current = null;
       isLoadingRef.current = false;
     }
@@ -136,23 +159,35 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
   // 모달이 열려있지 않으면 렌더링하지 않음
   if (!isOpen || !product) {
-
     return null;
   }
 
-
+  /**
+   * 수량 변경 핸들러
+   * 최소 수량은 1로 제한
+   * 
+   * @param {number} delta - 변경할 수량 (양수: 증가, 음수: 감소)
+   */
   const handleQuantityChange = (delta) => {
     const newQuantity = Math.max(1, quantity + delta);
     setQuantity(newQuantity);
   };
 
+  /**
+   * 총 금액 계산
+   * 할인가가 있으면 할인가 사용, 없으면 판매가 사용
+   * 
+   * @returns {string} 천단위 구분된 총 금액 문자열
+   */
   const calculateTotal = () => {
-    // disPrice 또는 salePrice 사용
     const price = product.disPrice || product.salePrice || 0;
     return (price * quantity).toLocaleString();
   };
 
-  // 견적의뢰 버튼 클릭 핸들러
+  /**
+   * 견적의뢰 버튼 클릭 핸들러
+   * 로그인 및 옵션 선택 여부를 확인한 후 견적의뢰 모달 열기
+   */
   const handleQuoteRequest = () => {
     // 로그인 체크
     if (!isLoggedIn) {
@@ -170,6 +205,11 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     setShowQuoteRequestModal(true);
   };
 
+  /**
+   * 장바구니 담기 핸들러
+   * 로그인 및 옵션 선택 확인 후 장바구니에 상품 추가
+   * localStorage를 사용하여 장바구니 데이터 저장
+   */
   const handleAddToCart = () => {
     // 로그인 체크
     if (!isLoggedIn) {
@@ -184,7 +224,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }
 
     try {
-      // 로그인된 상태에서 장바구니 담기 처리
+      // 장바구니 상품 데이터 구성
       const price = product.disPrice || product.salePrice || 0;
       const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
       
@@ -195,7 +235,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
         optValCd: selectedOptionValue || '',
         optValNm: selectedOption ? selectedOption.optValNm : '',
         price: price,
-        outUnitPrice: price, // 동일한 가격 정보
+        outUnitPrice: price,
         quantity: quantity,
         filePath: product.FILEPATH,
         totalAmount: price * quantity
@@ -255,10 +295,20 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }
   };
 
+  /**
+   * 모달 닫기 핸들러
+   */
   const handleClose = () => {
     onClose();
   };
 
+  /**
+   * 출하 가능일 포맷팅
+   * YYYYMMDD 형식을 MM.DD (요일) 형식으로 변환
+   * 
+   * @param {string} dateString - YYYYMMDD 형식의 날짜 문자열
+   * @returns {string} 포맷된 날짜 문자열 (예: "03.15 (금)")
+   */
   const formatShipDate = (dateString) => {
     if (!dateString) return '';
     
@@ -285,8 +335,13 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     return dateString;
   };
 
+  /**
+   * 백드롭 클릭 핸들러
+   * 모달 외부(오버레이) 클릭 시 모달 닫기
+   * 
+   * @param {Event} e - 클릭 이벤트
+   */
   const handleBackdropClick = (e) => {
-    // 오버레이 클릭시에만 닫기 (모달 내부 클릭은 무시)
     if (e.target === e.currentTarget) {
       handleClose();
     }
@@ -313,7 +368,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* 모달 콘텐츠 - 조건부 렌더링 */}
+          {/* 모달 콘텐츠 - 반응형 레이아웃 */}
           {isMobile ? (
             // 모바일 레이아웃: 상단(이미지+기본정보) + 하단(옵션/수량/총금액)
             <div className="quote-modal-scrollable-content">
@@ -558,7 +613,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
             </div>
           )}
 
-          {/* 모달 푸터 - 고정 */}
+          {/* 모달 푸터 - 액션 버튼들 */}
           <div className="quote-modal-actions">
             <button onClick={handleAddToCart} className="quote-modal-action-button quote-modal-cart-button">
               <ShoppingCart size={18} />
@@ -572,7 +627,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
         </div>
       </div>
 
-      {/* 로그인 모달 */}
+      {/* 로그인 필요 모달 */}
       {showLoginModal && (
         <Modal 
           isOpen={showLoginModal}
@@ -580,37 +635,33 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
           message={`장바구니 및 견적의뢰를 위해서는 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?`}
           onConfirm={() => {
             setShowLoginModal(false);
-            onClose(); // 모달 닫기
-            navigate('/login'); // 로그인 페이지로 이동
+            onClose();
+            navigate('/login');
           }}
           onCancel={() => setShowLoginModal(false)}
         />
       )}
 
-
-
       {/* 견적의뢰 모달 */}
       {showQuoteRequestModal && (
-        <>
-          <ProductQuoteModal
-            product={product}
-            isOpen={showQuoteRequestModal}
-            onClose={() => {
-              setShowQuoteRequestModal(false);
-            }}
-            selectedProducts={[{
-              itemCd: product.itemCd,
-              itemNm: product.itemNm,
-              optCd: product.optCd || '',
-              optValCd: selectedOptionValue || '',
-              optValNm: optionValues.find(opt => opt.optValCd === selectedOptionValue)?.optValNm || '',
-              price: product.disPrice || product.salePrice || 0,
-              quantity: quantity,
-              filePath: product.FILEPATH,
-              totalAmount: (product.disPrice || product.salePrice || 0) * quantity
-            }]}
-          />
-        </>
+        <ProductQuoteModal
+          product={product}
+          isOpen={showQuoteRequestModal}
+          onClose={() => {
+            setShowQuoteRequestModal(false);
+          }}
+          selectedProducts={[{
+            itemCd: product.itemCd,
+            itemNm: product.itemNm,
+            optCd: product.optCd || '',
+            optValCd: selectedOptionValue || '',
+            optValNm: optionValues.find(opt => opt.optValCd === selectedOptionValue)?.optValNm || '',
+            price: product.disPrice || product.salePrice || 0,
+            quantity: quantity,
+            filePath: product.FILEPATH,
+            totalAmount: (product.disPrice || product.salePrice || 0) * quantity
+          }]}
+        />
       )}
     </>
   );

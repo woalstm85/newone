@@ -1,3 +1,15 @@
+/**
+ * ProductList.js
+ * 제품 목록 표시 컴포넌트
+ * 
+ * 주요 기능:
+ * - 제품 목록을 그리드 형태로 표시
+ * - 카테고리별 필터링
+ * - 할인율 계산 및 표시
+ * - 제품 상세보기 모달
+ * - 다양한 리스트 타입 지원 (전체/잉여재고/행사품목)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Eye, Package, Filter } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
@@ -6,49 +18,69 @@ import ImageWithFallback from '../common/ImageWithFallback';
 import QuoteModal from '../modals/QuoteModal';
 import { productAPI } from '../../services/api';
 
+/**
+ * ProductList 컴포넌트
+ * 
+ * @param {Object} selectedCategory - 선택된 카테고리 정보
+ * @param {string} listType - 목록 타입 ('all', 'surplus', 'event')
+ * @param {Function} onClose - 목록 닫기 콜백 함수
+ * @param {Function} onProductCountUpdate - 제품 개수 업데이트 콜백 함수
+ */
 const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCountUpdate }) => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // 상태 관리
+  const [products, setProducts] = useState([]); // 전체 제품 목록
+  const [filteredProducts, setFilteredProducts] = useState([]); // 필터링된 제품 목록
+  const [selectedProduct, setSelectedProduct] = useState(null); // 선택된 제품
+  const [showQuoteModal, setShowQuoteModal] = useState(false); // 견적 모달 표시 여부
+  const [loading, setLoading] = useState(true); // 로딩 상태
+  const [error, setError] = useState(null); // 에러 상태
 
-  // 개선된 날짜 포맷팅 함수
+  /**
+   * 날짜를 보기 좋은 형식으로 변환
+   * 입력: "2024-03-15" 또는 "20240315" 등 다양한 형식
+   * 출력: "3.15 (금)" 형식
+   * 
+   * @param {string} dateString - 날짜 문자열
+   * @returns {string} 포맷된 날짜 문자열
+   */
   const formatShipDate = (dateString) => {
     if (!dateString) return '';
     
     try {
       let date;
       
-      // 여러 가지 날짜 형식을 시도
+      // 여러 가지 날짜 형식 처리
       if (typeof dateString === 'string') {
-        // ISO 8601 형식이 아닌 경우 변환 시도
+        // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm:ss 형식
         if (dateString.includes('-')) {
-          // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm:ss 형식
           date = new Date(dateString);
-        } else if (dateString.includes('/')) {
-          // MM/DD/YYYY 또는 DD/MM/YYYY 형식
+        } 
+        // MM/DD/YYYY 또는 DD/MM/YYYY 형식
+        else if (dateString.includes('/')) {
           date = new Date(dateString);
-        } else if (dateString.length === 8) {
-          // YYYYMMDD 형식
+        } 
+        // YYYYMMDD 형식 (8자리)
+        else if (dateString.length === 8) {
           const year = dateString.substring(0, 4);
           const month = dateString.substring(4, 6);
           const day = dateString.substring(6, 8);
           date = new Date(`${year}-${month}-${day}`);
-        } else {
+        } 
+        // 기타 형식
+        else {
           date = new Date(dateString);
         }
       } else {
         date = new Date(dateString);
       }
       
-      // 날짜가 유효한지 확인
+      // 날짜 유효성 검사
       if (isNaN(date.getTime())) {
         console.warn('Invalid date:', dateString);
         return dateString; // 원본 문자열 반환
       }
       
+      // 날짜 포맷팅
       const month = date.getMonth() + 1;
       const day = date.getDate();
       const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
@@ -61,13 +93,22 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     }
   };
 
-  // 할인율 계산
+  /**
+   * 할인율 계산
+   * 
+   * @param {number} salePrice - 판매가
+   * @param {number} disPrice - 할인가
+   * @returns {number} 할인율 (0-100 사이의 정수)
+   */
   const calculateDiscountPercent = (salePrice, disPrice) => {
     if (!salePrice || !disPrice || salePrice <= disPrice) return 0;
     return Math.round(((salePrice - disPrice) / salePrice) * 100);
   };
 
-  // 제품 데이터 로드
+  /**
+   * 제품 데이터 로드
+   * listType에 따라 다른 API 또는 데이터 소스를 사용
+   */
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -76,6 +117,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
 
         // listType에 따라 API 호출
         if (listType === 'surplus') {
+          // 잉여재고 제품 로드
           const data = await productAPI.getDashItems('010');
           const processedData = data.map(item => ({
             ...item,
@@ -95,6 +137,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
           }));
           setProducts(processedData);
         } else if (listType === 'event') {
+          // 행사품목 제품 로드
           const data = await productAPI.getDashItems('020');
           const processedData = data.map(item => ({
             ...item,
@@ -114,7 +157,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
           }));
           setProducts(processedData);
         } else {
-          // 기본값: products.json 파일 사용 (기존 로직)
+          // 기본값: products.json 파일 사용
           const response = await fetch('/data/products.json');
           if (!response.ok) {
             throw new Error('제품 데이터를 불러올 수 없습니다.');
@@ -133,7 +176,10 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     loadProducts();
   }, [listType]);
 
-  // 제품 필터링
+  /**
+   * 제품 필터링
+   * 선택된 카테고리에 따라 제품 목록을 필터링
+   */
   useEffect(() => {
     if (!products.length) return;
 
@@ -156,24 +202,35 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     }
   }, [products, selectedCategory, listType, onProductCountUpdate]);
 
-  // 제품 상세보기
+  /**
+   * 제품 상세보기 모달 열기
+   * 
+   * @param {Object} product - 선택된 제품 정보
+   */
   const handleProductView = (product) => {
     setSelectedProduct(product);
     setShowQuoteModal(true);
   };
 
-  // 모달 닫기
+  /**
+   * 모달 닫기
+   */
   const handleCloseModal = () => {
     setShowQuoteModal(false);
     setSelectedProduct(null);
   };
 
-  // 가격 포맷팅
+  /**
+   * 가격을 천단위 구분 형식으로 변환
+   * 
+   * @param {number} price - 가격
+   * @returns {string} 포맷된 가격 문자열
+   */
   const formatPrice = (price) => {
     return Number(price || 0).toLocaleString('ko-KR');
   };
 
-  // 로딩 중
+  // 로딩 중 UI
   if (loading) {
     return (
       <div className="prd_loading">
@@ -183,7 +240,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     );
   }
 
-  // 에러 발생
+  // 에러 발생 UI
   if (error) {
     return (
       <div className="prd_error">
@@ -195,7 +252,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     );
   }
 
-  // 제품이 없는 경우
+  // 제품이 없는 경우 UI
   if (filteredProducts.length === 0) {
     return (
       <div className="prd_empty">
@@ -211,6 +268,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     );
   }
 
+  // 메인 UI 렌더링
   return (
     <div className="prd_container">
       {/* 필터 정보 표시 */}
@@ -231,7 +289,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             className="prd_card"
             onClick={() => handleProductView(product)}
           >
-            {/* 할인 뱃지 컨테이너 */}
+            {/* 할인 뱃지 표시 */}
             <div className="prd_badge_container">
               {(() => {
                 const discountPercent = calculateDiscountPercent(product.salePrice, product.disPrice);
@@ -246,6 +304,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             {/* 제품 이미지 */}
             <div className="prd_image_wrapper">
               {product.FILEPATH ? (
+                // 이미지가 있는 경우
                 <ImageWithFallback
                   src={product.FILEPATH}
                   alt={product.itemNm}
@@ -254,6 +313,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                   height={200}
                 />
               ) : (
+                // 이미지가 없는 경우 기본 아이콘 표시
                 <div className="prd_image prd_no_image">
                   <CiImageOff size={48} color="#ccc" />
                 </div>
@@ -264,7 +324,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                 <button 
                   className="prd_overlay_view_btn"
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // 부모 요소 클릭 이벤트 방지
                     handleProductView(product);
                   }}
                 >
@@ -276,11 +336,15 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             
             {/* 제품 정보 */}
             <div className="prd_info">
+              {/* 제품명 */}
               <h3 className="prd_name">{product.itemNm}</h3>
+              
               <div className="prd_price_container">
                 {/* 출하일 정보 */}
                 {product.shipAvDate && (
-                  <div className="prd_delivery_badge">🚛 {formatShipDate(product.shipAvDate)} 출하가능</div>
+                  <div className="prd_delivery_badge">
+                    🚛 {formatShipDate(product.shipAvDate)} 출하가능
+                  </div>
                 )}
                 
                 {/* 회사명 */}
@@ -299,8 +363,6 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                     <span className="prd_original_price">{formatPrice(product.salePrice)} 원</span>
                   )}
                 </div>
-                
-                {/* 상세보기 버튼 제거 - 이미지 호버로 이동 */}
               </div>
             </div>
           </div>
