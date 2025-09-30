@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, Calculator, Plus, Minus, Trash2 } from 'lucide-react';
+import { X, Calculator, Plus, Minus, Trash2, ImageOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { quoteAPI, commonAPI } from '../../services/api';
 import './ProductQuoteModal.css';
@@ -516,12 +516,18 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
                       <div className="product-quote-item-main">
                         {/* 상품 이미지 */}
                         <div className="product-quote-item-image">
-                          <ImageWithFallback
-                            src={currentProduct.FILEPATH || currentProduct.filePath}
-                            alt={currentProduct.itemNm}
-                            width={80}
-                            height={80}
-                          />
+                          {currentProduct.FILEPATH || currentProduct.filePath ? (
+                            <ImageWithFallback
+                              src={currentProduct.FILEPATH || currentProduct.filePath}
+                              alt={currentProduct.itemNm}
+                              width={80}
+                              height={80}
+                            />
+                          ) : (
+                            <div className="product-quote-image-placeholder">
+                              <ImageOff size={40} color="#adb5bd" strokeWidth={1.0} />
+                            </div>
+                          )}
                         </div>
 
                         {/* 상품 정보 */}

@@ -1,11 +1,12 @@
 /**
- * api.js - API 호출 함수 정의
+ * api.ts - API 호출 함수 정의
  * 
  * 주요 기능:
  * 1. 비즈니스 로직에서 사용할 API 호출 함수 제공
  * 2. 기능별로 그룹화하여 관리 (authAPI, inventoryAPI, quoteAPI 등)
  * 3. apiClient를 활용한 실제 HTTP 요청 처리
  * 4. 에러 처리 및 로깅
+ * 5. TypeScript 타입 정의로 타입 안정성 확보
  * 
  * API 그룹:
  * - authAPI: 인증 관련
@@ -13,14 +14,85 @@
  * - quoteAPI: 견적 의뢰
  * - productAPI: 제품 정보
  * - commonAPI: 공통 기능 (카테고리, 옵션, 파일)
- * 
- * 보안 개선:
- * - 하드코딩된 URL 완전 제거
- * - API_ENDPOINTS를 통한 중앙 집중식 URL 관리
  */
 
 import apiClient from './apiClient';
 import { API_ENDPOINTS, buildQueryString } from './apiConfig';
+
+// ========== 타입 정의 ==========
+
+// 로그인 응답 타입
+interface LoginResponse {
+  userId: string;
+  userNm: string;
+  token?: string;
+  [key: string]: any;
+}
+
+// 재고 아이템 타입
+interface InventoryItem {
+  itemCd: string;
+  itemNm: string;
+  quantity: number;
+  [key: string]: any;
+}
+
+// 견적의뢰 타입
+interface QuoteRequest {
+  qtNo?: string;
+  userId: string;
+  items: QuoteItem[];
+  [key: string]: any;
+}
+
+interface QuoteItem {
+  itemCd: string;
+  itemNm: string;
+  quantity: number;
+  price?: number;
+  [key: string]: any;
+}
+
+// 제품 타입
+interface Product {
+  itemCd: string;
+  itemNm: string;
+  price: number;
+  compNm?: string;
+  filePath?: string;
+  [key: string]: any;
+}
+
+// 카테고리 타입
+interface Category {
+  code: string;
+  name: string;
+  [key: string]: any;
+}
+
+// 옵션값 타입
+interface OptionValue {
+  optCd: string;
+  optValCd: string;
+  optValNm: string;
+  [key: string]: any;
+}
+
+// 파일 업로드 응답 타입
+interface FileUploadResponse {
+  fileId: string;
+  fileUrl: string;
+  [key: string]: any;
+}
+
+// 공통 코드 타입
+interface CommonCode {
+  code: string;
+  name: string;
+  [key: string]: any;
+}
+
+// ========== API 함수 정의 ==========
 
 /**
  * 인증 관련 API
@@ -29,13 +101,13 @@ export const authAPI = {
   /**
    * 로그인
    * 
-   * @param {string} userId - 사용자 ID
-   * @param {string} password - 비밀번호
-   * @returns {Promise<Object>} 로그인 응답 (사용자 정보, 토큰 등)
+   * @param userId - 사용자 ID
+   * @param password - 비밀번호
+   * @returns 로그인 응답 (사용자 정보, 토큰 등)
    */
-  login: async (userId, password) => {
+  login: async (userId: string, password: string): Promise<LoginResponse> => {
     try {
-      const response = await apiClient.post(
+      const response = await apiClient.post<LoginResponse>(
         API_ENDPOINTS.LOGIN(userId.trim(), password),
         {},
         { includeAuth: false } // 로그인은 인증 토큰 불필요
@@ -50,9 +122,9 @@ export const authAPI = {
    * 로그아웃
    * localStorage의 인증 정보 제거
    * 
-   * @returns {Promise<Object>} 로그아웃 결과
+   * @returns 로그아웃 결과
    */
-  logout: async () => {
+  logout: async (): Promise<{ success: boolean }> => {
     try {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userInfo');
@@ -70,12 +142,12 @@ export const inventoryAPI = {
   /**
    * 자사재고현황 조회 (CUST0010)
    * 
-   * @param {string} userId - 사용자 ID
-   * @returns {Promise<Array>} 재고 목록
+   * @param userId - 사용자 ID
+   * @returns 재고 목록
    */
-  getCompanyInventory: async (userId) => {
+  getCompanyInventory: async (userId: string): Promise<InventoryItem[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<InventoryItem[]>(
         API_ENDPOINTS.CUST.COMPANY_INVENTORY(userId)
       );
       return response;
@@ -87,12 +159,12 @@ export const inventoryAPI = {
   /**
    * 시리얼/로트 재고 조회 (CUST0010_LOT)
    * 
-   * @param {string} userId - 사용자 ID
-   * @returns {Promise<Array>} 로트별 재고 목록
+   * @param userId - 사용자 ID
+   * @returns 로트별 재고 목록
    */
-  getLotInventory: async (userId) => {
+  getLotInventory: async (userId: string): Promise<InventoryItem[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<InventoryItem[]>(
         API_ENDPOINTS.CUST.LOT_INVENTORY(userId)
       );
       return response;
@@ -109,13 +181,13 @@ export const quoteAPI = {
   /**
    * 견적의뢰 목록 조회 (CUST0040)
    * 
-   * @param {string} ym - 조회 년월 (YYYYMM 형식)
-   * @param {string} userId - 사용자 ID
-   * @returns {Promise<Array>} 견적의뢰 목록
+   * @param ym - 조회 년월 (YYYYMM 형식)
+   * @param userId - 사용자 ID
+   * @returns 견적의뢰 목록
    */
-  getQuoteRequests: async (ym, userId) => {
+  getQuoteRequests: async (ym: string, userId: string): Promise<QuoteRequest[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<QuoteRequest[]>(
         API_ENDPOINTS.CUST.QUOTE_REQUEST(ym, userId)
       );
       return response;
@@ -127,10 +199,10 @@ export const quoteAPI = {
   /**
    * 견적의뢰 등록 (MrsQtRequest)
    * 
-   * @param {Object} requestData - 견적의뢰 데이터
-   * @returns {Promise<Object>} 등록 결과
+   * @param requestData - 견적의뢰 데이터
+   * @returns 등록 결과
    */
-  createQuoteRequest: async (requestData) => {
+  createQuoteRequest: async (requestData: QuoteRequest): Promise<any> => {
     try {
       const response = await apiClient.post(
         API_ENDPOINTS.CUST.QUOTE_CREATE(),
@@ -150,17 +222,22 @@ export const productAPI = {
   /**
    * 제품 목록 조회 (CUST0020)
    * 
-   * @param {string} itemName - 제품명 검색어
-   * @param {string} itemGroupLCd - 대분류 코드
-   * @param {string} itemGroupMCd - 중분류 코드
-   * @param {string} itemGroupSCd - 소분류 코드
-   * @returns {Promise<Array>} 제품 목록
+   * @param itemName - 제품명 검색어
+   * @param itemGroupLCd - 대분류 코드
+   * @param itemGroupMCd - 중분류 코드
+   * @param itemGroupSCd - 소분류 코드
+   * @returns 제품 목록
    */
-  getProductList: async (itemName = '', itemGroupLCd = '', itemGroupMCd = '', itemGroupSCd = '') => {
+  getProductList: async (
+    itemName: string = '', 
+    itemGroupLCd: string = '', 
+    itemGroupMCd: string = '', 
+    itemGroupSCd: string = ''
+  ): Promise<Product[]> => {
     try {
-      const params = {};
+      const params: Record<string, string> = {};
       
-      // 검색 조건이 있는 경우만 쿼리 파라미터 추가
+      // 검색 조건이 있는 경우만 파라미터 추가
       if (itemName.trim()) {
         params.p_itemNm = itemName.trim();
       }
@@ -177,7 +254,7 @@ export const productAPI = {
       const queryString = buildQueryString(params);
       const endpoint = API_ENDPOINTS.PRODUCT.PRODUCT_LIST() + queryString;
       
-      const response = await apiClient.get(endpoint);
+      const response = await apiClient.get<Product[]>(endpoint);
       return response;
     } catch (error) {
       throw error;
@@ -187,12 +264,12 @@ export const productAPI = {
   /**
    * 대시보드 아이템 조회 (잉여재고, 행사품목)
    * 
-   * @param {string} itemDivCd - 아이템 구분 코드
-   * @returns {Promise<Array>} 대시보드 아이템 목록
+   * @param itemDivCd - 아이템 구분 코드
+   * @returns 대시보드 아이템 목록
    */
-  getDashItems: async (itemDivCd) => {
+  getDashItems: async (itemDivCd: string): Promise<Product[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Product[]>(
         API_ENDPOINTS.PRODUCT.DASH_ITEMS(itemDivCd)
       );
       return response;
@@ -204,11 +281,11 @@ export const productAPI = {
   /**
    * 카테고리 목록 조회
    * 
-   * @returns {Promise<Array>} 카테고리 목록
+   * @returns 카테고리 목록
    */
-  getCategories: async () => {
+  getCategories: async (): Promise<Category[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Category[]>(
         API_ENDPOINTS.PRODUCT.CATEGORIES()
       );
       return response;
@@ -225,11 +302,11 @@ export const commonAPI = {
   /**
    * 대분류 카테고리 조회
    * 
-   * @returns {Promise<Array>} 대분류 목록
+   * @returns 대분류 목록
    */
-  getCategoryL: async () => {
+  getCategoryL: async (): Promise<Category[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Category[]>(
         API_ENDPOINTS.COMMON.CATEGORY_L()
       );
       return response;
@@ -241,11 +318,11 @@ export const commonAPI = {
   /**
    * 중분류 카테고리 조회
    * 
-   * @returns {Promise<Array>} 중분류 목록
+   * @returns 중분류 목록
    */
-  getCategoryM: async () => {
+  getCategoryM: async (): Promise<Category[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Category[]>(
         API_ENDPOINTS.COMMON.CATEGORY_M()
       );
       return response;
@@ -257,11 +334,11 @@ export const commonAPI = {
   /**
    * 소분류 카테고리 조회
    * 
-   * @returns {Promise<Array>} 소분류 목록
+   * @returns 소분류 목록
    */
-  getCategoryS: async () => {
+  getCategoryS: async (): Promise<Category[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Category[]>(
         API_ENDPOINTS.COMMON.CATEGORY_S()
       );
       return response;
@@ -273,12 +350,12 @@ export const commonAPI = {
   /**
    * 옵션값 조회
    * 
-   * @param {string} optCd - 옵션 코드
-   * @returns {Promise<Array>} 옵션값 목록
+   * @param optCd - 옵션 코드
+   * @returns 옵션값 목록
    */
-  getOptionValues: async (optCd) => {
+  getOptionValues: async (optCd: string): Promise<OptionValue[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<OptionValue[]>(
         API_ENDPOINTS.COMMON.OPTION_VALUES(optCd)
       );
       return response;
@@ -290,13 +367,13 @@ export const commonAPI = {
   /**
    * 파일 업로드
    * 
-   * @param {File} file - 업로드할 파일
-   * @param {Object} additionalData - 추가 데이터
-   * @returns {Promise<Object>} 업로드 결과 (파일 ID, URL 등)
+   * @param file - 업로드할 파일
+   * @param additionalData - 추가 데이터
+   * @returns 업로드 결과 (파일 ID, URL 등)
    */
-  uploadFile: async (file, additionalData = {}) => {
+  uploadFile: async (file: File, additionalData: Record<string, any> = {}): Promise<FileUploadResponse> => {
     try {
-      const response = await apiClient.uploadFile(
+      const response = await apiClient.uploadFile<FileUploadResponse>(
         API_ENDPOINTS.COMMON.FILE_UPLOAD(),
         file,
         additionalData
@@ -310,12 +387,12 @@ export const commonAPI = {
   /**
    * 파일 다운로드
    * 
-   * @param {string} fileId - 파일 ID
-   * @returns {Promise<Blob>} 파일 데이터
+   * @param fileId - 파일 ID
+   * @returns 파일 데이터
    */
-  downloadFile: async (fileId) => {
+  downloadFile: async (fileId: string): Promise<Blob> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<Blob>(
         API_ENDPOINTS.COMMON.FILE_DOWNLOAD(fileId),
         {},
         { 
@@ -333,12 +410,12 @@ export const commonAPI = {
   /**
    * 공통 코드 목록 조회
    * 
-   * @param {string} codeType - 코드 타입
-   * @returns {Promise<Array>} 코드 목록
+   * @param codeType - 코드 타입
+   * @returns 코드 목록
    */
-  getCodeList: async (codeType) => {
+  getCodeList: async (codeType: string): Promise<CommonCode[]> => {
     try {
-      const response = await apiClient.get(
+      const response = await apiClient.get<CommonCode[]>(
         API_ENDPOINTS.COMMON.CODE_LIST(codeType)
       );
       return response;

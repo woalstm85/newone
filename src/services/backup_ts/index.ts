@@ -1,5 +1,5 @@
 /**
- * index.js - 서비스 레이어 통합 export
+ * index.ts - 서비스 레이어 통합 export
  * 
  * 주요 기능:
  * 모든 서비스 모듈을 한 곳에서 import할 수 있도록 통합 제공
@@ -13,7 +13,7 @@
  *    import { authAPI, productAPI } from './services';
  * 
  * 3. 전체 API import:
- *    import api from './services';
+ *    import api from './services/api';
  *    api.auth.login(userId, password);
  */
 

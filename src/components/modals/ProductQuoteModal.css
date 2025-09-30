@@ -166,6 +166,16 @@
   object-fit: cover;
 }
 
+/* 이미지 플레이스홀더 */
+.product-quote-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+}
+
 .product-quote-item-info {
   flex: 1;
   min-width: 0;

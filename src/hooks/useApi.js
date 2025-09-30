@@ -13,7 +13,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { inventoryAPI, authAPI } from '../services';
+import { inventoryAPI, authAPI } from '../services/api';
 
 /**
  * useApi - 범용 API 호출 훅
