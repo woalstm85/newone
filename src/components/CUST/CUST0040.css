@@ -135,6 +135,7 @@
   cursor: pointer;
   margin-bottom: 8px;
   transition: all 0.3s ease;
+
   user-select: none;
   position: relative;
   overflow: hidden;
@@ -907,6 +908,7 @@
 /* 모바일에서 검색 토글 버튼 표시 */
 @media (max-width: 768px) {
   .cust0040-mobile-search-toggle {
+    min-height: 32px;;
     display: flex;
   }
   

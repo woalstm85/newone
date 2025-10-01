@@ -793,6 +793,10 @@
     flex-direction: column;
     gap: 16px;
   }
+
+   .cust0020-search-field {
+    width: 100%;
+  }
   
   .cust0020-search-field input,
   .cust0020-search-field select {
@@ -811,6 +815,12 @@
 }
 
 @media (max-width: 480px) {
+
+  .cust0020-program-header
+  {
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }  
   .cust0020-program-header h1 {
     font-size: 1rem;
   }
