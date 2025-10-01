@@ -1,31 +1,42 @@
-/* ===================================================================
-   1. 기본 레이아웃 및 헤더 스타일
-   =================================================================== */
+/**
+ * CUST0020.css - 제품정보 관리 스타일
+ * 
+ * 스타일 구조:
+ * 1. 컨테이너 및 헤더
+ * 2. 검색 영역
+ * 3. 페이지네이션 정보
+ * 4. 리스트 뷰 (테이블)
+ * 5. 이미지 뷰 (카드)
+ * 6. 페이지네이션
+ * 7. 반응형 미디어 쿼리
+ */
+
+/* ==================== 1. 컨테이너 및 헤더 ==================== */
+
 .cust0020-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* auto에서 hidden으로 변경하여 헤더/검색영역 고정 */
-  padding: 0 16px; /* 데스크톱 기본 패딩 */
-}
-
-.cust0020-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  overflow: hidden;
+  padding: 0 16px;
 }
 
 .cust0020-program-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   margin-bottom: 8px;
   padding: 8px 16px;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: white;
+}
+
+.cust0020-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cust0020-program-header h1 {
@@ -35,7 +46,7 @@
   font-size: 1.0rem;  
 }
 
-/* 뷰 모드 선택 토글 */
+/* 뷰 모드 토글 */
 .cust0020-view-toggle {
   display: flex;
   gap: 8px;
@@ -70,17 +81,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ===================================================================
-   2. 검색 영역 스타일
-   =================================================================== */
-.cust0020-search-section {
+/* ==================== 2. 검색 영역 ==================== */
 
+.cust0020-search-section {
   position: relative;
 }
 
-/* 모바일 검색 토글 버튼 (데스크톱에서는 숨김) */
+/* 모바일 검색 토글 버튼 */
 .cust0020-mobile-search-toggle {
-  display: none; /* 기본적으로 숨김, 모바일 미디어 쿼리에서 표시 */
+  display: none;
   align-items: center;
   justify-content: space-between;
   padding: 0px 12px;
@@ -91,39 +100,15 @@
   margin-bottom: 8px;
   transition: all 0.3s ease;
   user-select: none;
-  position: relative;
-  overflow: hidden;
   min-height: 32px;
   box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
   font-size: 14px;
-}
-
-.cust0020-mobile-search-toggle::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
-}
-
-.cust0020-mobile-search-toggle:active::before {
-  width: 300px;
-  height: 300px;
 }
 
 .cust0020-mobile-search-toggle:hover {
   background: #138496;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
-}
-
-.cust0020-mobile-search-toggle:active {
-  transform: scale(0.98);
 }
 
 /* 검색 컨테이너 */
@@ -173,12 +158,12 @@
 
 .cust0020-search-field input,
 .cust0020-search-field select {
-  padding: 8px 15px; /* 패딩을 늘려서 높이 증가 */
+  padding: 8px 15px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  min-width: 200px; /* 데스크톱에서 제품명 입력창을 더욱 넓게 */
+  min-width: 200px;
   font-size: 0.9rem;
-  min-height: 25px; /* 최소 높이 명시적 지정 */
+  min-height: 25px;
 }
 
 .cust0020-search-field input:focus,
@@ -194,11 +179,9 @@
   margin-left: auto;
 }
 
-.cust0020-search-btn {
+.cust0020-search-btn,
+.cust0020-reset-btn {
   padding: 6px 12px;
-  border: 1px solid #007bff;
-  background: #007bff;
-  color: white;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
@@ -208,6 +191,12 @@
   justify-content: center;
   gap: 4px;
   min-height: 32px;
+}
+
+.cust0020-search-btn {
+  border: 1px solid #007bff;
+  background: #007bff;
+  color: white;
 }
 
 .cust0020-search-btn:hover {
@@ -215,33 +204,17 @@
 }
 
 .cust0020-reset-btn {
-  padding: 6px 12px;
   border: 1px solid #6c757d;
   background: #6c757d;
   color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 32px;
 }
 
 .cust0020-reset-btn:hover {
   background: #545b62;
 }
 
-.cust0020-search-section.swiping {
-  transform: translateY(-2px);
-  transition: transform 0.1s ease-out;
-}
+/* ==================== 3. 페이지네이션 정보 ==================== */
 
-/* ===================================================================
-   3. 페이지네이션 정보 및 설정
-   =================================================================== */
 .cust0020-pagination-info {
   display: flex;
   justify-content: space-between;
@@ -277,9 +250,8 @@
   font-size: 0.9rem;
 }
 
-/* ===================================================================
-   4. 리스트 뷰 (Grid) 스타일
-   =================================================================== */
+/* ==================== 4. 리스트 뷰 (테이블) ==================== */
+
 .cust0020-grid-container {
   flex: 1;
   border-radius: 6px;
@@ -337,7 +309,7 @@
   cursor: pointer;
 }
 
-/* 테이블 이미지 및 오버레이 */
+/* 테이블 이미지 */
 .cust0020-table-image-container {
   position: relative;
   width: 50px;
@@ -404,10 +376,9 @@
   border-radius: 4px;
   color: #ccc;
   margin: 0 auto;
-  box-sizing: border-box;
 }
 
-/* 리스트 뷰 내 데이터 표시 스타일 */
+/* 테이블 정렬 */
 .cust0020-center-column { 
   text-align: center; 
 }
@@ -426,7 +397,7 @@
   color: #333;
 }
 
-/* 제품명 클릭 가능 스타일 */
+/* 제품명 클릭 */
 .cust0020-product-name {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -437,18 +408,6 @@
   background-color: #e3f2fd !important;
   color: #1976d2;
   font-weight: 600;
-}
-
-/* 제품명 호버 툴팁 애니메이션 */
-@keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .cust0020-product-name:hover::after {
@@ -467,10 +426,19 @@
   animation: tooltipFadeIn 0.2s ease;
 }
 
-/* ===================================================================
-   5. 이미지 뷰 (Card) 스타일
-   =================================================================== */
-/* 이미지 뷰 컨테이너 - 스크롤 영역 */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== 5. 이미지 뷰 (카드) ==================== */
+
 .cust0020-image-view-container {
   flex: 1;
   overflow: auto;
@@ -490,7 +458,6 @@
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
-  position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -501,7 +468,6 @@
 
 .cust0020-inventory-image-card:hover .cust0020-inventory-image-header {
   background-color: #5a9de8;
-  border-bottom: 1px solid #5a9de8;
 }
 
 .cust0020-inventory-image-card:hover .cust0020-inventory-image-header h4 {
@@ -544,13 +510,10 @@
   letter-spacing: 0.5px;
   white-space: nowrap;
   flex-shrink: 0;
-  align-self: flex-start;
-  height: fit-content;
   background-color: #d4edda;
   color: #155724;
 }
 
-/* 카드 콘텐츠 */
 .cust0020-inventory-image-content {
   display: flex;
   padding: 15px;
@@ -561,15 +524,10 @@
 
 .cust0020-inventory-image-section {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
   width: 120px;
 }
 
 .cust0020-inventory-image-placeholder {
-  flex-shrink: 0;
   width: 120px;
   height: 120px;
   background-color: #f8f9fa;
@@ -586,7 +544,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
   transition: transform 0.3s ease;
   border-radius: 7px;
 }
@@ -606,7 +563,6 @@
   border-radius: 7px;
 }
 
-/* 이미지 오버레이 (확대 버튼) */
 .cust0020-image-overlay {
   position: absolute;
   top: 0;
@@ -637,7 +593,6 @@
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
   gap: 6px !important;
   transition: all 0.2s ease !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
@@ -649,14 +604,12 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* 상세 정보 섹션 */
 .cust0020-inventory-item-details {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 120px;
-  padding-top: 4px;
 }
 
 .cust0020-inventory-item-specs {
@@ -669,10 +622,8 @@
 .cust0020-inventory-spec-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid #f5f5f5;
-  min-height: 24px;
 }
 
 .cust0020-inventory-spec-row:last-child {
@@ -683,8 +634,7 @@
   font-size: 13px;
   color: #666;
   font-weight: 500;
-  min-width: 60px;
-  flex-shrink: 0;
+  min-width: 70px;
 }
 
 .cust0020-inventory-spec-value {
@@ -701,7 +651,6 @@
   text-align: right;
 }
 
-/* 상품 정보 버튼 */
 .cust0020-product-info-long-btn {
   display: flex;
   align-items: center;
@@ -710,7 +659,7 @@
   width: calc(100% - 30px);
   margin: 12px 15px 15px 15px;
   padding: 8px 14px;
-  background: #6f42c1; /* 퍼플 계열 */
+  background: #6f42c1;
   color: white;
   border: none;
   border-radius: 6px;
@@ -719,10 +668,6 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  align-self: flex-end;
 }
 
 .cust0020-product-info-long-btn:hover {
@@ -731,21 +676,13 @@
   box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
 }
 
-.cust0020-product-info-long-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
-}
-
-/* 데이터 없음 메시지 */
 .cust0020-no-data {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 60px 20px;
   color: #6b7280;
-  text-align: center;
 }
 
 .cust0020-no-data svg {
@@ -759,9 +696,8 @@
   font-weight: 500;
 }
 
-/* ===================================================================
-   6. 페이지네이션
-   =================================================================== */
+/* ==================== 6. 페이지네이션 ==================== */
+
 .cust0020-pagination {
   display: flex;
   justify-content: center;
@@ -820,336 +756,76 @@
   border-color: #3b82f6;
 }
 
-/* ===================================================================
-   7. 로딩 및 애니메이션
-   =================================================================== */
-/* (MySpinner 컴포넌트 내부에서 처리될 가능성이 높지만, 필요한 경우를 위해 유지) */
-.cust0020-loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
+/* ==================== 7. 반응형 미디어 쿼리 ==================== */
 
-.cust0020-loading-spinner {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.cust0020-spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #007bff;
-  border-radius: 50%;
-  animation: cust0020-spin 1s linear infinite;
-}
-
-@keyframes cust0020-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ===================================================================
-   8. 반응형 미디어 쿼리
-   =================================================================== */
-
-/* 태블릿 크기 (1024px 이하) */
 @media (max-width: 1024px) {
   .cust0020-search-row {
     gap: 16px;
   }
   
   .cust0020-search-field input {
-    min-width: 150px; /* 태블릿에서 적당한 크기 */
-    min-height: 36px; /* 태블릿에서도 적절한 높이 */
+    min-width: 150px;
   }
 }
 
-/* 태블릿 세로/모바일 가로 (768px 이하) */
 @media (max-width: 768px) {
   .cust0020-container {
     padding: 0 8px;
   }
   
   .cust0020-mobile-search-toggle {
-    display: flex; /* 모바일에서 토글 버튼 표시 */
+    display: flex;
   }
   
-  .cust0020-search-container {
-    /* 기본적으로 숨김 상태로 설정 */
+  .cust0020-search-container.hidden {
     max-height: 0;
     padding: 0;
-    border: none;
-    margin: 0;
     opacity: 0;
-    transform: scaleY(0);
   }
   
   .cust0020-search-container.visible {
-    /* 검색 영역 표시 */
-    max-height: 350px; /* 검색 영역 높이를 늘려서 버튼이 안 잘리도록 */
+    max-height: 350px;
     padding: 12px;
-    border: 1px solid #BFBFBF;
-    margin-bottom: 8px;
     opacity: 1;
-    transform: scaleY(1);
   }
   
   .cust0020-search-row {
     flex-direction: column;
-    align-items: stretch;
     gap: 16px;
-  }
-  
-  .cust0020-search-field {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .cust0020-search-field label {
-    font-size: 0.9rem;
-    min-width: 65px;
-    flex-shrink: 0;
   }
   
   .cust0020-search-field input,
   .cust0020-search-field select {
     flex: 1;
-    padding: 8px 14px; /* 패딩 줄임 */
-    border: 1px solid #BFBFBF;
-    border-radius: 6px;
-    font-size: 16px;
-    box-sizing: border-box;
-    min-height: 40px; /* 높이를 다른 요소와 통일 */
+
   }
   
   .cust0020-search-buttons {
     margin-left: 0;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-  }
-
-  .cust0020-view-btn {
-    padding: 6px 10px;
-    min-width: 36px;
   }
   
-  .cust0020-search-btn,
-  .cust0020-reset-btn {
-    flex: 1;
-    padding: 6px 12px; /* 모바일에서 패딩 더 줄임 */
-    font-size: 0.85rem;
-    border-radius: 6px;
-    min-height: 36px; /* 모바일에서 높이 줄임 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  /* 페이지네이션 정보 모바일 최적화 */
-  .cust0020-pagination-info {
-    flex-wrap: nowrap;
-  }
-  
-  .cust0020-data-info {
-    font-size: 0.8rem;
-  }
-  
-  .cust0020-page-size-selector label {
-    display: none;
-  }
-  
-  .cust0020-page-size-selector select {
-    min-width: 60px;
-    font-size: 0.8rem;
-  }
-
-  .cust0020-pagination {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  
-  /* 리스트 뷰 모바일 최적화 */
-  .cust0020-grid-wrapper th:first-child {
-    width: 70px;
-  }
-  
-  /* 이미지 뷰 모바일 최적화 */
   .cust0020-inventory-image-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 12px;
   }
-  
-  .cust0020-inventory-image-content {
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 12px;
-  }
-  
-  .cust0020-inventory-image-section,
-  .cust0020-inventory-image-placeholder {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .cust0020-inventory-item-details {
-    min-height: 100px;
-  }
-
-  .cust0020-inventory-spec-label,
-  .cust0020-inventory-spec-value,
-  .cust0020-inventory-spec-client {
-    font-size: 11px;
-  }
-
-  .cust0020-product-info-long-btn {
-    margin: 8px 12px 12px 12px;
-    padding: 8px 12px;
-    font-size: 11px;
-  }
 }
 
-/* 터치 스크린 기기 (768px 이상이어도 터치스크린이면 큰 버튼) */
-@media (pointer: coarse) {
-  .cust0020-mobile-search-toggle {
-    min-height: 48px;
-  }
-  
-  .cust0020-search-field input,
-  .cust0020-search-field select {
-    min-height: 44px;
-    font-size: 16px;
-  }
-  
-  .cust0020-search-btn,
-  .cust0020-reset-btn {
-    min-height: 44px;
-    padding: 8px 16px;
-  }
-}
-
-/* 소형 모바일 (480px 이하) */
 @media (max-width: 480px) {
-  .cust0020-container {
-    padding: 0 6px;
-  }
-
-.cust0020-program-header {
-  margin-top: 4px;
-}  
-
   .cust0020-program-header h1 {
     font-size: 1rem;
-  }  
-  
-  .cust0020-search-container.visible {
-    padding: 14px; /* 패딩 약간 증가 */
-    max-height: 320px; /* 높이 약간 증가 */
   }
   
-  .cust0020-search-field label {
-    min-width: 55px;
-    font-size: 0.85rem;
-  }
-  
-  .cust0020-search-field input,
-  .cust0020-search-field select {
-    padding: 10px 12px;
-  }
-  
-  .cust0020-search-btn,
-  .cust0020-reset-btn {
-    flex: 1; /* flex: 1 추가하여 버튼도 균등하게 확장 */
-    padding: 6px 12px; /* 소형 모바일에서 패딩 줄임 */
-    font-size: 0.85rem;
-    border-radius: 6px;
-    min-height: 34px; /* 소형 모바일에서 높이 더 줄임 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .cust0020-page-size-selector select {
-    font-size: 14px;
-  }
-
-  .cust0020-pagination {
-    gap: 2px;
-    padding: 12px 0;
-  }
-
-  .cust0020-page-btn,
-  .cust0020-page-number {
-    padding: 4px 8px;
-    font-size: 0.8rem;
-    min-width: 28px;
-  }
-
-  .cust0020-image-grid {
-    grid-template-columns: 1fr; /* 하나의 컬럼으로 변경 */
-    gap: 8px;
-  }
-
-  .cust0020-grid-wrapper th:first-child {
-    width: 60px;
-    font-size: 0.8rem;
-  }
-
-  .cust0020-product-info-long-btn {
-    font-size: 11px;
-    padding: 8px 8px;
+  .cust0020-inventory-image-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* 초소형 모바일 (360px 이하) */
 @media (max-width: 360px) {
   .cust0020-container {
     padding: 0 4px;
   }
   
-  .cust0020-search-field label {
-    min-width: 50px;
-    font-size: 0.8rem;
-  }
-  
-  .cust0020-search-btn,
-  .cust0020-reset-btn {
-    padding: 6px 10px; /* 초소형에서 패딩 더 줄임 */
-    font-size: 0.8rem;
-    min-height: 32px; /* 초소형에서 높이 더 줄임 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-  }
-  
-  .cust0020-pagination-info {
-    font-size: 0.75rem;
-  }
-
   .cust0020-page-btn span {
-    display: none; /* '이전', '다음' 텍스트 숨김 */
-  }
-
-  .cust0020-grid-wrapper th:first-child {
-    width: 50px;
-    font-size: 0.75rem;
+    display: none;
   }
 }
