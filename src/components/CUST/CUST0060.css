@@ -129,22 +129,20 @@
 
 /* 모바일 검색 토글 버튼 (데스크톱에서는 숨김) */
 .cust0060-mobile-search-toggle {
-  display: none;
+  display: none; /* 평소엔 숨김, 모바일 뷰에서 flex로 변경 */
   align-items: center;
   justify-content: space-between;
   padding: 0px 12px;
   background: #17a2b8;
   color: white;
   border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
   margin-bottom: 8px;
   transition: all 0.3s ease;
   user-select: none;
-  position: relative;
-  overflow: hidden;
   min-height: 32px;
   box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
-  font-size: 14px;
 }
 
 .cust0060-mobile-search-toggle::before {
@@ -1778,7 +1776,7 @@
 /* 터치 스크린 기기 */
 @media (pointer: coarse) {
   .cust0060-mobile-search-toggle {
-    min-height: 48px;
+    display: flex;
   }
   
   .cust0060-search-field input,
