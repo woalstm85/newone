@@ -1,3 +1,18 @@
+/**
+ * ============================================================================
+ * CUST0040.js - 견적의뢰 관리
+ * ============================================================================
+ * 주요 기능:
+ * 1. 견적의뢰 목록 조회 (월별 조회)
+ * 2. 리스트/이미지 뷰 모드 전환
+ * 3. 견적번호, 고객명, 담당자명 검색
+ * 4. 견적의뢰 상세 정보 모달
+ * 5. 진행상태별 색상 구분
+ * 6. 페이지네이션 및 페이지 크기 조절
+ * 7. 반응형 디자인 (모바일/태블릿/데스크톱)
+ * ============================================================================
+ */
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, FileText, List, ImageIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -9,16 +24,14 @@ import MySpinner from '../common/MySpinner';
 import './CUST0040.css';
 
 const CUST0040 = () => {
-  // 상태 관리
+  // ==================== 상태 관리 ====================
+  
+  // 데이터 및 로딩
   const [quotesData, setQuotesData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
   
-  // 뷰 모드 상태 추가
-  const [viewMode, setViewMode] = useState('image'); // 기본값을 'image'로 변경
-  
-  // 검색 조건
+  // 뷰 모드 및 검색
+  const [viewMode, setViewMode] = useState('image');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -28,31 +41,98 @@ const CUST0040 = () => {
   const [isQuoteDetailModalOpen, setIsQuoteDetailModalOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
 
-  // 검색 영역 표시 상태 추가 - 모바일에서는 기본 닫혀있도록
-  const [isSearchVisible, setIsSearchVisible] = useState(() => {
-    return window.innerWidth > 768; // 768px 초과시 열림, 이하는 닫힘
-  });
+  // 검색 영역 토글 (모바일)
+  const [isSearchVisible, setIsSearchVisible] = useState(window.innerWidth > 768);
   
-  // 스와이프 제스처용 ref와 상태 추가
-  const searchToggleRef = useRef(null);
+  // 스와이프 제스처
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  
-  // 스와이프 최소 거리 (픽셀)
   const minSwipeDistance = 50;
-
-  // 컨텍스트
+  
+  // 페이지네이션
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  
+  // Context
   const { globalState } = useAuth();
   const { currentMenuTitle } = useMenu();
+  const searchToggleRef = useRef(null);
 
-  // 현재 년월 기본값 설정
+  // ==================== 초기화 ====================
+  
+  /**
+   * 현재 년월 기본값 설정
+   */
   useEffect(() => {
     const currentDate = new Date();
     const currentYM = `${currentDate.getFullYear()}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
     setSelectedMonth(currentYM);
   }, []);
 
-  // 페이지네이션 계산
+  // ==================== 유틸리티 함수 ====================
+  
+  /**
+   * 날짜 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    if (dateString.length === 8) {
+      const year = dateString.substring(0, 4);
+      const month = dateString.substring(4, 6);
+      const day = dateString.substring(6, 8);
+      return `${year}-${month}-${day}`;
+    }
+    return dateString;
+  };
+
+  /**
+   * 금액 포맷팅
+   */
+  const formatAmount = (amount) => {
+    if (!amount || amount === 0) return '0';
+    return new Intl.NumberFormat('ko-KR').format(amount);
+  };
+
+  /**
+   * 진행상태에 따른 배지 클래스 반환
+   */
+  const getStatusBadgeClass = (status) => {
+    if (!status) return 'status-default';
+    const statusText = status.toString().toLowerCase();
+    
+    if (statusText.includes('접수') || statusText === '접수') {
+      return 'status-received';
+    } else if (statusText.includes('처리') || statusText.includes('진행')) {
+      return 'status-processing';
+    } else if (statusText.includes('완료')) {
+      return 'status-completed';
+    }
+    return 'status-default';
+  };
+
+  /**
+   * 페이지 번호 생성
+   */
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
+  // ==================== 페이지네이션 ====================
+  
   const { currentItems, totalPages, startIndex, endIndex, totalItems } = useMemo(() => {
     const startIdx = (currentPage - 1) * itemsPerPage;
     const endIdx = startIdx + itemsPerPage;
@@ -79,7 +159,115 @@ const CUST0040 = () => {
     };
   }, [quotesData, currentPage, itemsPerPage, searchTerm]);
 
-  // API 호출 함수
+  // ==================== 이벤트 핸들러 ====================
+  
+  /**
+   * 검색 실행
+   */
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchQuotesData();
+    if (window.innerWidth <= 768) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  /**
+   * 뷰 모드 변경
+   */
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    setCurrentPage(1);
+  };
+
+  /**
+   * 검색 영역 토글
+   */
+  const toggleSearchArea = () => {
+    setIsSearchVisible(!isSearchVisible);
+  };
+
+  /**
+   * 스와이프 제스처 처리
+   */
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+    const isDownSwipe = distance < -minSwipeDistance;
+
+    if (isDownSwipe && !isSearchVisible) {
+      setIsSearchVisible(true);
+    }
+    else if (isUpSwipe && isSearchVisible) {
+      setIsSearchVisible(false);
+    }
+  };
+
+  /**
+   * 검색 영역 외부 클릭 시 닫기 (모바일)
+   */
+  const handleClickOutside = useCallback((event) => {
+    if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
+      if (window.innerWidth <= 768 && isSearchVisible) {
+        setIsSearchVisible(false);
+      }
+    }
+  }, [isSearchVisible]);
+
+  /**
+   * 견적의뢰 상세 모달 열기
+   */
+  const handleQuoteDetailClick = (quote) => {
+    setSelectedQuote(quote);
+    setIsQuoteDetailModalOpen(true);
+  };
+
+  /**
+   * 견적의뢰 상세 모달 닫기
+   */
+  const handleQuoteDetailClose = () => {
+    setIsQuoteDetailModalOpen(false);
+    setSelectedQuote(null);
+  };
+
+  /**
+   * 행 클릭 처리
+   */
+  const handleRowClick = (quote) => {
+    handleQuoteDetailClick(quote);
+  };
+
+  /**
+   * 페이지 변경
+   */
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  /**
+   * 페이지 크기 변경
+   */
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
+  // ==================== 데이터 로드 ====================
+  
+  /**
+   * API 데이터 조회
+   */
   const fetchQuotesData = useCallback(async () => {
     if (!globalState.G_USER_ID || !selectedMonth) {
       return;
@@ -106,67 +294,8 @@ const CUST0040 = () => {
     }
   }, [selectedMonth, globalState.G_USER_ID]);
 
-  // 검색 버튼 클릭
-  const handleSearch = () => {
-    setCurrentPage(1);
-    fetchQuotesData();
-    // 모바일에서 검색 후 검색영역 닫기
-    if (window.innerWidth <= 768) {
-      setIsSearchVisible(false);
-    }
-  };
-
-  // 뷰 모드 변경 함수
-  const handleViewModeChange = (mode) => {
-    setViewMode(mode);
-    setCurrentPage(1); // 뷰 모드 변경 시 페이지 초기화
-  };
-
-  // 검색영역 토글
-  const toggleSearchArea = () => {
-    setIsSearchVisible(!isSearchVisible);
-  };
-
-  // 스와이프 시작
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  // 스와이프 중
-  const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  // 스와이프 종료
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isUpSwipe = distance > minSwipeDistance;
-    const isDownSwipe = distance < -minSwipeDistance;
-
-    // 아래로 스와이프하면 검색영역 열기
-    if (isDownSwipe && !isSearchVisible) {
-      setIsSearchVisible(true);
-    }
-    // 위로 스와이프하면 검색영역 닫기
-    else if (isUpSwipe && isSearchVisible) {
-      setIsSearchVisible(false);
-    }
-  };
-
-  // 검색영역 외부 클릭시 닫기
-  const handleClickOutside = useCallback((event) => {
-    if (searchToggleRef.current && !searchToggleRef.current.contains(event.target)) {
-      // 모바일에서만 작동하도록 체크
-      if (window.innerWidth <= 768 && isSearchVisible) {
-        setIsSearchVisible(false);
-      }
-    }
-  }, [isSearchVisible]);
-
-  // 외부 클릭 이벤트 리스너 등록
+  // ==================== 생명주기 ====================
+  
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -174,94 +303,17 @@ const CUST0040 = () => {
     };
   }, [handleClickOutside]);
 
-  // 초기 데이터 로드 - selectedMonth 변경 시마다 자동 호출
   useEffect(() => {
     if (selectedMonth && globalState.G_USER_ID) {
       fetchQuotesData();
     }
   }, [selectedMonth, globalState.G_USER_ID, fetchQuotesData]);
 
-  // 견적의뢰 상세 모달 핸들러
-  const handleQuoteDetailClick = (quote) => {
-    setSelectedQuote(quote);
-    setIsQuoteDetailModalOpen(true);
-  };
-
-  // 견적의뢰 상세 모달 닫기
-  const handleQuoteDetailClose = () => {
-    setIsQuoteDetailModalOpen(false);
-    setSelectedQuote(null);
-  };
-
-  // 날짜 포맷팅
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    if (dateString.length === 8) {
-      const year = dateString.substring(0, 4);
-      const month = dateString.substring(4, 6);
-      const day = dateString.substring(6, 8);
-      return `${year}-${month}-${day}`;
-    }
-    return dateString;
-  };
-
-  // 금액 포맷팅
-  const formatAmount = (amount) => {
-    if (!amount || amount === 0) return '0';
-    return new Intl.NumberFormat('ko-KR').format(amount);
-  };
-
-  // 행 클릭 처리 - 견적상세 모달 열기
-  const handleRowClick = (quote) => {
-    handleQuoteDetailClick(quote);
-  };
-
-  // 진행상태에 따른 스타일 반환
-  const getStatusBadgeClass = (status) => {
-    if (!status) return 'status-default';
-    const statusText = status.toString().toLowerCase();
-    
-    if (statusText.includes('접수') || statusText === '접수') {
-      return 'status-received';
-    } else if (statusText.includes('처리') || statusText.includes('진행')) {
-      return 'status-processing';
-    } else if (statusText.includes('완료')) {
-      return 'status-completed';
-    }
-    return 'status-default';
-  };
-
-  // 페이지 변경
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  // 페이지 크기 변경
-  const handleItemsPerPageChange = (newItemsPerPage) => {
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-  };
-
-  // 페이지 번호 생성
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
-
-  // 리스트뷰 렌더링
+  // ==================== 렌더링 함수 ====================
+  
+  /**
+   * 리스트뷰 렌더링
+   */
   const renderListView = () => (
     <div className="cust0040-table-container">
       <table className="cust0040-table">
@@ -326,7 +378,9 @@ const CUST0040 = () => {
     </div>
   );
 
-  // 이미지뷰 렌더링
+  /**
+   * 이미지뷰 렌더링
+   */
   const renderImageView = () => (
     <div className="cust0040-image-container">
       <div className="cust0040-image-grid">
@@ -402,6 +456,8 @@ const CUST0040 = () => {
     </div>
   );
 
+  // ==================== 메인 렌더링 ====================
+
   return (
     <div className="cust0040-container">
       {/* 프로그램 헤더 */}
@@ -432,7 +488,6 @@ const CUST0040 = () => {
 
       {/* 검색 영역 */}
       <div className="cust0040-search-section">
-        {/* 모바일 검색 토글 버튼 */}
         <div
           ref={searchToggleRef}
           className="cust0040-mobile-search-toggle"
@@ -453,8 +508,8 @@ const CUST0040 = () => {
                 type="month"
                 value={selectedMonth ? `${selectedMonth.substring(0,4)}-${selectedMonth.substring(4,6)}` : ''}
                 onChange={(e) => {
-                  const value = e.target.value; // YYYY-MM 형식
-                  const yearMonth = value.replace('-', ''); // YYYYMM 형식으로 변환
+                  const value = e.target.value;
+                  const yearMonth = value.replace('-', '');
                   setSelectedMonth(yearMonth);
                 }}
               />
