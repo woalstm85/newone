@@ -268,7 +268,6 @@ function CUST0060() {
             <th style={{ width: '100px' }}>옵션</th>
             <th style={{ width: '80px' }}>수량</th>
             <th style={{ width: '100px' }}>금액</th>
-            <th style={{ width: '100px' }}>창고</th>
             <th style={{ width: '120px' }}>로케이션</th>            
             <th style={{ width: '100px' }}>담당자</th>
             <th style={{ width: '100px' }}>비고</th>
@@ -313,24 +312,30 @@ function CUST0060() {
                   {row.inOutDiv}
                 </span>
               </td>
-              <td className="cust0060-left">{row.itemNm}</td>
+              <td className="cust0060-left">
+                <div className="cust0060-item-info">
+                  {row.itemCd && (
+                    <span className="cust0060-item-code">{row.itemCd}</span>
+                  )}
+                  <span className="cust0060-item-name">{row.itemNm}</span>
+                </div>
+              </td>
               <td className="cust0060-center">{row.optValNm || '-'}</td>
               <td className="cust0060-right">{formatAmount(row.qty)}</td>
               <td className="cust0060-right">{formatAmount(row.amount)}</td>
-              <td className="cust0060-center">{row.whNm || '-'}</td>
               <td className="cust0060-center">
-                {row.locCd &&
+                {row.locCd && (
                   <span className="cust0060-location-badge">
                     📍 {row.locCd}
                   </span>
-}
+                )}
               </td>              
               <td className="cust0060-center">{row.userNm}</td>
               <td className="cust0060-left">{row.remark || '-'}</td>
             </tr>
           )) : (
             <tr>
-              <td colSpan={12} className="cust0060-center" style={{ padding: '40px', color: '#666' }}>
+              <td colSpan={11} className="cust0060-center" style={{ padding: '40px', color: '#666' }}>
                 데이터가 없습니다.
               </td>
             </tr>
