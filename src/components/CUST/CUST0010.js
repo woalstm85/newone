@@ -298,53 +298,544 @@ function CUST0010() {
     </div>
   );
 
-  /** 일반 재고 - 이미지 뷰(카드) 렌더링 */
+  // 일반 재고 이미지 뷰 렌더링
   const renderNormalInventoryImage = () => {
-    if (currentItems.length === 0) return renderNoDataMessage("표시할 재고 데이터가 없습니다.", <CiImageOff size={48} color="#ccc" />);
+    const items = currentItems.map((item, index) => (
+      <div key={`${item.itemCd}-${index}`} className="cust0010-inventory-image-card" >
+        <div className="cust0010-inventory-image-header">
+          <h4>{item.itemNm}</h4>
+          <span className={`cust0010-inventory-badge ${item.closingQty > 0 ? 'normal' : 'warning'}`}>
+            {item.closingQty > 0 ? '재고있음' : '재고없음'}
+          </span>
+        </div>
+        <div className="cust0010-inventory-image-content">
+          <div className="cust0010-inventory-image-section">
+            <div className="cust0010-inventory-image-placeholder">
+              {item.thFilePath ? (
+                <>
+                  <img
+                    src={item.thFilePath}
+                    alt={item.itemNm}
+                    className="cust0010-inventory-image"
+                  />
+                  <div className="cust0010-image-overlay">
+                    <button
+                      className="cust0010-overlay-view-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick(item.thFilePath, item.itemNm, item.itemCd);
+                      }}
+                    >
+                      <Eye size={14} />
+                      확대
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="cust0010-inventory-no-image">
+                  <CiImageOff size={48} color="#ccc" />
+                </div>
+              )}
+            </div>
+            
+            <div className="cust0010-inventory-image-info">
+                <span className="cust0010-inventory-option-badge">
+                  🏷️ {item.optValNm}
+                </span>
+              {item.unitNm && (
+                <span className="cust0010-inventory-unit-badge">
+                  📏 {item.unitNm}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="cust0010-inventory-item-details">
+            <div className="cust0010-inventory-item-specs">
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">기초재고:</span>
+                <span className="cust0010-inventory-spec-value">{(item.openingQty || 0).toLocaleString()}</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고:</span>
+                <span className="cust0010-inventory-spec-value">{(item.totalInQty || 0).toLocaleString()}</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">출고:</span>
+                <span className="cust0010-inventory-spec-value">{(item.totalOutQty || 0).toLocaleString()}</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">현재고:</span>
+                <span className="cust0010-inventory-spec-value">{(item.closingQty || 0).toLocaleString()}</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">평균단가:</span>
+                <span className="cust0010-inventory-spec-client">{(item.avgPrice || 0).toLocaleString()}원</span>
+              </div>
+            </div>
+            {item.locCd ? (
+              <span className="cust0010-inventory-location-badge">
+                📍 {item.locCd}
+              </span>
+            ) : (
+              <span className="cust0010-inventory-no-location-badge">
+                📋 위치 미지정
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    ));
 
     return (
       <div className="cust0010-inventory-image-grid">
-        {currentItems.map((item, index) => (
-          <div key={`${item.itemCd}-${index}`} className="cust0010-inventory-image-card">
-            {/* ... 카드 내용 ... */}
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <CiImageOff size={48} color="#ccc" />
+            <p>데이터가 없습니다.</p>
           </div>
-        ))}
+        )}
       </div>
     );
   };
   
-  /** 시리얼/로트 재고 - 이미지 뷰(카드) 렌더링 */
+  // 시리얼 재고 이미지 뷰 렌더링
   const renderSerialInventoryImage = () => {
-    if (currentItems.length === 0) return renderNoDataMessage("표시할 로트 데이터가 없습니다.", <Package size={48} color="#ccc" />);
-    
+    const items = currentItems.map((item, index) => (
+      <div key={`${item.lotNo}-${index}`} className="cust0010-inventory-image-card">
+        <div className="cust0010-inventory-image-header">
+          <div className="cust0010-serial-header-content">
+            <span className="cust0010-inventory-lot-badge">{item.lotNo}</span>
+            <h4>{item.itemNm}</h4>
+          </div>
+          <span className={`cust0010-inventory-badge ${item.currentQty > 0 ? 'normal' : 'warning'}`}>
+            {item.currentQty > 0 ? '재고있음' : '재고없음'}
+          </span>
+        </div>
+        <div className="cust0010-inventory-image-content">
+          <div className="cust0010-inventory-image-section">
+            <div className="cust0010-inventory-image-placeholder">
+              {item.filePath || item.thFilePath ? (
+                <>
+                  <img
+                    src={item.filePath || item.thFilePath}
+                    alt={item.itemNm}
+                    className="cust0010-inventory-image"
+                  />
+                  <div className="cust0010-image-overlay">
+                    <button
+                      className="cust0010-overlay-view-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick(item.filePath || item.thFilePath, item.itemNm, item.itemCd);
+                      }}
+                    >
+                      <Eye size={14} />
+                      확대
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="cust0010-inventory-no-image">
+                  <CiImageOff size={48} color="#ccc" />
+                </div>
+              )}
+            </div>
+            
+            <div className="cust0010-inventory-image-info">
+              {item.optValNm && (
+                <span className="cust0010-inventory-option-badge">
+                  🏷️ {item.optValNm}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="cust0010-inventory-item-details">
+            <div className="cust0010-inventory-item-specs">
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고일:</span>
+                <span className="cust0010-inventory-spec-date">{formatDate(item.inpDat)}</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고수량:</span>
+                <div className="cust0010-inventory-spec-with-unit">
+                  <span className="cust0010-inventory-spec-value">{formatAmount(item.inpQty)}</span>
+                  {item.unitNm && (
+                    <span className="cust0010-inventory-inline-unit-badge">{item.unitNm}</span>
+                  )}
+                </div>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">입고금액:</span>
+                <span className="cust0010-inventory-spec-client">{formatAmount(item.inpAmt)}원</span>
+              </div>
+              <div className="cust0010-inventory-spec-row">
+                <span className="cust0010-inventory-spec-label">현재고:</span>
+                <div className="cust0010-inventory-spec-with-unit">
+                  <span className={`cust0010-inventory-spec-value ${item.currentQty > 0 ? 'positive' : 'zero'}`}>
+                    {formatAmount(item.currentQty)}
+                  </span>
+                  {item.unitNm && (
+                    <span className="cust0010-inventory-inline-unit-badge">{item.unitNm}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="cust0010-serial-bottom-section">
+              {item.locCd ? (
+                <span className="cust0010-inventory-location-badge">
+                  📍 {item.locCd}
+                </span>
+              ) : (
+                <span className="cust0010-inventory-no-location-badge">
+                  📋 위치 미지정
+                </span>
+              )}
+            </div>
+            
+            {item.subData && item.subData.length > 0 && (
+              <div className="cust0010-inventory-history-section">
+                <button 
+                  className="cust0010-inventory-history-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLotExpansion(item.lotNo);
+                  }}
+                >
+                  📋 입출고 이력 {item.subData.length}건 {expandedLots.has(item.lotNo) ? '접기' : '보기'}
+                </button>
+              </div>
+            )}
+            
+            {expandedLots.has(item.lotNo) && item.subData && item.subData.length > 0 && (
+              <div className="cust0010-inventory-expanded-history">
+                <div className="cust0010-inventory-history-list">
+                  {item.subData.slice(0, 3).map((detail, detailIndex) => (
+                    <div key={`${item.lotNo}-history-${detailIndex}`} className="cust0010-inventory-history-item">
+                      <div className="cust0010-inventory-history-header">
+                        <span className={`lot-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
+                          {detail.inOutDiv}
+                        </span>
+                        <span className="cust0010-inventory-history-date">{formatDate(detail.transDate)}</span>
+                      </div>
+                      <div className="cust0010-inventory-history-details">
+                        <span>{detail.transTypeNm}</span>
+                        <span className="cust0010-inventory-history-amount">{formatAmount(detail.qty)} {item.unitNm}</span>
+                      </div>
+                      {detail.remark && (
+                        <div className="cust0010-inventory-history-remark">
+                          {detail.remark}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {item.subData.length > 3 && (
+                    <div className="cust0010-inventory-history-more">
+                      외 {item.subData.length - 3}건 더...
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    ));
+
     return (
-      <div className="cust0010-lot-image-grid">
-        {currentItems.map((item, index) => (
-           <div key={`${item.lotNo}-${index}`} className="cust0010-lot-image-card">
-              {/* ... 카드 내용 ... */}
-           </div>
-        ))}
+      <div className="cust0010-inventory-image-grid">
+        {items.length > 0 ? items : (
+          <div className="cust0010-no-data">
+            <Package size={48} color="#ccc" />
+            <p>데이터가 없습니다.</p>
+          </div>
+        )}
       </div>
     );
   };
 
   /** 일반 재고 - 리스트 뷰(테이블) 렌더링 */
-  const renderNormalInventory = () => (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
-        {/* ... 테이블 thead, tbody, tfoot ... */}
-      </table>
-    </div>
-  );
+ // 일반 재고 테이블 렌더링
+  const renderNormalInventory = () => {
+    const totals = currentItems.reduce((acc, item) => {
+      acc.closingQty += item.closingQty || 0;
+      acc.closingAmt += item.closingAmt || 0;
+      return acc;
+    }, { closingQty: 0, closingAmt: 0 });
+
+    return (
+      <div className="cust0010-table-container">
+        <table className="cust0010-table">
+          <thead>
+            <tr>
+              <th style={{ width: '80px' }}>이미지</th>
+              <th>품목명</th>
+              <th style={{ width: '100px' }}>옵션</th>
+              <th style={{ width: '60px' }}>단위</th>
+              <th style={{ width: '80px' }}>평균단가</th>
+              <th style={{ width: '80px' }}>기초재고</th>
+              <th style={{ width: '90px' }}>기초금액</th>
+              <th style={{ width: '80px' }}>입고</th>
+              <th style={{ width: '90px' }}>입고금액</th>
+              <th style={{ width: '80px' }}>출고</th>
+              <th style={{ width: '90px' }}>출고금액</th>
+              <th style={{ width: '80px' }}>현재고</th>
+              <th style={{ width: '90px' }}>현재고금액</th>
+              <th style={{ width: '100px' }}>위치</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.length > 0 ? (
+              currentItems.map((row, index) => (
+                <tr key={`${row.itemCd}-${index}`}>
+                  <td className="cust0010-center">
+                    <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      {row.thFilePath ? (
+                        <div className="cust0010-table-image-container">
+                          <img
+                            src={row.thFilePath}
+                            alt={row.itemNm}
+                            className="cust0010-table-image-item"
+                          />
+                          <div className="cust0010-table-image-overlay">
+                            <button
+                              className="cust0010-table-overlay-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleImageClick(row.thFilePath, row.itemNm, row.itemCd);
+                              }}
+                            >
+                              <Eye size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="cust0010-table-no-image">
+                          <CiImageOff size={20} color="#ccc" />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="cust0010-left">{row.itemNm}</td>
+                  <td className="cust0010-center">{row.optValNm || '-'}</td>
+                  <td className="cust0010-center">{row.unitNm || '-'}</td>
+                  <td className="cust0010-right">{(row.avgPrice || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.openingQty || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.openingAmt || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.totalInQty || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.totalInAmt || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.totalOutQty || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.totalOutAmt || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.closingQty || 0).toLocaleString()}</td>
+                  <td className="cust0010-right">{(row.closingAmt || 0).toLocaleString()}</td>
+                  <td className="cust0010-center">
+                    {row.locCd && (
+                      <span className="cust0010-table-location-badge">
+                        📍 {row.locCd}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={14} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+          {currentItems.length > 0 && (
+            <tfoot>
+              <tr className="cust0010-total-row">
+                <td colSpan={11} className="cust0010-center" style={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#e3f2fd',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px',
+                  fontSize: '14px',
+                  color: '#1976d2'
+                }}>
+                  합  계
+                </td>
+                <td className="cust0010-right" style={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px',
+                  fontSize: '14px'
+                }}>
+                  {totals.closingQty.toLocaleString()}
+                </td>
+                <td className="cust0010-right" style={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px',
+                  fontSize: '14px'
+                }}>
+                  {totals.closingAmt.toLocaleString()}
+                </td>
+                <td className="cust0010-center" style={{
+                  backgroundColor: '#e3f2fd',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px'
+                }}>-</td>
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+    );
+  };
   
-  /** 시리얼/로트 재고 - 리스트 뷰(테이블) 렌더링 */
-  const renderSerialInventory = () => (
-    <div className="cust0010-table-container">
-      <table className="cust0010-table">
-        {/* ... 테이블 thead, tbody ... */}
-      </table>
-    </div>
-  );
+  // 시리얼/로트 재고 테이블 렌더링
+  const renderSerialInventory = () => {
+    return (
+      <div className="cust0010-table-container">
+        <table className="cust0010-table">
+          <thead>
+            <tr>
+              <th style={{ width: '40px' }}>상세</th>
+              <th style={{ width: '120px' }}>로트번호</th>
+              <th style={{ width: '80px' }}>제품코드</th>
+              <th>품목명</th>
+              <th style={{ width: '80px' }}>옵션</th>
+              <th style={{ width: '100px' }}>입고수량</th>
+              <th style={{ width: '90px' }}>입고금액</th>
+              <th style={{ width: '100px' }}>현재고</th>
+              <th style={{ width: '120px' }}>위치</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.length > 0 ? (
+              currentItems.map((row, index) => (
+                <React.Fragment key={`${row.lotNo}-${index}`}>
+                  <tr 
+                    className="lot-main-row" 
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td className="cust0010-center">
+                      <button
+                        className="lot-expand-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLotExpansion(row.lotNo);
+                        }}
+                        title="상세 이력 보기"
+                      >
+                        {expandedLots.has(row.lotNo) ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </button>
+                    </td>
+                    <td className="cust0010-center" style={{ fontWeight: '600', color: '#007bff' }}>
+                      {row.lotNo}
+                    </td>
+                    <td className="cust0010-center">{row.itemCd}</td>
+                    <td className="cust0010-left">{row.itemNm}</td>
+                    <td className="cust0010-center">{row.optValNm || '-'}</td>
+                    <td className="cust0010-right">
+                      <div className="cust0010-table-quantity-cell">
+                        {formatAmount(row.inpQty)}
+                        {row.unitNm && (
+                          <span className="cust0010-table-unit-badge">{row.unitNm}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="cust0010-right">{formatAmount(row.inpAmt)}</td>
+                    <td className="cust0010-right">
+                      <div className="cust0010-table-quantity-cell" style={{ fontWeight: '600', color: row.currentQty > 0 ? '#28a745' : '#dc3545' }}>
+                        {formatAmount(row.currentQty)}
+                        {row.unitNm && (
+                          <span className="cust0010-table-unit-badge">{row.unitNm}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="cust0010-center">
+                      {row.locCd && (
+                        <span className="cust0010-table-location-badge">
+                          📍 {row.locCd}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                  
+                  {expandedLots.has(row.lotNo) && row.subData && row.subData.length > 0 && (
+                    <tr>
+                      <td colSpan={9} className="lot-details-container">
+                        <div className="lot-details-wrapper">
+                          <div className="lot-details-header">
+                            <FileText size={16} />
+                            <span>입출고 이력 ({row.subData.length}건)</span>
+                          </div>
+                          <div className="lot-details-table-wrapper">
+                            <table className="lot-details-table">
+                              <thead>
+                                <tr>
+                                  <th>거래일자</th>
+                                  <th>거래유형</th>
+                                  <th>구분</th>
+                                  <th>수량</th>
+                                  <th>금액</th>
+                                  <th>담당자</th>
+                                  <th>입고번호</th>
+                                  <th>비고</th>
+                                  <th>등록일시</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {row.subData.map((detail, detailIndex) => (
+                                  <tr key={`${row.lotNo}-detail-${detailIndex}`}>
+                                    <td className="cust0010-center">{formatDate(detail.transDate)}</td>
+                                    <td className="cust0010-center">{detail.transTypeNm || '-'}</td>
+                                    <td className="cust0010-center">
+                                      <span className={`lot-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
+                                        {detail.inOutDiv || '-'}
+                                      </span>
+                                    </td>
+                                    <td className="cust0010-right">
+                                      <div className="cust0010-table-quantity-cell">
+                                        {formatAmount(detail.qty)}
+                                        {row.unitNm && (
+                                          <span className="cust0010-table-unit-badge">{row.unitNm}</span>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="cust0010-right">{formatAmount(detail.amount)}</td>
+                                    <td className="cust0010-center">{detail.userNm || detail.transEmp || '-'}</td>
+                                    <td className="cust0010-center">{detail.ioTransNo || '-'}</td>
+                                    <td className="cust0010-left">{detail.remark || '-'}</td>
+                                    <td className="cust0010-center">{formatDate(detail.insDate)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="cust0010-center" style={{ padding: '40px', color: '#666' }}>
+                  데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   /** 현재 뷰 모드와 탭에 맞는 컨텐츠를 선택하여 렌더링 */
   const renderCurrentView = () => {

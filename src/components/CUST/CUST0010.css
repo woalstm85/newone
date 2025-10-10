@@ -1,55 +1,31 @@
-/**
- * ===================================================================
- * CUST0010: 재고 현황 관리 화면 스타일시트
- * ===================================================================
-
- * 최종수정일: 2025-10-01
- * * 목차:
- * 1.  전체 레이아웃 및 공통 스타일
- * 2.  프로그램 헤더 및 뷰 토글 버튼
- * 3.  탭 메뉴
- * 4.  검색 영역
- * 5.  데이터 정보 및 페이지 설정
- * 6.  리스트 뷰 (공통 테이블 스타일)
- * 7.  리스트 뷰 (로트 상세 확장)
- * 8.  이미지 뷰 (공통 카드 스타일)
- * 9.  이미지 뷰 (일반 재고 카드)
- * 10. 이미지 뷰 (로트 재고 카드)
- * 11. 공통 컴포넌트 (페이지네이션, 로딩, 데이터 없음)
- * 12. 반응형 미디어 쿼리
- * ===================================================================
- */
-
 /* ===================================================================
-   1. 전체 레이아웃 및 공통 스타일
+   1. 기본 레이아웃 및 헤더 스타일
    =================================================================== */
 .cust0010-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0 16px; /* 데스크톱 기본 좌우 패딩 */
-}
-
-/* ===================================================================
-   2. 프로그램 헤더 및 뷰 토글 버튼
-   =================================================================== */
-.cust0010-program-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0 16px; /* 데스크톱 기본 패딩 */
 }
 
 .cust0010-header-left {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.cust0010-program-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: white;
 }
 
 .cust0010-program-header h1 {
@@ -59,25 +35,25 @@
   font-size: 1.0rem;  
 }
 
-/* 뷰 모드(리스트/이미지) 선택 토글 버튼 */
+/* 뷰 모드 선택 토글 */
 .cust0010-view-toggle {
   display: flex;
   gap: 8px;
 }
 
 .cust0010-view-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   padding: 6px 10px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.9rem;
   transition: all 0.2s ease;
-  backdrop-filter: blur(10px); /* 반투명 배경에 블러 효과 */
+  backdrop-filter: blur(10px);
 }
 
 .cust0010-view-btn:hover {
@@ -95,12 +71,12 @@
 }
 
 /* ===================================================================
-   3. 탭 메뉴
+   2. 탭 메뉴 스타일
    =================================================================== */
 .cust0010-tab-container {
   display: flex;
   gap: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   border-bottom: 2px solid #e5e7eb;
 }
 
@@ -122,8 +98,9 @@
   font-weight: 500;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  border-bottom: 2px solid transparent; /* 활성 탭 하단 보더를 위한 공간 확보 */
   transition: all 0.2s;
+  position: relative;
+  border-bottom: 2px solid transparent;
 }
 
 .cust0010-tab:hover {
@@ -135,7 +112,7 @@
   background: #007bff;
   color: white;
   border-bottom-color: #007bff;
-  transform: translateY(2px); /* 탭이 아래 보더와 연결된 것처럼 보이게 함 */
+  transform: translateY(2px);
 }
 
 .cust0010-tab.active:hover {
@@ -143,40 +120,62 @@
 }
 
 /* ===================================================================
-   4. 검색 영역
+   3. 검색 영역 스타일
    =================================================================== */
 .cust0010-search-section {
+
   position: relative;
 }
 
 /* 모바일 검색 토글 버튼 (데스크톱에서는 숨김) */
 .cust0010-mobile-search-toggle {
-  display: none; /* 평소엔 숨김, 모바일 뷰에서 flex로 변경 */
+  display: none;
   align-items: center;
   justify-content: space-between;
   padding: 0px 12px;
   background: #17a2b8;
   color: white;
   border-radius: 6px;
-  font-size: 14px;
   cursor: pointer;
   margin-bottom: 8px;
   transition: all 0.3s ease;
   user-select: none;
+  position: relative;
+  overflow: hidden;
   min-height: 32px;
   box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+  font-size: 14px;
+}
+
+.cust0010-mobile-search-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.cust0010-mobile-search-toggle:active::before {
+  width: 300px;
+  height: 300px;
 }
 
 .cust0010-mobile-search-toggle:hover {
   background: #138496;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
 }
 
 .cust0010-mobile-search-toggle:active {
   transform: scale(0.98);
 }
 
-/* 검색 조건 컨테이너 */
+/* 검색 컨테이너 */
 .cust0010-search-container {
   background: #f8f9fa;
   border: 1px solid #BFBFBF;
@@ -184,23 +183,20 @@
   border-radius: 6px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  transform-origin: top; /* 애니메이션 기준점을 위쪽으로 설정 */
+  transform-origin: top;
 }
 
-/* 모바일에서 검색창이 숨겨졌을 때의 스타일 */
 .cust0010-search-container.hidden {
   max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 0;
   border: none;
   margin: 0;
   opacity: 0;
   transform: scaleY(0);
 }
 
-/* 데스크탑 또는 모바일에서 검색창이 보일 때의 스타일 */
 .cust0010-search-container.visible {
-  max-height: 280px; /* 충분한 높이 값 */
+  max-height: 280px;
   opacity: 1;
   transform: scaleY(1);
 }
@@ -209,7 +205,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  flex-wrap: wrap; /* 창 크기가 줄어들면 아래로 떨어지도록 설정 */
+  flex-wrap: wrap;
 }
 
 .cust0010-search-field {
@@ -220,18 +216,18 @@
 
 .cust0010-search-field label {
   font-weight: 600;
-  white-space: nowrap; /* 라벨 줄바꿈 방지 */
+  white-space: nowrap;
   color: #374151;
 }
 
 .cust0010-search-field input,
 .cust0010-search-field select {
-  padding: 8px 15px;
+  padding: 8px 15px; /* 패딩을 늘려서 높이 증가 */
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  min-width: 250px;
+  min-width: 250px; /* 데스크톱에서 제품명 입력창을 더욱 넓게 */
   font-size: 0.9rem;
-  min-height: 25px;
+  min-height: 25px; /* 최소 높이 명시적 지정 */
 }
 
 .cust0010-search-field input:focus,
@@ -244,29 +240,24 @@
 .cust0010-search-buttons {
   display: flex;
   gap: 8px;
-  margin-left: auto; /* 버튼들을 오른쪽 끝으로 정렬 */
+  margin-left: auto;
 }
 
-.cust0010-search-btn,
-.cust0010-reset-btn {
+.cust0010-search-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   padding: 6px 12px;
-  border: 1px solid;
+  border: 1px solid #007bff;
+  background: #007bff;
+  color: white;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.85rem;
   transition: all 0.2s;
   min-height: 32px;
   white-space: nowrap;
-}
-
-.cust0010-search-btn {
-  background: #007bff;
-  border-color: #007bff;
-  color: white;
-  font-size: 0.85rem;
 }
 
 .cust0010-search-btn:hover {
@@ -275,19 +266,33 @@
 }
 
 .cust0010-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px; /* 패딩 줄임 */
+  border: 1px solid #6c757d;
   background: #6c757d;
-  border-color: #6c757d;
   color: white;
-  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem; /* 폰트 크기 줄임 */
+  transition: all 0.2s;
+  min-height: 30px; /* 최소 높이 줄임 */
+  white-space: nowrap;
 }
 
 .cust0010-reset-btn:hover {
   background: #545b62;
-  border-color: #545b62;
+}
+
+.cust0010-search-section.swiping {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease-out;
 }
 
 /* ===================================================================
-   5. 데이터 정보 및 페이지 설정
+   4. 페이지네이션 정보 및 설정
    =================================================================== */
 .cust0010-pagination-info {
   display: flex;
@@ -326,18 +331,18 @@
 }
 
 /* ===================================================================
-   6. 리스트 뷰 (공통 테이블 스타일)
+   5. 리스트 뷰 (Grid) 스타일
    =================================================================== */
 .cust0010-grid-container {
-  flex: 1; /* 남은 공간을 모두 차지하여 스크롤이 가능하도록 함 */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* flex 자식 요소의 높이 계산 오류 방지 */
+  min-height: 0;
 }
 
 .cust0010-grid-wrapper {
   flex: 1;
-  overflow: auto; /* 내용이 넘칠 경우 스크롤 생성 */
+  overflow: auto;
   border-radius: 6px;
   min-height: 400px;
 }
@@ -354,19 +359,20 @@
 
 /* 테이블 헤더 */
 .cust0010-table thead th {
-  position: sticky; /* 스크롤 시 헤더 고정 */
+  position: sticky;
   top: 0;
-  z-index: 10;
   background: #374151;
   color: white;
+  z-index: 1;
   padding: 12px 8px;
+  font-size: 0.9rem;
   font-weight: 600;
   white-space: nowrap;
   border: 1px solid #4b5563;
   text-align: center;
 }
 
-/* 테이블 셀 (공통) */
+/* 테이블 셀 */
 .cust0010-table tbody td {
   padding: 10px 8px;
   border: 1px solid #e5e7eb;
@@ -374,32 +380,108 @@
   vertical-align: middle;
 }
 
-.cust0010-table tbody tr:nth-child(even) { background-color: #ffffff; }
-.cust0010-table tbody tr:nth-child(odd) { background-color: #f9fafb; }
+.cust0010-table tbody tr:nth-child(even) td {
+  background-color: #ffffff;
+}
 
-.cust0010-table tbody tr:hover {
+.cust0010-table tbody tr:nth-child(odd) td {
+  background-color: #f9fafb;
+}
+
+.cust0010-table tbody tr:hover td {
   background-color: #dbeafe;
   cursor: pointer;
 }
 
-/* 테이블 셀 정렬 유틸리티 */
-.cust0010-center { text-align: center; }
-.cust0010-left { text-align: left; }
-.cust0010-right { 
-  text-align: right;
-  font-family: 'Courier New', monospace; /* 숫자 가독성을 위한 고정폭 글꼴 */
+/* 테이블 셀 정렬 */
+.cust0010-center {
+  text-align: center;
 }
 
-/* 테이블 합계 행 */
+.cust0010-left {
+  text-align: left;
+}
+
+.cust0010-right {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+/* 테이블 수량 셀 컨테이너 */
+.cust0010-table-quantity-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* 테이블용 단위 배지 */
+.cust0010-table-unit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: #f3e5f5;
+  color: #7b1fa2;
+  font-size: 9px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* 테이블용 위치 배지 */
+.cust0010-table-location-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: #6f42c1;
+  color: white;
+  font-size: 11px;
+  border-radius: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* 테이블용 위치 미지정 배지 */
+.cust0010-table-no-location-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: #f8f9fa;
+  color: #6c757d;
+  font-size: 10px;
+  border-radius: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+  border: 1px solid #dee2e6;
+  letter-spacing: 0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* 합계 행 스타일 */
 .cust0010-total-row td {
   border-top: 2px solid #1976d2 !important;
   border-bottom: 2px solid #1976d2 !important;
-  background-color: #e3f2fd !important; /* hover 스타일보다 우선 적용 */
+  background-color: #e3f2fd !important;
   font-weight: bold;
   color: #1976d2;
+  font-size: 14px;
+  padding: 12px 8px;
 }
 
-/* 테이블 내 이미지 */
+.cust0010-total-row:hover td {
+  background-color: #e0f2fe !important;
+}
+
+/* 테이블 이미지 및 오버레이 */
 .cust0010-table-image-container {
   position: relative;
   width: 50px;
@@ -419,7 +501,10 @@
 
 .cust0010-table-image-overlay {
   position: absolute;
-  inset: 0; /* top, left, right, bottom 0과 동일 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
@@ -433,7 +518,7 @@
 }
 
 .cust0010-table-overlay-btn {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   color: #333;
   border: none;
   border-radius: 50%;
@@ -443,10 +528,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .cust0010-table-overlay-btn:hover {
+  background: white;
   transform: scale(1.1);
 }
 
@@ -463,9 +549,16 @@
   margin: 0 auto;
 }
 
-/* ===================================================================
-   7. 리스트 뷰 (로트 상세 확장)
-   =================================================================== */
+/* 로트 메인 행 스타일 */
+.lot-main-row {
+  transition: background-color 0.2s ease;
+}
+
+.lot-main-row:hover {
+  background-color: #f0f8ff !important;
+}
+
+/* 로트 확장 버튼 */
 .lot-expand-btn {
   display: flex;
   align-items: center;
@@ -486,10 +579,11 @@
   color: #374151;
 }
 
-/* 로트 상세 내용이 표시되는 셀 */
+/* 로트 상세 컨테이너 */
 .lot-details-container {
-  padding: 0 !important; /* 부모 td의 패딩 제거 */
+  padding: 0 !important;
   background: #f8f9fa !important;
+  border-top: 2px solid #e5e7eb !important;
 }
 
 .lot-details-wrapper {
@@ -507,7 +601,6 @@
   font-size: 0.95rem;
 }
 
-/* 상세 이력 테이블 */
 .lot-details-table-wrapper {
   overflow-x: auto;
   border-radius: 6px;
@@ -525,94 +618,132 @@
   background: #6b7280;
   color: white;
   padding: 8px 10px;
+  font-size: 0.8rem;
   font-weight: 600;
   white-space: nowrap;
+  border: 1px solid #9ca3af;
   text-align: center;
 }
 
 .lot-details-table tbody td {
   padding: 8px 10px;
   border: 1px solid #e5e7eb;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
-/* 로트 상태 배지 */
+.lot-details-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.lot-details-table tbody tr:hover {
+  background-color: #eff6ff;
+}
+
+/* 로트 배지 스타일 */
 .lot-badge {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.lot-badge-in { background: #dcfce7; color: #166534; }
-.lot-badge-out { background: #fee2e2; color: #991b1b; }
-.lot-badge-adjust { background: #dbeafe; color: #1e40af; }
-.lot-badge-default { background: #f3f4f6; color: #6b7280; }
+.lot-badge-in {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.lot-badge-out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.lot-badge-adjust {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.lot-badge-default {
+  background: #f3f4f6;
+  color: #6b7280;
+}
 
 /* ===================================================================
-   8. 이미지 뷰 (공통 카드 스타일)
+   6. 이미지 뷰 (Card) 스타일 - 일반 재고
    =================================================================== */
-.cust0010-inventory-image-grid,
-.cust0010-lot-image-grid {
+.cust0010-inventory-image-grid {
   display: grid;
-  /* 최소 320px, 공간이 남으면 1fr 만큼 너비 차지 */
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
-  padding-bottom: 16px;
+  padding: 0 0 16px 0;
   min-height: 400px;
 }
 
-.cust0010-lot-image-grid {
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-}
-
-/* 카드 공통 스타일 */
-.cust0010-inventory-image-card,
-.cust0010-lot-image-card {
+.cust0010-inventory-image-card {
   background: white;
   border: 1px solid #d1d5db;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
+  position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: default;
 }
 
-.cust0010-inventory-image-card:hover,
-.cust0010-lot-image-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-/* 카드 헤더 공통 스타일 */
-.cust0010-inventory-image-header,
-.cust0010-lot-image-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-/* 카드 콘텐츠 공통 스타일 */
-.cust0010-inventory-image-content,
-.cust0010-lot-image-content {
-  display: flex;
-  padding: 16px;
-  gap: 16px;
-}
-
-/* ===================================================================
-   9. 이미지 뷰 (일반 재고 카드)
-   =================================================================== */
 .cust0010-inventory-image-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   border-color: #5a9de8;
 }
 
 .cust0010-inventory-image-card:hover .cust0010-inventory-image-header {
   background-color: #5a9de8;
+  border-bottom: 1px solid #5a9de8;
+}
+
+.cust0010-inventory-image-card:hover .cust0010-inventory-image-header h4 {
   color: white;
+}
+
+.cust0010-inventory-image-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 15px;
+  border-bottom: 1px solid #d1d5db;
+  background-color: #F8F9FA;
+  min-height: 40px;
+  transition: all 0.3s ease;
+}
+
+/* 시리얼 헤더 콘텐츠 */
+.cust0010-serial-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  margin-right: 10px;
+  min-width: 0;
+}
+
+/* 로트번호 배지 */
+.cust0010-inventory-lot-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  align-self: flex-start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .cust0010-inventory-image-header h4 {
@@ -626,27 +757,43 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* 2줄까지만 표시 */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  max-height: 36px;
 }
 
-.cust0010-inventory-image-card:hover .cust0010-inventory-image-header h4 {
-  color: white;
-}
-
-/* 재고 상태 배지 (재고있음/없음) */
 .cust0010-inventory-badge {
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  height: fit-content;
 }
 
-.cust0010-inventory-badge.normal { background-color: #d4edda; color: #155724; }
-.cust0010-inventory-badge.warning { background-color: #fff3cd; color: #856404; }
+.cust0010-inventory-badge.normal {
+  background-color: #d4edda;
+  color: #155724;
+}
 
-/* 카드 좌측 이미지 섹션 */
+.cust0010-inventory-badge.warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* 카드 콘텐츠 */
+.cust0010-inventory-image-content {
+  display: flex;
+  padding: 15px;
+  gap: 15px;
+  align-items: flex-start;
+  min-height: 140px;
+}
+
 .cust0010-inventory-image-section {
   flex-shrink: 0;
   display: flex;
@@ -657,8 +804,10 @@
 }
 
 .cust0010-inventory-image-placeholder {
+  flex-shrink: 0;
   width: 120px;
   height: 120px;
+  background-color: #f8f9fa;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -672,7 +821,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.3s ease;
+  border-radius: 7px;
 }
 
 .cust0010-inventory-image-placeholder:hover .cust0010-inventory-image {
@@ -690,36 +841,60 @@
   border-radius: 7px;
 }
 
+/* 이미지 아래 정보 영역 */
+.cust0010-inventory-image-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 120px;
+}
+
 /* 옵션 및 단위 배지 */
-.cust0010-inventory-option-badge,
-.cust0010-inventory-unit-badge {
+.cust0010-inventory-option-badge {
   display: inline-block;
   padding: 4px 8px;
+  background: #e3f2fd;
+  color: #1976d2;
   font-size: 10px;
   border-radius: 12px;
   font-weight: 600;
+  text-align: center;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cust0010-inventory-option-badge { background: #e3f2fd; color: #1976d2; }
-.cust0010-inventory-unit-badge { background: #f3e5f5; color: #7b1fa2; }
+.cust0010-inventory-unit-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #f3e5f5;
+  color: #7b1fa2;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
 
-/* 카드 우측 상세 정보 */
+/* 상세 정보 섹션 */
 .cust0010-inventory-item-details {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 120px;
+  padding-top: 4px;
+  min-width: 0;
 }
 
 .cust0010-inventory-item-specs {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
 }
 
 .cust0010-inventory-spec-row {
@@ -728,39 +903,110 @@
   align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid #f5f5f5;
+  min-height: 24px;
 }
 
-.cust0010-inventory-spec-label { font-size: 13px; color: #666; font-weight: 500; }
-.cust0010-inventory-spec-value { font-size: 13px; color: #333; font-weight: 500; text-align: right; }
-.cust0010-inventory-spec-client { font-size: 13px; color: #28a745; font-weight: 600; text-align: right; }
+.cust0010-inventory-spec-row:last-child {
+  border-bottom: none;
+}
 
-/* 위치 정보 배지 */
-.cust0010-inventory-location-badge,
+/* 수량과 단위 컨테이너 */
+.cust0010-inventory-spec-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 인라인 단위 배지 */
+.cust0010-inventory-inline-unit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  background: #f3e5f5;
+  color: #7b1fa2;
+  font-size: 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.cust0010-inventory-spec-label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.cust0010-inventory-spec-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+  text-align: right;
+}
+
+.cust0010-inventory-spec-client {
+  font-size: 13px;
+  color: #28a745;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* 위치 배지 */
+.cust0010-inventory-location-badge {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  background: #6f42c1;
+  color: white;
+  font-size: 11px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-align: center;
+  box-sizing: border-box;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .cust0010-inventory-no-location-badge {
   display: block;
   width: 100%;
-  padding: 8px 10px;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  color: #6c757d;
   font-size: 11px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 600;
-  margin-top: 12px;
+  letter-spacing: 0.3px;
   text-align: center;
+  border: 1px solid #dee2e6;
   box-sizing: border-box;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.cust0010-inventory-location-badge { background: #6f42c1; color: white; }
-.cust0010-inventory-no-location-badge { background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; }
-
-/* 이미지 확대보기 오버레이 */
+/* 이미지 오버레이 (확대 버튼) */
 .cust0010-image-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
 .cust0010-inventory-image-placeholder:hover .cust0010-image-overlay {
@@ -768,31 +1014,69 @@
 }
 
 .cust0010-overlay-view-btn {
-  background: white;
-  color: #333;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #333 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 20px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .cust0010-overlay-view-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* ===================================================================
-   10. 이미지 뷰 (로트 재고 카드)
+   7. 이미지 뷰 (Card) 스타일 - 로트 재고
    =================================================================== */
+.cust0010-lot-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+  padding: 0 0 16px 0;
+  min-height: 400px;
+}
+
+.cust0010-lot-image-card {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: default;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 .cust0010-lot-image-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: #007bff;
+}
+
+.cust0010-lot-image-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lot-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .lot-header-main h4 {
@@ -800,6 +1084,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: #1f2937;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -807,23 +1092,17 @@
   -webkit-box-orient: vertical;
 }
 
-.lot-number-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  background: #007bff;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 8px;
+.cust0010-lot-image-content {
+  display: flex;
+  padding: 16px;
+  gap: 16px;
 }
 
-/* 카드 좌측 아이콘 섹션 */
 .cust0010-lot-icon-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  width: 80px;
   flex-shrink: 0;
 }
 
@@ -844,12 +1123,37 @@
   background: #eff6ff;
 }
 
-/* 카드 우측 상세 정보 */
+.cust0010-lot-code-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 80px;
+}
+
+.lot-number-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #007bff;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+}
+
 .cust0010-lot-details {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.cust0010-lot-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .cust0010-lot-spec-row {
@@ -860,35 +1164,78 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-.cust0010-lot-spec-label { font-size: 0.85rem; color: #6b7280; }
-.cust0010-lot-spec-value { font-size: 0.85rem; font-weight: 500; color: #374151; }
-.cust0010-lot-spec-amount { color: #059669; font-weight: 600; font-family: 'Courier New', monospace; }
-.cust0010-lot-spec-date { font-size: 0.8rem; color: #6b7280; }
-.cust0010-lot-spec-current { font-size: 0.9rem; font-weight: 700; font-family: 'Courier New', monospace; }
-.cust0010-lot-spec-current.positive { color: #059669; }
-.cust0010-lot-spec-current.zero { color: #dc2626; }
-
-/* 로트 위치/창고 정보 */
-.cust0010-inventory-warehouse-location-badge {
-  display: inline-block;
-  width: 100%;
-  padding: 8px 10px;
-  background: #6f42c1;
-  color: white;
-  font-size: 11px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-align: center;
-  margin-top: auto; /* 상단 컨텐츠와의 간격을 최대로 확보 */
+.cust0010-lot-spec-row:last-child {
+  border-bottom: none;
 }
 
-/* 로트 이력 보기 버튼 */
+.cust0010-lot-spec-row.highlight {
+  background: #f0f9ff;
+  margin: 0 -8px;
+  padding: 8px;
+  border-radius: 6px;
+  border-bottom: none;
+}
+
+.cust0010-lot-spec-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.cust0010-lot-spec-value, .cust0010-lot-spec-amount {
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: right;
+  color: #374151;
+}
+
+.cust0010-lot-spec-amount {
+  color: #059669;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.cust0010-lot-spec-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-align: right;
+}
+
+.cust0010-lot-spec-current {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+.cust0010-lot-spec-current.positive {
+  color: #059669;
+}
+
+.cust0010-lot-spec-current.zero {
+  color: #dc2626;
+}
+
+/* 시리얼 하단 섹션 (위치만) */
+.cust0010-serial-bottom-section {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+/* 로트 이력 섹션 여백 */
+.cust0010-inventory-history-section {
+  margin-top: 4px;
+}
+
+/* 로트 이력 버튼 */
 .cust0010-inventory-history-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #fef3c7;
   color: #92400e;
   border: 1px solid #fbbf24;
@@ -897,14 +1244,17 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: center;
+  min-height: 32px;
 }
 
 .cust0010-inventory-history-btn:hover {
   background: #fcd34d;
   border-color: #f59e0b;
+  transform: translateY(-1px);
 }
 
-/* 확장된 이력 스타일 */
+/* 확장된 이력 스타일 (Image View) */
 .cust0010-inventory-expanded-history {
   padding: 12px;
   background: #f8fafc;
@@ -913,16 +1263,88 @@
   margin-top: 8px;
 }
 
-.cust0010-inventory-history-list { display: flex; flex-direction: column; gap: 8px; }
-.cust0010-inventory-history-item { padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.8rem; }
-.cust0010-inventory-history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.cust0010-inventory-history-date { font-size: 0.7rem; color: #6b7280; }
-.cust0010-inventory-history-details { display: flex; justify-content: space-between; align-items: center; }
-.cust0010-inventory-history-amount { font-weight: 600; color: #059669; font-family: 'Courier New', monospace; }
-.cust0010-inventory-history-more { text-align: center; padding-top: 6px; color: #6b7280; font-size: 0.75rem; font-style: italic; }
+.cust0010-inventory-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cust0010-inventory-history-item {
+  padding: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.cust0010-inventory-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.cust0010-inventory-history-date {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.cust0010-inventory-history-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.cust0010-inventory-history-amount {
+  font-weight: 600;
+  color: #059669;
+  font-family: 'Courier New', monospace;
+}
+
+.cust0010-inventory-history-remark {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cust0010-inventory-history-more {
+  text-align: center;
+  padding: 6px;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+
+/* 데이터 없음 메시지 */
+.cust0010-no-data {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.cust0010-no-data svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.cust0010-no-data p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
 
 /* ===================================================================
-   11. 공통 컴포넌트 (페이지네이션, 로딩, 데이터 없음)
+   8. 페이지네이션
    =================================================================== */
 .cust0010-pagination {
   display: flex;
@@ -934,8 +1356,7 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.cust0010-page-btn,
-.cust0010-page-number {
+.cust0010-page-btn {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -949,13 +1370,33 @@
   transition: all 0.2s;
 }
 
-.cust0010-page-btn:hover:not(:disabled),
-.cust0010-page-number:hover {
+.cust0010-page-btn:hover:not(:disabled) {
   background: #f3f4f6;
   border-color: #9ca3af;
 }
 
-.cust0010-page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cust0010-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cust0010-page-number {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  min-width: 36px;
+  text-align: center;
+}
+
+.cust0010-page-number:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
 
 .cust0010-page-number.active {
   background: #007bff;
@@ -963,108 +1404,456 @@
   border-color: #007bff;
 }
 
-/* 데이터 없음 메시지 */
-.cust0010-no-data {
-  grid-column: 1 / -1; /* grid 레이아웃 전체 너비 차지 */
+/* ===================================================================
+   9. 로딩 및 애니메이션
+   =================================================================== */
+.cust0010-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: #6b7280;
-  text-align: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.cust0010-no-data svg { margin-bottom: 16px; opacity: 0.5; }
-.cust0010-no-data p { margin: 0; font-size: 1.1rem; font-weight: 500; }
+.cust0010-loading-spinner {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cust0010-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: cust0010-spin 1s linear infinite;
+}
+
+@keyframes cust0010-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 /* ===================================================================
-   12. 반응형 미디어 쿼리
+   10. 반응형 미디어 쿼리
    =================================================================== */
 
-/* 태블릿 (1024px 이하) */
+/* 태블릿 크기 (1024px 이하) */
 @media (max-width: 1024px) {
-  .cust0010-search-field input { min-width: 200px; }
-  .cust0010-lot-image-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+  .cust0010-search-row {
+    gap: 16px;
+  }
+
+  .cust0010-search-field input {
+    min-width: 150px; /* 태블릿에서 적당한 크기 */
+    min-height: 36px; /* 태블릿에서도 적절한 높이 */
+  }
+  
+  .cust0010-lot-image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
 }
 
-/* 모바일 (768px 이하) */
+/* 태블릿 세로/모바일 가로 (768px 이하) */
 @media (max-width: 768px) {
-  .cust0010-container { padding: 0 8px; }
-  
-  /* 모바일 검색 토글 버튼 표시 */
-  .cust0010-mobile-search-toggle { display: flex; }
-
-  /* 검색 영역은 기본적으로 숨김 (JS로 'visible' 클래스 제어) */
-  .cust0010-search-container {
-    transform: scaleY(0);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    opacity: 0;
-    border: none;
-    margin-bottom: 0;
+  .cust0010-container {
+    padding: 0 8px;
   }
+  
+  /* 모바일 검색 토글 표시 */
+  .cust0010-mobile-search-toggle {
+    display: flex;
+  }
+
+  /* 검색 영역 토글 애니메이션 */
+  .cust0010-search-container {
+    max-height: 0;
+    padding: 0;
+    border: none;
+    margin: 0;
+    opacity: 0;
+    transform: scaleY(0);
+  }
+
   .cust0010-search-container.visible {
-    transform: scaleY(1);
     max-height: 280px;
     padding: 12px;
-    opacity: 1;
     border: 1px solid #BFBFBF;
     margin-bottom: 8px;
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+
+  .cust0010-tab-container {
+    flex-direction: row;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .cust0010-tab {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .cust0010-view-btn {
+    padding: 6px 10px;
+    min-width: 36px;
   }
   
   /* 검색 폼 세로 정렬 */
-  .cust0010-search-row { flex-direction: column; align-items: stretch; gap: 12px; }
-  .cust0010-search-field { flex-direction: row; }
-  .cust0010-search-field label { min-width: 65px; }
+  .cust0010-search-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* 모바일에서 검색 필드 스타일 */
+  .cust0010-search-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cust0010-search-field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    min-width: 65px;
+    flex-shrink: 0;
+  }
 
   .cust0010-search-field input,
   .cust0010-search-field select {
-    flex: 1; /* 남은 공간 모두 차지 */
-    min-width: 0;
-    font-size: 16px; /* iOS 자동 줌 방지 */
-
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    min-height: 44px;
+    min-width: 0; /* min-width 제거하여 화면 끝까지 늘어나도록 */
   }
 
-  .cust0010-search-buttons { margin-left: 0; }
-  .cust0010-search-btn, .cust0010-reset-btn { flex: 1; min-height: 44px; }
+  .cust0010-search-buttons {
+    margin-left: 0;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
 
-  /* 탭, 페이지 정보 등 모바일 최적화 */
-  .cust0010-tab { flex: 1; justify-content: center; font-size: 0.9rem; }
-  .cust0010-data-info { font-size: 0.85rem; }
-  .cust0010-page-size-selector label { display: none; } /* '페이지당 표시:' 라벨 숨김 */
-  .cust0010-pagination { flex-wrap: wrap; }
+  .cust0010-search-btn,
+  .cust0010-reset-btn {
+    flex: 1;
+    padding: 10px 14px; /* 모바일에서 터치 친화적으로 유지 */
+    font-size: 0.9rem;
+    border-radius: 6px;
+    min-height: 44px; /* 터치 친화적 높이 유지 */
+    justify-content: center; /* 가운데 정렬 */
+  }
+
+  /* 페이지네이션 정보 */
+  .cust0010-pagination-info {
+    flex-wrap: nowrap;
+  }
   
-  /* 테이블 가로 스크롤 생성 */
-  .cust0010-grid-wrapper { overflow-x: auto; }
-  .cust0010-table { min-width: 800px; }
+  .cust0010-data-info {
+    font-size: 0.8rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  
+  .cust0010-page-size-selector {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .cust0010-page-size-selector label {
+    display: none;
+  }
 
-  /* 이미지 뷰는 1열로 변경 */
-  .cust0010-inventory-image-grid, .cust0010-lot-image-grid {
+  .cust0010-pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  /* 테이블 가로 스크롤 */
+  .cust0010-grid-wrapper {
+    overflow-x: auto;
+  }
+
+  .cust0010-table {
+    min-width: 800px; /* 모바일에서 테이블 최소 너비 설정 */
+  }
+
+  /* 이미지 뷰 모바일 최적화 (일반 재고) */
+  .cust0010-inventory-image-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+    padding: 12px;
+  }
+  
+  /* 이미지 뷰 모바일 최적화 (로트 재고) */
+  .cust0010-lot-image-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .cust0010-inventory-image-content,
+  .cust0010-lot-image-content {
+    flex-direction: row; /* 가로 배치 유지 */
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .cust0010-inventory-image-section,
+  .cust0010-lot-icon-section {
+    flex-shrink: 0;
+    width: 100px;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .cust0010-inventory-image-placeholder,
+  .cust0010-lot-icon-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .cust0010-inventory-image-info,
+  .cust0010-lot-code-info {
+    width: 100px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .cust0010-inventory-option-badge,
+  .cust0010-inventory-unit-badge,
+  .cust0010-inventory-lot-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    padding: 2px 6px;
+    max-width: 90px;
+  }
+  
+  .cust0010-inventory-item-details,
+  .cust0010-lot-details {
+    flex: 1;
+    min-height: 100px;
+  }
+  
+  .cust0010-inventory-item-specs,
+  .cust0010-lot-specs {
+    gap: 4px;
+  }
+  
+  .cust0010-inventory-spec-row,
+  .cust0010-lot-spec-row {
+    padding: 4px 0;
+    min-height: 20px;
+  }
+  
+  .cust0010-inventory-spec-label,
+  .cust0010-lot-spec-label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+  
+  .cust0010-inventory-spec-value,
+  .cust0010-inventory-spec-client,
+  .cust0010-lot-spec-value,
+  .cust0010-lot-spec-amount {
+    font-size: 11px;
+  }
+  
+  /* 로트 상세 테이블 모바일 최적화 */
+  .lot-details-table {
+    min-width: 600px;
   }
 }
 
 /* 소형 모바일 (480px 이하) */
 @media (max-width: 480px) {
-  .cust0010-program-header
-  {
-    margin-top: 4px;
-    margin-bottom: 5px;
+  .cust0010-container {
+    padding: 0 6px;
   }
 
-  .cust0010-program-header h1 
-  { 
-    font-size: 1rem; 
+  .cust0010-tab {
+    padding: 6px 8px;
+    font-size: 0.75rem;
   }
-  .cust0010-tab 
-  { 
-    font-size: 0.8rem; padding: 8px; 
+
+  .cust0010-tab svg {
+    width: 14px;
+    height: 14px;
   }
-  .cust0010-table 
-  { 
-    font-size: 0.8rem; min-width: 900px; /* 더 많은 스크롤 허용 */ 
+
+  .cust0010-program-header {
+    margin-top: 4px;
+  }    
+
+  .cust0010-program-header h1 {
+    font-size: 1rem;
+  }
+
+  .cust0010-search-container.visible {
+    padding: 8px;
+  }
+
+  .cust0010-search-field label {
+    min-width: 55px;
+    font-size: 0.85rem;
+  }
+
+  .cust0010-search-field input,
+  .cust0010-search-field select {
+    padding: 10px 12px;
+    font-size: 16px; /* iOS에서 줌 방지를 위해 16px 유지 */
+    border-radius: 6px;
+    min-width: 0; /* 화면 끝까지 늘어나도록 */
+  }
+
+  .cust0010-search-btn,
+  .cust0010-reset-btn {
+    padding: 10px 12px; /* 소형 모바일에서 약간 축소 */
+    font-size: 0.85rem;
+    min-height: 42px; /* 소형 화면에서 약간 축소 */
+    justify-content: center;
+  }
+
+  .cust0010-pagination-info {
+    font-size: 0.75rem;
+  }
+
+  .cust0010-page-btn,
+  .cust0010-page-number {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    min-width: 32px;
+  }
+
+  /* 테이블 폰트 크기 조정 */
+  .cust0010-table {
+    font-size: 0.8rem;
+    min-width: 900px;
+  }
+
+  .cust0010-table thead th {
+    padding: 10px 6px;
+    font-size: 0.8rem;
+  }
+
+  .cust0010-table tbody td {
+    padding: 8px 6px;
+  }
+
+  /* 이미지 뷰 소형 화면 최적화 */
+  .cust0010-inventory-image-content,
+  .cust0010-lot-image-content {
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .cust0010-inventory-image-section,
+  .cust0010-lot-icon-section {
+    width: 90px;
+  }
+  
+  .cust0010-inventory-image-placeholder,
+  .cust0010-lot-icon-placeholder {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .cust0010-inventory-image-info,
+  .cust0010-lot-code-info {
+    width: 90px;
+  }
+  
+  .cust0010-inventory-option-badge,
+  .cust0010-inventory-unit-badge,
+  .cust0010-inventory-lot-badge {
+    font-size: 8px;
+    padding: 2px 5px;
+    max-width: 80px;
+  }
+  
+  .cust0010-inventory-item-details,
+  .cust0010-lot-details {
+    min-height: 90px;
+  }
+  
+  .cust0010-inventory-spec-row,
+  .cust0010-lot-spec-row {
+    padding: 3px 0;
+    min-height: 18px;
+  }
+  
+  .cust0010-inventory-spec-label,
+  .cust0010-lot-spec-label {
+    font-size: 10px;
+    min-width: 45px;
+  }
+  
+  .cust0010-inventory-spec-value,
+  .cust0010-inventory-spec-client,
+  .cust0010-lot-spec-value,
+  .cust0010-lot-spec-amount {
+    font-size: 10px;
+  }
+  
+  .lot-details-table {
+    min-width: 700px;
+  }
+}
+
+/* 초소형 모바일 (360px 이하) */
+@media (max-width: 360px) {
+  .cust0010-container {
+    padding: 0 4px;
+  }
+
+  .cust0010-page-btn span {
+    display: none;
+  }
+}
+
+/* 터치 스크린 기기 */
+@media (pointer: coarse) {
+  .cust0010-mobile-search-toggle {
+    min-height: 48px;
+  }
+  
+  .cust0010-search-field input,
+  .cust0010-search-field select {
+    min-height: 44px;
+    font-size: 16px;
+    min-width: 0; /* 터치 기기에서도 화면 끝까지 늘어나도록 */
+  }
+  
+  .cust0010-search-btn,
+  .cust0010-reset-btn {
+    min-height: 44px;
+    padding: 8px 14px; /* 터치 기기에서 약간 축소 */
+    justify-content: center; /* 가운데 정렬 */
   }
 }
