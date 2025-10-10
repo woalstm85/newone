@@ -840,3 +840,25 @@
     font-size: 18px;
   }
 }
+
+/* 단가와 단위 컨테이너 */
+.detail-value-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 장바구니용 단위 배지 */
+.cart-unit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  background: #f3e5f5;
+  color: #7b1fa2;
+  font-size: 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+}

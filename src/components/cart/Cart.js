@@ -517,7 +517,12 @@ const Cart = () => {
                         
                         <div className="item-detail-row">
                           <span className="detail-label">단가:</span>
-                          <span className="detail-value price-value">{item.price.toLocaleString()}원</span>
+                          <div className="detail-value-with-unit">
+                            <span className="detail-value price-value">{item.price.toLocaleString()}원</span>
+                            {item.unitNm && (
+                              <span className="cart-unit-badge">{item.unitNm}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       

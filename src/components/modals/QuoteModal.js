@@ -231,6 +231,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       const cartItem = {
         itemCd: product.itemCd,
         itemNm: product.itemNm,
+        unitNm: product.unitNm,
         optCd: product.optCd || '',
         optValCd: selectedOptionValue || '',
         optValNm: selectedOption ? selectedOption.optValNm : '',
