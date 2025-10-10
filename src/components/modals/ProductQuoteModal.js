@@ -383,16 +383,6 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
       e.stopPropagation();
     }
     
-    // 견적 의뢰 성공 시 장바구니에서 상품 제거
-    if (isSuccess && !isSingleProduct) {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const updatedCart = cart.filter(cartItem => 
-        !currentProducts.some(reqItem => reqItem.itemCd === cartItem.itemCd)
-      );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      window.dispatchEvent(new Event('cartUpdated'));
-    }
-    
     setQuantity(1);
     setShowLoginModal(false);
     setShowSuccessModal(false);
@@ -400,7 +390,12 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
     setValidationErrors({});
     
     if (onClose) {
-      onClose();
+      // 견적 의뢰 성공 시 현재 모달에 남아있는 제품들을 전달
+      if (isSuccess && !isSingleProduct) {
+        onClose(currentProducts);
+      } else {
+        onClose(null);
+      }
     }
   };
 

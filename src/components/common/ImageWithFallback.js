@@ -108,7 +108,7 @@ const ImageWithFallback = ({
         src={createNoImageSvg(width, height)}
         alt={alt}
         className={className}
-        style={{ width, height, objectFit: 'cover', ...style }}
+        style={{ width, height, ...style }}
         {...props}
       />
     );
@@ -142,7 +142,6 @@ const ImageWithFallback = ({
         style={{ 
           width, 
           height, 
-          objectFit: 'cover',
           display: isLoading ? 'none' : 'block',
           ...style 
         }}

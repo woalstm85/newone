@@ -352,16 +352,30 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                   <div className="prd_company_badge">{product.compNm}</div>
                 )}
                 
+                {/* 단위와 가격 한 줄 */}
+                <div className="prd_price_row">
+                  {/* 단위 배지 */}
+                  {product.unitNm && (
+                    <span className="prd_unit_badge">{product.unitNm}</span>
+                  )}
+                
                 {/* 가격 표시 */}
                 <div className="prd_price_display">
-                  {/* 할인가가 있으면 할인가를 메인으로, 없으면 판매가를 메인으로 */}
-                  <span className="prd_current_price">
-                    {formatPrice(product.disPrice || product.salePrice)} 원
-                  </span>
-                  {/* 할인가가 있고 판매가와 다르면 판매가를 원가로 표시 */}
-                  {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && (
-                    <span className="prd_original_price">{formatPrice(product.salePrice)} 원</span>
+                  {/* disPrice와 salePrice가 모두 있고 다른 경우 */}
+                  {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && product.disPrice > 0 ? (
+                    <>
+                      <span className="prd_current_price">
+                        {formatPrice(product.disPrice)} 원
+                      </span>
+                      <span className="prd_original_price">{formatPrice(product.salePrice)} 원</span>
+                    </>
+                  ) : (
+                    /* disPrice만 있거나, salePrice만 있거나, 둘이 같은 경우 */
+                    <span className="prd_current_price">
+                      {formatPrice(product.disPrice || product.salePrice)} 원
+                    </span>
                   )}
+                </div>
                 </div>
               </div>
             </div>

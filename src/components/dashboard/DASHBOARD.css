@@ -87,7 +87,7 @@
 /* Product Card */
 .dash-product-card {
   background: white;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -101,6 +101,7 @@
 .dash-product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #9ca3af;
 }
 
 .dash-product-badge-container {
@@ -127,24 +128,28 @@
   width: 100%;
   height: 200px;
   overflow: hidden;
-  background-color: #f8f8f8;
+  background-color: #ffffff;
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dash-product-image {
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  object-fit: cover;
-  object-position: center;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   transition: transform 0.3s ease;
   display: block;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .dash-product-card:hover .dash-product-image {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .dash-product-image-overlay {
@@ -212,6 +217,29 @@
   -webkit-box-orient: vertical;
 }
 
+.dash-product-unit-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  border: 1px solid #90caf9;
+  width: fit-content;
+}
+
+/* Price Row - 단위와 가격을 한 줄로 */
+.dash-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
 /* Price Container */
 .dash-price-container {
   margin-top: auto;
@@ -245,11 +273,12 @@
   font-weight: 500;
 }
 
+/* 가격 표시 */
 .dash-price-display {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-top: 8px;
+  margin-left: auto;
 }
 
 .dash-current-price {
@@ -372,21 +401,24 @@
   flex-shrink: 0;
   width: 120px;
   height: 120px;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: none; /* 중복 테두리 제거 */
+  border: none;
   position: relative;
 }
 
 .dash-inventory-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
 /* Package 아이콘 스타일 */

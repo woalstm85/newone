@@ -55,6 +55,7 @@ const Cart = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [quoteItems, setQuoteItems] = useState([]); // 모달용 제품 목록
   
   const { globalState } = useAuth();
   const navigate = useNavigate();
@@ -289,17 +290,26 @@ const Cart = () => {
    * @param {number} delta - 증감량
    */
   const handleQuoteQuantityUpdate = (itemCd, delta) => {
-    handleQuantityChange(itemCd, delta);
+    setQuoteItems(prev => prev.map(item => {
+      if (item.itemCd === itemCd) {
+        const newQuantity = Math.max(1, item.quantity + delta);
+        return {
+          ...item,
+          quantity: newQuantity
+        };
+      }
+      return item;
+    }));
   };
 
   /**
-   * 견적 모달에서 상품 제거
+   * 견적 모달에서 상품 제거 (모달에서만 제거)
    * ProductQuoteModal의 콜백으로 사용
    * 
    * @param {string} itemCd - 제품 코드
    */
   const handleQuoteRemoveProduct = (itemCd) => {
-    handleRemoveItem(itemCd);
+    setQuoteItems(prev => prev.filter(item => item.itemCd !== itemCd));
   };
 
   /**
@@ -319,7 +329,30 @@ const Cart = () => {
       return;
     }
 
+    // 선택된 제품들의 복사본 생성
+    setQuoteItems(getSelectedItemsForQuote());
     setShowQuoteModal(true);
+  };
+
+  /**
+   * 견적 모달 닫기 핸들러
+   * 
+   * @param {Array} submittedItems - 견적 의뢰된 제품 목록 (있으면 장바구니에서 제거)
+   */
+  const handleCloseQuoteModal = (submittedItems = null) => {
+    // 견적 의뢰가 완료된 경우 (submittedItems가 있으면)
+    if (submittedItems && submittedItems.length > 0) {
+      // 장바구니에서 견적 의뢰된 제품들만 제거
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = cart.filter(cartItem => 
+        !submittedItems.some(reqItem => reqItem.itemCd === cartItem.itemCd)
+      );
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      window.dispatchEvent(new Event('cartUpdated'));
+    }
+    
+    setShowQuoteModal(false);
+    setQuoteItems([]);
   };
 
   /**
@@ -601,9 +634,9 @@ const Cart = () => {
       
       {/* 견적 의뢰 모달 */}
       <ProductQuoteModal 
-        selectedProducts={getSelectedItemsForQuote()}
+        selectedProducts={quoteItems}
         isOpen={showQuoteModal}
-        onClose={() => setShowQuoteModal(false)}
+        onClose={handleCloseQuoteModal}
         onRemoveProduct={handleQuoteRemoveProduct}
         onUpdateQuantity={handleQuoteQuantityUpdate}
       />

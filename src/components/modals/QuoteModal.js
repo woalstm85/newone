@@ -417,18 +417,28 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                       </div>
                     )}
                     
-                    <div className="quote-modal-product-row">
-                      <span className="quote-modal-product-label">가격:</span>
-                      <span className="quote-modal-product-value price">
-                        {Number(product.disPrice || product.salePrice || 0).toLocaleString()}원
-                      </span>
-                    </div>
-                    
-                    {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && (
+                    {product.unitNm && (
                       <div className="quote-modal-product-row">
-                        <span className="quote-modal-product-label">정가:</span>
-                        <span className="quote-modal-product-value">{Number(product.salePrice).toLocaleString()}원</span>
+                        <span className="quote-modal-product-unit-badge">{product.unitNm}</span>
                       </div>
+                    )}
+                    
+                    {(product.disPrice > 0 || product.salePrice > 0) && (
+                      <>
+                        <div className="quote-modal-product-row">
+                          <span className="quote-modal-product-label">가격:</span>
+                          <span className="quote-modal-product-value price">
+                            {Number(product.disPrice || product.salePrice).toLocaleString()}원
+                          </span>
+                        </div>
+                        
+                        {product.disPrice > 0 && product.salePrice > 0 && product.disPrice !== product.salePrice && (
+                          <div className="quote-modal-product-row">
+                            <span className="quote-modal-product-label">정가:</span>
+                            <span className="quote-modal-product-value" style={{ textDecoration: 'line-through', color: '#999' }}>{Number(product.salePrice).toLocaleString()}원</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -539,18 +549,28 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                     </div>
                   )}
                   
-                  <div className="quote-modal-product-row">
-                    <span className="quote-modal-product-label">가격:</span>
-                    <span className="quote-modal-product-value price">
-                      {Number(product.disPrice || product.salePrice || 0).toLocaleString()}원
-                    </span>
-                  </div>
-                  
-                  {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && (
+                  {product.unitNm && (
                     <div className="quote-modal-product-row">
-                      <span className="quote-modal-product-label">정가:</span>
-                      <span className="quote-modal-product-value">{Number(product.salePrice).toLocaleString()}원</span>
+                      <span className="quote-modal-product-unit-badge">{product.unitNm}</span>
                     </div>
+                  )}
+                  
+                  {(product.disPrice > 0 || product.salePrice > 0) && (
+                    <>
+                      <div className="quote-modal-product-row">
+                        <span className="quote-modal-product-label">가격:</span>
+                        <span className="quote-modal-product-value price">
+                          {Number(product.disPrice || product.salePrice).toLocaleString()}원
+                        </span>
+                      </div>
+                      
+                      {product.disPrice > 0 && product.salePrice > 0 && product.disPrice !== product.salePrice && (
+                        <div className="quote-modal-product-row">
+                          <span className="quote-modal-product-label">정가:</span>
+                          <span className="quote-modal-product-value" style={{ textDecoration: 'line-through', color: '#999' }}>{Number(product.salePrice).toLocaleString()}원</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 
