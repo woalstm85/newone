@@ -338,7 +338,7 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
         ]);
 
         // 데이터 처리 - 각각 최대 10개만 사용
-        const processData = (data, maxItems = 10) => {
+        const processData = (data, maxItems = 10, type = 'general') => {
           return data.slice(0, maxItems).map(item => {
             return {
               ...item,
@@ -348,6 +348,9 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
               salePrice: item.salePrice,
               shipAvDate: item.shipAvDate,
               FILEPATH: item.FILEPATH,
+              // source 구분을 위한 플래그 추가
+              isSurplus: type === 'surplus',
+              isEvent: type === 'event'
             };
           });
         };
@@ -356,12 +359,12 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
           { 
             title: "잉여 재고 거래", 
             icon: "📦",
-            items: processData(surplusData, 10)
+            items: processData(surplusData, 10, 'surplus')
           },
           { 
             title: "행사 품목", 
             icon: "🔥",
-            items: processData(eventData, 10)
+            items: processData(eventData, 10, 'event')
           }
         ];
 

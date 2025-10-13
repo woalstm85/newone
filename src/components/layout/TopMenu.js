@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; 
 import { useAuth } from '../../context/AuthContext';
 import { ShoppingCart, Menu, X } from 'lucide-react';
+import { getCartItemCount } from '../../utils/cartUtils';
 import './TopMenu.css';
 
 function TopMenu({ onTopMenuClick, activeTopMenu }) {
@@ -34,11 +35,14 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
 
   /**
    * 장바구니 아이템 개수 업데이트
+   * 거래처별 장바구니 카운트
    */
   useEffect(() => {
+    const custCd = globalState.G_CUST_CD || '';
+    
     const updateCartCount = () => {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      setCartItemCount(cart.length);
+      const count = getCartItemCount(custCd);
+      setCartItemCount(count);
     };
 
     updateCartCount();
@@ -49,7 +53,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       window.removeEventListener('storage', updateCartCount);
       window.removeEventListener('cartUpdated', updateCartCount);
     };
-  }, []);
+  }, [globalState.G_CUST_CD]);
 
   /**
    * 모바일 메뉴 외부 클릭 시 닫기

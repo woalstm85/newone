@@ -116,6 +116,7 @@ function Login() {
         // 전역 상태에 사용자 정보 저장
         updateGlobalState({
           G_USER_ID: data.userId,
+          G_CUST_CD: data.custCd || data.userId, // 거래처 코드 (없으면 userId 사용)
           G_CUST_NM: data.custNm,
           G_CUST_S_NM: data.custSNm,
           G_COMPID: data.compId,

@@ -8,6 +8,7 @@
  * 
  * 관리되는 상태:
  * - G_USER_ID: 사용자 ID
+ * - G_CUST_CD: 거래처 코드
  * - G_CUST_NM: 고객명 (전체)
  * - G_CUST_S_NM: 고객명 (약칭)
  * - G_COMPID: 회사 ID
@@ -29,6 +30,7 @@ export function AuthProvider({ children }) {
     const savedState = sessionStorage.getItem('authState');
     return savedState ? JSON.parse(savedState) : {
       G_USER_ID: '',
+      G_CUST_CD: '',
       G_CUST_NM: '',
       G_CUST_S_NM: '',
       G_COMPID: '',
@@ -55,6 +57,7 @@ export function AuthProvider({ children }) {
   const clearGlobalState = () => {
     setGlobalState({
       G_USER_ID: '',
+      G_CUST_CD: '',
       G_CUST_NM: '',
       G_CUST_S_NM: '',
       G_COMPID: '',

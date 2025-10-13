@@ -22,6 +22,7 @@ import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
 import { toast } from 'react-toastify';
+import { addToCart } from '../../utils/cartUtils';
 
 /**
  * 모바일 환경 감지 커스텀 훅
@@ -207,8 +208,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
   /**
    * 장바구니 담기 핸들러
-   * 로그인 및 옵션 선택 확인 후 장바구니에 상품 추가
-   * localStorage를 사용하여 장바구니 데이터 저장
+   * 거래처별 장바구니 저장
    */
   const handleAddToCart = () => {
     // 로그인 체크
@@ -224,11 +224,12 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     }
 
     try {
-      // 장바구니 상품 데이터 구성
       const price = product.disPrice || product.salePrice || 0;
       const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
+      const custCd = globalState.G_CUST_CD || '';
       
-      const cartItem = {
+      // cartUtils를 사용하여 거래처별 장바구니에 추가
+      const success = addToCart(custCd, {
         itemCd: product.itemCd,
         itemNm: product.itemNm,
         unitNm: product.unitNm,
@@ -240,56 +241,36 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
         quantity: quantity,
         filePath: product.FILEPATH,
         totalAmount: price * quantity,
-        source: product.isSurplus ? 'surplus' : (product.isEvent ? 'event' : 'general')
-      };
+        source: product.isSurplus ? 'surplus' : (product.isEvent ? 'event' : 'general'),
+        shipAvDate: product.shipAvDate,
+        compNm: product.compNm
+      });
       
-      // 장바구니에 상품 추가 (localStorage 사용)
-      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItemIndex = existingCart.findIndex(item => 
-        item.itemCd === cartItem.itemCd && item.optValCd === cartItem.optValCd
-      );
-      
-      let isNewItem = true;
-      if (existingItemIndex >= 0) {
-        // 기존 상품이 있으면 수량 업데이트
-        existingCart[existingItemIndex].quantity += cartItem.quantity;
-        existingCart[existingItemIndex].totalAmount = 
-          existingCart[existingItemIndex].price * existingCart[existingItemIndex].quantity;
-        isNewItem = false;
-      } else {
-        // 새 상품 추가
-        existingCart.push(cartItem);
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(existingCart));
-      
-      // 장바구니 업데이트 이벤트 발생
-      window.dispatchEvent(new CustomEvent('cartUpdated'));
-      
-      // Toast 성공 알림 표시
-      const optionText = selectedOption ? ` (옵션: ${selectedOption.optValNm})` : '';
-      const actionText = isNewItem ? '추가되었습니다' : '수량이 업데이트되었습니다';
-      
-      toast.success(
-        `🛒 ${product.itemNm}${optionText}\n${quantity}개 ${actionText}\n총 ${existingCart.length}개 상품`, 
-        {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          style: {
-            fontSize: '16px',
-            minWidth: '350px',
-            padding: '16px',
-            fontWeight: '500'
+      if (success) {
+        const optionText = selectedOption ? ` (옵션: ${selectedOption.optValNm})` : '';
+        
+        toast.success(
+          `🛒 ${product.itemNm}${optionText}\n${quantity}개 장바구니에 추가되었습니다`, 
+          {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            style: {
+              fontSize: '16px',
+              minWidth: '350px',
+              padding: '16px',
+              fontWeight: '500'
+            }
           }
-        }
-      );
-      
-      // 모달 닫기
-      handleClose();
+        );
+        
+        handleClose();
+      } else {
+        toast.error('장바구니 추가에 실패했습니다.');
+      }
       
     } catch (error) {
       console.error('장바구니 추가 오류:', error);

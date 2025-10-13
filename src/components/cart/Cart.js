@@ -10,10 +10,11 @@
  * 6. 견적 의뢰 (ProductQuoteModal 연동)
  * 7. 로그인 체크
  * 8. 반응형 디자인 (데스크톱/모바일)
+ * 9. 거래처별 장바구니 분리 (cartUtils 사용)
  * 
  * 데이터 저장:
  * - localStorage를 사용하여 장바구니 데이터 영속화
- * - 'cart' 키로 배열 형태로 저장
+ * - 거래처별로 분리된 키 사용: cart_{거래처코드}
  * 
  * 장바구니 아이템 구조:
  * {
@@ -46,10 +47,14 @@ import './Cart.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 import ProductQuoteModal from '../modals/ProductQuoteModal';
+import { 
+  getCartItems, 
+  setCartItems 
+} from '../../utils/cartUtils';
 
 const Cart = () => {
   // ========== 상태 관리 ==========
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItemsState] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -61,12 +66,26 @@ const Cart = () => {
   const navigate = useNavigate();
   
   const isLoggedIn = !!globalState.G_USER_ID;
+  const custCd = globalState.G_CUST_CD || ''; // 거래처 코드
 
   /**
    * 컴포넌트 마운트 시 장바구니 데이터 로드
    * 및 cartUpdated 이벤트 리스너 추가
+   * custCd가 변경될 때마다 해당 거래처 장바구니 로드
    */
   useEffect(() => {
+    const loadCartItems = () => {
+      const savedCart = getCartItems(custCd);
+      setCartItemsState(savedCart);
+      
+      // 선택 상태 초기화 (모든 항목 선택)
+      const initialSelected = {};
+      savedCart.forEach(item => {
+        initialSelected[item.itemCd] = true;
+      });
+      setSelectedItems(initialSelected);
+    };
+    
     loadCartItems();
     
     // 장바구니 업데이트 이벤트 리스너
@@ -79,23 +98,7 @@ const Cart = () => {
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
-  }, []);
-
-  /**
-   * localStorage에서 장바구니 데이터 로드
-   * 모든 항목을 기본 선택 상태로 설정
-   */
-  const loadCartItems = () => {
-    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(savedCart);
-    
-    // 선택 상태 초기화 (모든 항목 선택)
-    const initialSelected = {};
-    savedCart.forEach(item => {
-      initialSelected[item.itemCd] = true;
-    });
-    setSelectedItems(initialSelected);
-  };
+  }, [custCd]); // custCd가 변경될 때마다 장바구니 다시 로드
 
   /**
    * 상품 수량 변경 (증가/감소)
@@ -116,9 +119,8 @@ const Cart = () => {
       return item;
     });
     
-    setCartItems(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
-    window.dispatchEvent(new Event('cartUpdated'));
+    setCartItemsState(updatedItems);
+    setCartItems(custCd, updatedItems);
   };
 
   /**
@@ -140,8 +142,8 @@ const Cart = () => {
       return item;
     });
     
-    setCartItems(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
+    setCartItemsState(updatedItems);
+    setCartItems(custCd, updatedItems);
   };
 
   /**
@@ -151,9 +153,8 @@ const Cart = () => {
    */
   const handleRemoveItem = (itemCd) => {
     const updatedItems = cartItems.filter(item => item.itemCd !== itemCd);
-    setCartItems(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
-    window.dispatchEvent(new Event('cartUpdated'));
+    setCartItemsState(updatedItems);
+    setCartItems(custCd, updatedItems);
     
     // 선택 상태에서도 제거
     const updatedSelected = { ...selectedItems };
@@ -344,12 +345,11 @@ const Cart = () => {
     // 견적 의뢰가 완료된 경우 (submittedItems가 있으면)
     if (submittedItems && submittedItems.length > 0) {
       // 장바구니에서 견적 의뢰된 제품들만 제거
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const cart = getCartItems(custCd);
       const updatedCart = cart.filter(cartItem => 
         !submittedItems.some(reqItem => reqItem.itemCd === cartItem.itemCd)
       );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      window.dispatchEvent(new Event('cartUpdated'));
+      setCartItems(custCd, updatedCart);
     }
     
     setShowQuoteModal(false);
@@ -403,9 +403,8 @@ const Cart = () => {
               // 선택되지 않은 상품들만 남김
               const updatedItems = cartItems.filter(item => !selectedItems[item.itemCd]);
               
-              setCartItems(updatedItems);
-              localStorage.setItem('cart', JSON.stringify(updatedItems));
-              window.dispatchEvent(new Event('cartUpdated'));
+              setCartItemsState(updatedItems);
+              setCartItems(custCd, updatedItems);
               
               // 선택 상태 초기화
               const newSelectedState = {};
