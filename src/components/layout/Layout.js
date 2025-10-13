@@ -178,6 +178,7 @@ function Layout() {
 
     const handleLogoutConfirm = () => {
         clearGlobalState();
+        sessionStorage.removeItem('authToken');
         setActiveTopMenuCd('HOME');
         navigate('/dashboard');
         setIsModalOpen(false);

@@ -553,9 +553,14 @@ const ProductQuoteModal = ({ product, products, selectedProducts, isOpen, onClos
                             )}
                             <div className="product-quote-item-price">
                               <span className="product-quote-detail-label">단가:</span>
-                              <span className="product-quote-detail-value price">
-                                {Number(currentProduct.disPrice || currentProduct.salePrice || currentProduct.price || 0).toLocaleString()} 원
-                              </span>
+                              <div className="product-quote-price-with-unit">
+                                <span className="product-quote-detail-value price">
+                                  {Number(currentProduct.disPrice || currentProduct.salePrice || currentProduct.price || 0).toLocaleString()} 원
+                                </span>
+                                {(currentProduct.unitNm || (item && item.unitNm)) && (
+                                  <span className="product-quote-unit-badge">{currentProduct.unitNm || item.unitNm}</span>
+                                )}
+                              </div>
                             </div>
                             {currentProduct.disPrice && currentProduct.salePrice && currentProduct.disPrice !== currentProduct.salePrice && (
                               <div className="product-quote-item-original-price">

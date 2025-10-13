@@ -123,7 +123,7 @@ function Login() {
 
         // 인증 토큰 저장 (API에서 제공하는 경우)
         if (data.token) {
-          localStorage.setItem('authToken', data.token);
+          sessionStorage.setItem('authToken', data.token);
         }
 
         // 메인 화면으로 이동

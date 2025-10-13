@@ -219,6 +219,7 @@ const Cart = () => {
       .map(item => ({
         itemCd: item.itemCd,
         itemNm: item.itemNm,
+        unitNm: item.unitNm,
         compNm: item.compNm,
         price: item.price,
         quantity: item.quantity,

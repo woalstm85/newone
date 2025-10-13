@@ -3,7 +3,7 @@
  * 
  * 주요 기능:
  * 1. 사용자 로그인 정보 전역 상태 관리
- * 2. localStorage를 통한 인증 상태 영속성 유지 (새로고침 시에도 유지)
+ * 2. sessionStorage를 통한 세션 내 인증 상태 유지 (브라우저 닫으면 로그아웃)
  * 3. 로그아웃 시 상태 초기화
  * 
  * 관리되는 상태:
@@ -24,9 +24,9 @@ const AuthContext = createContext();
  * @param {ReactNode} children - 하위 컴포넌트
  */
 export function AuthProvider({ children }) {
-  // localStorage에서 저장된 인증 상태 복원 (초기값 설정)
+  // sessionStorage에서 저장된 인증 상태 복원 (초기값 설정)
   const [globalState, setGlobalState] = useState(() => {
-    const savedState = localStorage.getItem('authState');
+    const savedState = sessionStorage.getItem('authState');
     return savedState ? JSON.parse(savedState) : {
       G_USER_ID: '',
       G_CUST_NM: '',
@@ -35,9 +35,9 @@ export function AuthProvider({ children }) {
     };
   });
 
-  // 상태가 변경될 때마다 localStorage에 자동 저장
+  // 상태가 변경될 때마다 sessionStorage에 자동 저장
   useEffect(() => {
-    localStorage.setItem('authState', JSON.stringify(globalState));
+    sessionStorage.setItem('authState', JSON.stringify(globalState));
   }, [globalState]);
 
   /**
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
 
   /**
    * 인증 상태 초기화 (로그아웃)
-   * localStorage에서도 완전히 제거
+   * sessionStorage에서도 완전히 제거
    */
   const clearGlobalState = () => {
     setGlobalState({
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
       G_CUST_S_NM: '',
       G_COMPID: '',
     });
-    localStorage.removeItem('authState');
+    sessionStorage.removeItem('authState');
   };
 
   return (
