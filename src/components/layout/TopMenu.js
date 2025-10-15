@@ -81,11 +81,14 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
   }, [isMobileMenuOpen]);
 
   /**
-   * 라우트 변경 감지하여 activeTopMenu 자동 업데이트
+   * 라우트 변경 감지하여 activeTopMenu 자동 업데이트 - 비활성화
+   * Layout.js에서 URL 동기화를 처리하므로 여기서는 하지 않음
    */
+  /*
   useEffect(() => {
     const currentPath = location.pathname;
     
+    // SURPLUS나 EVENT 가 활성화되어 있을 때 dashboard로 가는 것을 방지
     if ((currentPath === '/dashboard' || currentPath === '/') && 
         (activeTopMenu === 'SURPLUS' || activeTopMenu === 'EVENT')) {
       return;
@@ -106,6 +109,22 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
     } else if (currentPath === '/cart') {
       menuCdToSet = 'CART';
       menuNmToSet = '장바구니';
+    } else if (currentPath.includes('CUST0010') || currentPath === '/CUST0010') {
+      // CUST0010 경로 명시적 처리
+      menuCdToSet = 'CUST0010';
+      menuNmToSet = '재고현황 관리';
+    } else if (currentPath.includes('CUST0020') || currentPath === '/CUST0020') {
+      // CUST0020 경로 명시적 처리
+      menuCdToSet = 'CUST0020';
+      menuNmToSet = '자사재고현황';
+    } else if (currentPath.includes('CUST0040') || currentPath === '/CUST0040') {
+      // CUST0040 경로 명시적 처리
+      menuCdToSet = 'CUST0040';
+      menuNmToSet = '발주관리';
+    } else if (currentPath.includes('CUST0060') || currentPath === '/CUST0060') {
+      // CUST0060 경로 명시적 처리
+      menuCdToSet = 'CUST0060';
+      menuNmToSet = '발주내역';
     } else {
       // LEFT 메뉴에서 현재 경로와 일치하는 항목 찾기
       const matchingMenuItem = topMenuItems.find(item => {
@@ -123,6 +142,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
         menuCdToSet = matchingMenuItem.top_menuCd;
         menuNmToSet = matchingMenuItem.top_menuNm;
       } else {
+        // 매칭되는 메뉴를 찾지 못했을 때, activeTopMenu를 유지
         return;
       }
     }
@@ -131,6 +151,7 @@ function TopMenu({ onTopMenuClick, activeTopMenu }) {
       onTopMenuClick(menuCdToSet, menuNmToSet);
     }
   }, [location.pathname, topMenuItems, activeTopMenu, onTopMenuClick]);
+  */
 
   /**
    * 메뉴 데이터 로드

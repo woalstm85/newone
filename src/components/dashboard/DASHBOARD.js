@@ -440,8 +440,11 @@ const DASHBOARD = ({ onProductClick, onMoreClick, isLoggedIn = false }) => {
       targetMenuCd = 'CUST0010'; // 자사재고현황은 CUST0010으로 이동
     }
     
+    
     if(onMoreClick) {
       onMoreClick(targetMenuCd);
+    } else {
+      console.log('DASHBOARD onMoreClick is not defined!');
     }
   };
 

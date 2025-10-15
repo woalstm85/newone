@@ -30,6 +30,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAuthApi } from '../../hooks';
+import { ShoppingBag } from 'lucide-react';
 import './Login.css';
 
 function Login() {
@@ -162,7 +163,23 @@ function Login() {
 
   return (
     <div className="login-container">
+      {/* 모바일 배경 이미지 */}
+      <div className="mobile-background-image">
+        <img src="/images/login_img.png" alt="Background" />
+      </div>
+      
       <div className="login-wrapper">
+        {/* 모바일 전용 헤더 */}
+        <div className="mobile-login-header">
+          <div className="mobile-logo-container">
+            <ShoppingBag size={48} strokeWidth={1.5} />
+          </div>
+          <div className="mobile-welcome-text">
+            <h1>뉴원에 오신 것을 환영합니다</h1>
+            <p>재고 관리를 스마트하게</p>
+          </div>
+        </div>
+        
         {/* 왼쪽 이미지 섹션 */}
         <div className="login-image-section">
           <img src="/images/login_img.png" alt="SteppingStone Logo" />
