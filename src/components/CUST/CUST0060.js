@@ -261,6 +261,15 @@ function CUST0060() {
     }
   };
 
+  // 옵션 표시 여부 확인 함수 (CUST0010, CUST0020와 동일)
+  const shouldShowOption = (optCd, optValNm) => {
+    // optCd가 없거나 'OP0000'이면 표시하지 않음
+    if (!optCd || optCd === 'OP0000') return false;
+    // optValNm이 있으면 표시
+    if (optValNm && optValNm.trim() !== '') return true;
+    return false;
+  };
+
   // 리스트 뷰 렌더링
   const renderListView = () => (
     <div className="cust0060-table-container">
@@ -327,7 +336,13 @@ function CUST0060() {
                   <span className="cust0060-item-name">{row.itemNm}</span>
                 </div>
               </td>
-              <td className="cust0060-center">{row.optValNm || '-'}</td>
+              <td className="cust0060-center">
+                {shouldShowOption(row.optCd, row.optValNm) ? (
+                  <span className="cust0060-option-badge">
+                    {row.optValNm}
+                  </span>
+                ) : '-'}
+              </td>
               <td className="cust0060-right">{formatAmount(row.qty)}</td>
               <td className="cust0060-right">{formatAmount(row.amount)}</td>
               <td className="cust0060-center">

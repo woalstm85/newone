@@ -33,6 +33,19 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
   if (!isOpen || !quote) return null;
 
   /**
+   * 옵션 표시 여부 확인 함수
+   * optValNm이 '', 'N/A'이면 표시하지 않음
+   * 
+   * @param {string} optValNm - 옵션값 명
+   * @returns {boolean} 옵션 표시 여부
+   */
+  const shouldShowOption = (optValNm) => {
+    // optValNm이 없거나 빈 문자열이거나 'N/A'이면 표시하지 않음
+    if (!optValNm || optValNm.trim() === '' || optValNm.trim() === 'N/A') return false;
+    return true;
+  };
+
+  /**
    * 이미지 클릭 핸들러
    * 이미지를 확대하여 볼 수 있는 모달 열기
    * 
@@ -355,7 +368,9 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                     <h4>{item.itemNm}</h4>
                     <div className="quote-detail-item-details">
                       <p><span>품목코드:</span> {item.itemCd}</p>
-                      {item.optValNm && <p><span>옵션:</span> {item.optValNm}</p>}
+                      {shouldShowOption(item.optValNm) && (
+                        <p><span>옵션:</span> {item.optValNm}</p>
+                      )}
                       {item.remark && <p><span>비고:</span> {item.remark}</p>}
                     </div>
                   </div>

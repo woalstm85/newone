@@ -1910,3 +1910,26 @@
   color: white;
   border-color: #3b82f6;
 }
+
+/* ===================================================================
+   옵션 배지 스타일 (CUST0010, CUST0020과 동일)
+   =================================================================== */
+.cust0060-option-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+  transition: all 0.2s ease;
+}
+
+.cust0060-option-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
