@@ -353,9 +353,11 @@ function CUST0010() {
             </div>
             
             <div className="cust0010-inventory-image-info">
+              {shouldShowOption(item.optCd, item.optValNm) && (
                 <span className="cust0010-inventory-option-badge">
                   🏷️ {item.optValNm}
                 </span>
+              )}
               {item.unitNm && (
                 <span className="cust0010-inventory-unit-badge">
                   📏 {item.unitNm}
@@ -457,7 +459,7 @@ function CUST0010() {
             </div>
             
             <div className="cust0010-inventory-image-info">
-              {item.optValNm && (
+              {shouldShowOption(item.optCd, item.optValNm) && (
                 <span className="cust0010-inventory-option-badge">
                   🏷️ {item.optValNm}
                 </span>
@@ -542,13 +544,14 @@ function CUST0010() {
 
   /** 일반 재고 - 리스트 뷰(테이블) 렌더링 */
   /**
-   * 옵션 코드 유효성 검사
+   * 옵션 표시 여부 확인 함수 (CUST0020과 동일)
    */
-  const isValidOptionCode = (optCd) => {
-    if (!optCd || optCd.trim() === '' || optCd === 'OP0000') {
-      return false;
-    }
-    return true;
+  const shouldShowOption = (optCd, optValNm) => {
+    // optCd가 없거나 'OP0000'이면 표시하지 않음
+    if (!optCd || optCd === 'OP0000') return false;
+    // optValNm이 있으면 표시
+    if (optValNm && optValNm.trim() !== '') return true;
+    return false;
   };
 
  // 일반 재고 테이블 렌더링
@@ -616,7 +619,13 @@ function CUST0010() {
                     </div>
                   </td>
                   <td className="cust0010-left">{row.itemNm}</td>
-                  <td className="cust0010-center">{isValidOptionCode(row.optCd) ? (row.optValNm || '-') : '-'}</td>
+                  <td className="cust0010-center">
+                    {shouldShowOption(row.optCd, row.optValNm) ? (
+                      <span className="cust0010-option-badge">
+                        {row.optValNm}
+                      </span>
+                    ) : '-'}
+                  </td>
                   <td className="cust0010-center">{row.unitNm || '-'}</td>
                   <td className="cust0010-right">{(row.avgPrice || 0).toLocaleString()}</td>
                   <td className="cust0010-right">{(row.openingQty || 0).toLocaleString()}</td>
@@ -734,7 +743,7 @@ function CUST0010() {
             <tr>
               <th style={{ width: '40px' }}>상세</th>
               <th style={{ width: '120px' }}>로트번호</th>
-              <th style={{ width: '80px' }}>제품코드</th>
+              <th style={{ width: '80px' }}>이미지</th>
               <th>품목명</th>
               <th style={{ width: '80px' }}>옵션</th>
               <th style={{ width: '100px' }}>입고수량</th>
@@ -770,9 +779,47 @@ function CUST0010() {
                     <td className="cust0010-center" style={{ fontWeight: '600', color: '#007bff' }}>
                       {row.lotNo}
                     </td>
-                    <td className="cust0010-center">{row.itemCd}</td>
-                    <td className="cust0010-left">{row.itemNm}</td>
-                    <td className="cust0010-center">{row.optValNm || '-'}</td>
+                    <td className="cust0010-center">
+                      <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        {row.filePath || row.thFilePath ? (
+                          <div className="cust0010-table-image-container">
+                            <img
+                              src={row.filePath || row.thFilePath}
+                              alt={row.itemNm}
+                              className="cust0010-table-image-item"
+                            />
+                            <div className="cust0010-table-image-overlay">
+                              <button
+                                className="cust0010-table-overlay-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleImageClick(row.filePath || row.thFilePath, row.itemNm, row.itemCd);
+                                }}
+                              >
+                                <Eye size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="cust0010-table-no-image">
+                            <CiImageOff size={20} color="#ccc" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="cust0010-left">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="cust0010-item-code-text">{row.itemCd}</span>
+                        <span>{row.itemNm}</span>
+                      </div>
+                    </td>
+                    <td className="cust0010-center">
+                      {shouldShowOption(row.optCd, row.optValNm) ? (
+                        <span className="cust0010-option-badge">
+                          {row.optValNm}
+                        </span>
+                      ) : '-'}
+                    </td>
                     <td className="cust0010-right">
                       <div className="cust0010-table-quantity-cell">
                         {formatAmount(row.inpQty)}
