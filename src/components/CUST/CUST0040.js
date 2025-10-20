@@ -565,6 +565,16 @@ const CUST0040 = () => {
       {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="cust0040-pagination">
+          {/* 처음으로 */}
+          <button
+            className="cust0040-page-btn"
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            처음으로
+          </button>
+          
+          {/* 이전 */}
           <button
             className="cust0040-page-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -584,6 +594,7 @@ const CUST0040 = () => {
             </button>
           ))}
 
+          {/* 다음 */}
           <button
             className="cust0040-page-btn"
             onClick={() => handlePageChange(currentPage + 1)}
@@ -591,6 +602,15 @@ const CUST0040 = () => {
           >
             다음
             <ChevronRight size={16} />
+          </button>
+          
+          {/* 끝으로 */}
+          <button
+            className="cust0040-page-btn"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            끝으로
           </button>
         </div>
       )}

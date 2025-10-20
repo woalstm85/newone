@@ -41,6 +41,7 @@ import './Layout.css';
 import Modal from '../common/Modal';
 import ProductCategoryMenu from '../product/ProductCategoryMenu';
 import ProductList from '../product/ProductList';
+import Footer from '../common/Footer';
 
 function Layout() {
     // ========== 상태 관리 ==========
@@ -201,6 +202,8 @@ function Layout() {
         if (!isLoggedIn && !['HOME', 'SURPLUS', 'EVENT', 'CART'].includes(menuCd)) {
             return;
         }
+        
+        // 메뉴 상태 업데이트를 한 번에 처리
         setActiveTopMenuCd(menuCd);
         switchTab(menuCd);
         
@@ -246,6 +249,11 @@ function Layout() {
             setIsProductCategoryMenuOpen(false);
             setSelectedCategory(null);
             
+            // LEFT 메뉴는 즉시 setCurrentMenu 호출
+            if (isLoggedIn) {
+                setCurrentMenu(menuNm || menuCd, menuCd);
+            }
+            
             const menuItem = menuItems.find(item => item.menuCd === menuCd);
             
             if (menuItem && menuItem.isLeftMenu) {
@@ -253,14 +261,6 @@ function Layout() {
                     navigate(`/${menuItem.menuPath}`);
                 } else {
                     navigate(`/${menuCd}`);
-                }
-                
-                if (isLoggedIn) {
-                    setCurrentMenu(menuNm || menuCd, menuCd);
-                }
-            } else {
-                if (isLoggedIn) {
-                    setCurrentMenu(menuNm || menuCd, menuCd);
                 }
             }
         }
@@ -272,79 +272,71 @@ function Layout() {
     useEffect(() => {
         const currentPath = location.pathname;
         
-        // 이미 해당 메뉴가 활성화되어 있으면 아무것도 하지 않음
-        if (currentPath === '/cart' && activeTopMenuCd === 'CART') return;
-        if (currentPath === '/surplus' && activeTopMenuCd === 'SURPLUS') return;
-        if (currentPath === '/event' && activeTopMenuCd === 'EVENT') return;
-        if ((currentPath === '/dashboard' || currentPath === '/') && activeTopMenuCd === 'HOME') return;
-        if (currentPath.includes('CUST0010') && activeTopMenuCd === 'CUST0010') return;
-        if (currentPath.includes('CUST0020') && activeTopMenuCd === 'CUST0020') return;
-        if (currentPath.includes('CUST0040') && activeTopMenuCd === 'CUST0040') return;
-        if (currentPath.includes('CUST0060') && activeTopMenuCd === 'CUST0060') return;
-        if (currentPath.includes('CUST0050') && activeTopMenuCd === 'CUST0050') return;
-        
         // 경로에 따른 메뉴 설정
         if (currentPath === '/cart') {
-            setActiveTopMenuCd('CART');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
+            if (activeTopMenuCd !== 'CART') {
+                setActiveTopMenuCd('CART');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
+            }
         } else if (currentPath === '/surplus') {
-            setActiveTopMenuCd('SURPLUS');
-            setCurrentListType('surplus');
-            setIsProductListOpen(true);
-            setIsProductCategoryMenuOpen(window.innerWidth > 1024);
-            setSelectedCategory(null);
+            if (activeTopMenuCd !== 'SURPLUS') {
+                setActiveTopMenuCd('SURPLUS');
+                setCurrentListType('surplus');
+                setIsProductListOpen(true);
+                setIsProductCategoryMenuOpen(window.innerWidth > 1024);
+                setSelectedCategory(null);
+            }
         } else if (currentPath === '/event') {
-            setActiveTopMenuCd('EVENT');
-            setCurrentListType('event');
-            setIsProductListOpen(true);
-            setIsProductCategoryMenuOpen(window.innerWidth > 1024);
-            setSelectedCategory(null);
+            if (activeTopMenuCd !== 'EVENT') {
+                setActiveTopMenuCd('EVENT');
+                setCurrentListType('event');
+                setIsProductListOpen(true);
+                setIsProductCategoryMenuOpen(window.innerWidth > 1024);
+                setSelectedCategory(null);
+            }
         } else if (currentPath === '/dashboard' || currentPath === '/') {
-            setActiveTopMenuCd('HOME');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
+            if (activeTopMenuCd !== 'HOME') {
+                setActiveTopMenuCd('HOME');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
+            }
         } else if (currentPath.includes('CUST0010')) {
-            setActiveTopMenuCd('CUST0010');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
-            if (isLoggedIn) {
-                setCurrentMenu('재고현황 관리', 'CUST0010');
+            if (activeTopMenuCd !== 'CUST0010') {
+                setActiveTopMenuCd('CUST0010');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
             }
         } else if (currentPath.includes('CUST0020')) {
-            setActiveTopMenuCd('CUST0020');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
-            if (isLoggedIn) {
-                setCurrentMenu('제품정보 조회', 'CUST0020');
+            if (activeTopMenuCd !== 'CUST0020') {
+                setActiveTopMenuCd('CUST0020');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
             }
         } else if (currentPath.includes('CUST0040')) {
-            setActiveTopMenuCd('CUST0040');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
-            if (isLoggedIn) {
-                setCurrentMenu('견적의뢰내역', 'CUST0040');
+            if (activeTopMenuCd !== 'CUST0040') {
+                setActiveTopMenuCd('CUST0040');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
             }
         } else if (currentPath.includes('CUST0050')) {
-            setActiveTopMenuCd('CUST0050');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
-            if (isLoggedIn) {
-                setCurrentMenu('비용정산', 'CUST0050');
+            if (activeTopMenuCd !== 'CUST0050') {
+                setActiveTopMenuCd('CUST0050');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
             }
         } else if (currentPath.includes('CUST0060')) {
-            setActiveTopMenuCd('CUST0060');
-            setIsProductCategoryMenuOpen(false);
-            setIsProductListOpen(false);
-            setSelectedCategory(null);
-            if (isLoggedIn) {
-                setCurrentMenu('품목 입출고현황', 'CUST0060');
+            if (activeTopMenuCd !== 'CUST0060') {
+                setActiveTopMenuCd('CUST0060');
+                setIsProductCategoryMenuOpen(false);
+                setIsProductListOpen(false);
+                setSelectedCategory(null);
             }
         } else {
             // 기타 LEFT 메뉴 처리
@@ -603,7 +595,7 @@ function Layout() {
                         </div>
                     )}
 
-                    <div className="main-content">
+                    <div className={`main-content ${isDashboardActive || location.pathname === '/cart' ? 'dashboard-content' : ''}`}>
                         {(activeTopMenuCd === 'SURPLUS' || activeTopMenuCd === 'EVENT') && (
                             <div className={`content-header ${
                                 isProductCategoryMenuOpen && isMobile ? 'menu-open' : ''
@@ -656,6 +648,9 @@ function Layout() {
                         {!isDashboardActive && (
                             <Outlet />
                         )}
+                        
+                        {/* 푸터 - 모든 페이지에 표시 */}
+                        <Footer variant={(isDashboardActive || location.pathname === '/cart') ? 'white' : 'default'} />
                     </div>
                 </div>
             </div>

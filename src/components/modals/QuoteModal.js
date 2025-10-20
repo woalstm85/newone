@@ -72,14 +72,26 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   const isLoadingRef = useRef(false); // API 호출 중복 방지 플래그
   
   /**
+   * 옵션 코드 유효성 검사
+   * optCd가 없거나 'OP0000'일 경우 false 반환
+   */
+  const isValidOptionCode = (optCd) => {
+    // optCd가 없거나, 빈 문자열이거나, 'OP0000'이면 false
+    if (!optCd || optCd.trim() === '' || optCd === 'OP0000') {
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * 옵션값 로드 함수
    * 중복 API 호출을 방지하고 제품의 옵션 목록을 가져옴
    * 
    * @param {string} optCd - 옵션 코드
    */
   const loadOptionValues = useCallback(async (optCd) => {
-    // 이미 로딩 중이거나 같은 optCd면 중복 호출 방지
-    if (isLoadingRef.current || loadedOptCdRef.current === optCd) {
+    // optCd가 유효하지 않거나, 이미 로딩 중이거나 같은 optCd면 중복 호출 방지
+    if (!isValidOptionCode(optCd) || isLoadingRef.current || loadedOptCdRef.current === optCd) {
       return;
     }
 
@@ -122,18 +134,22 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       setQuantity(1);
       setShowLoginModal(false);
       setSelectedOptionValue('');
+      setLoadingOptions(false);
       
       // 옵션 처리
       const currentOptCd = product.optCd || null;
       
-      if (currentOptCd && loadedOptCdRef.current !== currentOptCd) {
+      console.log('QuoteModal - optCd:', currentOptCd, 'isValid:', isValidOptionCode(currentOptCd));
+      
+      if (isValidOptionCode(currentOptCd) && loadedOptCdRef.current !== currentOptCd) {
         // 새로운 옵션 코드 - 로드 필요
         setOptionValues([]);
         loadOptionValues(currentOptCd);
-      } else if (!currentOptCd) {
-        // 옵션이 없는 상품
+      } else {
+        // 옵션이 없거나 유효하지 않은 상품
         setOptionValues([]);
         setSelectedOptionValue('');
+        setLoadingOptions(false);
         loadedOptCdRef.current = null;
       }
       
@@ -152,6 +168,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
     if (!isOpen) {
       loadedOptCdRef.current = null;
       isLoadingRef.current = false;
+      setLoadingOptions(false);
     }
   }, [isOpen, product?.itemCd, loadOptionValues]);
 
@@ -196,8 +213,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       return;
     }
 
-    // 옵션값 선택 체크
-    if (optionValues.length > 0 && !selectedOptionValue) {
+    // 유효한 옵션 코드가 있고 옵션값 선택 체크
+    if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
     }
@@ -217,8 +234,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       return;
     }
 
-    // 옵션값 선택 체크
-    if (optionValues.length > 0 && !selectedOptionValue) {
+    // 유효한 옵션 코드가 있고 옵션값 선택 체크
+    if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
     }
@@ -428,8 +445,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
               {/* 하단 영역: 옵션/수량/총금액 */}
               <div className="quote-modal-bottom-section">
-                {/* 옵션 선택 */}
-                {optionValues.length > 0 && (
+                {/* 옵션 선택 - 유효한 옵션 코드일 때만 표시 */}
+                {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                   <div className="quote-modal-option-section">
                     <span className="quote-modal-option-label">옵션:</span>
                     {loadingOptions ? (
@@ -556,8 +573,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                   )}
                 </div>
 
-                {/* 옵션 선택 */}
-                {optionValues.length > 0 && (
+                {/* 옵션 선택 - 유효한 옵션 코드일 때만 표시 */}
+                {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                   <div className="quote-modal-option-section">
                     <span className="quote-modal-option-label">옵션:</span>
                     {loadingOptions ? (

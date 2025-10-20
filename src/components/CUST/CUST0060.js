@@ -19,6 +19,7 @@ function CUST0060() {
   // 검색 조건 - CUST0040처럼 년월 검색
   const [selectedMonth, setSelectedMonth] = useState('');
   const [itemName, setItemName] = useState(''); // 추가 검색 옵션
+  const [inOutDiv, setInOutDiv] = useState(''); // 입/출고구분
 
   // 이미지 모달 상태
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -108,10 +109,15 @@ function CUST0060() {
 
     // 품목명 필터링
     if (itemName.trim()) {
-      filteredData = gridData.filter(item =>
+      filteredData = filteredData.filter(item =>
         (item.itemNm && item.itemNm.toLowerCase().includes(itemName.trim().toLowerCase())) ||
         (item.itemCd && item.itemCd.toLowerCase().includes(itemName.trim().toLowerCase()))
       );
+    }
+
+    // 입/출고구분 필터링
+    if (inOutDiv) {
+      filteredData = filteredData.filter(item => item.inOutDiv === inOutDiv);
     }
 
     const currentItems = filteredData.slice(startIdx, endIdx);
@@ -123,7 +129,7 @@ function CUST0060() {
       startIndex: startIdx + 1,
       endIndex: Math.min(endIdx, filteredData.length)
     };
-  }, [gridData, currentPage, itemsPerPage, itemName]);
+  }, [gridData, currentPage, itemsPerPage, itemName, inOutDiv]);
 
   // API 호출 함수
   const fetchData = useCallback(async () => {
@@ -178,6 +184,7 @@ function CUST0060() {
   // 검색 초기화
   const handleReset = () => {
     setItemName('');
+    setInOutDiv(''); // 입/출고구분 초기화
     setCurrentPage(1);
   };
 
@@ -385,6 +392,18 @@ function CUST0060() {
             </div>
 
             <div className="cust0060-search-field">
+              <label>구분</label>
+              <select
+                value={inOutDiv}
+                onChange={(e) => setInOutDiv(e.target.value)}
+              >
+                <option value="">전체</option>
+                <option value="입고">입고</option>
+                <option value="출고">출고</option>
+              </select>
+            </div>
+
+            <div className="cust0060-search-field">
               <label>품목명</label>
               <input
                 type="text"
@@ -439,6 +458,16 @@ function CUST0060() {
       {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="cust0060-pagination">
+          {/* 처음으로 */}
+          <button
+            className="cust0060-page-btn"
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            처음으로
+          </button>
+          
+          {/* 이전 */}
           <button
             className="cust0060-page-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -458,6 +487,7 @@ function CUST0060() {
             </button>
           ))}
 
+          {/* 다음 */}
           <button
             className="cust0060-page-btn"
             onClick={() => handlePageChange(currentPage + 1)}
@@ -465,6 +495,15 @@ function CUST0060() {
           >
             다음
             <ChevronRight size={16} />
+          </button>
+          
+          {/* 끝으로 */}
+          <button
+            className="cust0060-page-btn"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            끝으로
           </button>
         </div>
       )}

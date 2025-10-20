@@ -654,6 +654,16 @@ function CUST0020() {
 
       {totalPages > 1 && (
         <div className="cust0020-pagination">
+          {/* 맨 처음으로 */}
+          <button
+            className="cust0020-page-btn"
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            처음으로
+          </button>
+          
+          {/* 이전 */}
           <button
             className="cust0020-page-btn"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -663,6 +673,7 @@ function CUST0020() {
             이전
           </button>
           
+          {/* 페이지 번호들 */}
           {getPageNumbers().map(page => (
             <button
               key={page}
@@ -673,6 +684,7 @@ function CUST0020() {
             </button>
           ))}
           
+          {/* 다음 */}
           <button
             className="cust0020-page-btn"
             onClick={() => handlePageChange(currentPage + 1)}
@@ -680,6 +692,15 @@ function CUST0020() {
           >
             다음
             <ChevronRight size={16} />
+          </button>
+          
+          {/* 맨 끝으로 */}
+          <button
+            className="cust0020-page-btn"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            끝으로
           </button>
         </div>
       )}

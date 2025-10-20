@@ -76,11 +76,24 @@ const ProductInfoModal = ({
   const isLoggedIn = !!globalState.G_USER_ID;
 
   /**
+   * 옵션 코드 유효성 검사
+   * optCd가 없거나 'OP0000'일 경우 false 반환
+   */
+  const isValidOptionCode = (optCd) => {
+    // optCd가 없거나, 빈 문자열이거나, 'OP0000'이면 false
+    if (!optCd || optCd.trim() === '' || optCd === 'OP0000') {
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * 옵션값 로드 함수
    * 동일한 optCd에 대한 중복 로딩 방지
    */
   const loadOptionValues = useCallback(async (optCd) => {
-    if (isLoadingRef.current || loadedOptCdRef.current === optCd) {
+    // optCd가 없거나 OP0000이면 로드하지 않음
+    if (!isValidOptionCode(optCd) || isLoadingRef.current || loadedOptCdRef.current === optCd) {
       return;
     }
 
@@ -124,15 +137,18 @@ const ProductInfoModal = ({
       setQuantity(1);
       setShowLoginModal(false);
       setSelectedOptionValue('');
+      setLoadingOptions(false);
       
       const currentOptCd = product.optCd || null;
       
-      if (currentOptCd && loadedOptCdRef.current !== currentOptCd) {
+      // 유효한 옵션 코드가 있을 때만 로드
+      if (isValidOptionCode(currentOptCd) && loadedOptCdRef.current !== currentOptCd) {
         setOptionValues([]);
         loadOptionValues(currentOptCd);
-      } else if (!currentOptCd) {
+      } else {
         setOptionValues([]);
         setSelectedOptionValue('');
+        setLoadingOptions(false);
         loadedOptCdRef.current = null;
       }
       
@@ -149,6 +165,7 @@ const ProductInfoModal = ({
     if (!isOpen) {
       loadedOptCdRef.current = null;
       isLoadingRef.current = false;
+      setLoadingOptions(false);
     }
   }, [isOpen, product?.itemCd, loadOptionValues]);
 
@@ -191,7 +208,8 @@ const ProductInfoModal = ({
       return;
     }
 
-    if (product.optCd && optionValues.length > 0 && !selectedOptionValue) {
+    // 유효한 옵션 코드가 있고 옵션 값이 로드되었을 때만 선택 체크
+    if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
     }
@@ -209,7 +227,8 @@ const ProductInfoModal = ({
       return;
     }
 
-    if (product.optCd && optionValues.length > 0 && !selectedOptionValue) {
+    // 유효한 옵션 코드가 있고 옵션 값이 로드되었을 때만 선택 체크
+    if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
     }
@@ -377,8 +396,8 @@ const ProductInfoModal = ({
               {/* 하단 영역 */}
               <div className="product-info-mobile-bottom-section">
                 
-                {/* 옵션값 선택 */}
-                {product.optCd && optionValues.length > 0 && (
+                {/* 옵션값 선택 - 유효한 옵션 코드일 때만 표시 */}
+                {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                   <div className="product-info-option">
                     <span className="product-info-option-label">옵션:</span>
                     {loadingOptions ? (
@@ -396,12 +415,6 @@ const ProductInfoModal = ({
                         ))}
                       </select>
                     )}
-                  </div>
-                )}
-                
-                {(!product.optCd || (product.optCd && optionValues.length === 0)) && !loadingOptions && (
-                  <div className="product-info-option-none-mobile">
-                    옵션 정보 없음
                   </div>
                 )}
 
@@ -513,8 +526,8 @@ const ProductInfoModal = ({
                     )}
                   </div>
 
-                  {/* 옵션값 선택 */}
-                  {product.optCd && optionValues.length > 0 && (
+                  {/* 옵션값 선택 - 유효한 옵션 코드일 때만 표시 */}
+                  {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                     <div className="product-info-option">
                       <span className="product-info-option-label">옵션:</span>
                       {loadingOptions ? (
@@ -532,12 +545,6 @@ const ProductInfoModal = ({
                           ))}
                         </select>
                       )}
-                    </div>
-                  )}
-                  
-                  {(!product.optCd || (product.optCd && optionValues.length === 0)) && !loadingOptions && (
-                    <div className="product-info-option-none">
-                      옵션 정보 없음
                     </div>
                   )}
 

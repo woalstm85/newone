@@ -57,6 +57,8 @@ function CUST0010() {
   const [modalMessage, setModalMessage] = useState('');          // 알림 모달 메시지
   const [isImageModalOpen, setIsImageModalOpen] = useState(false); // 이미지 확대 보기 모달
   const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' }); // 확대할 이미지 정보
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false); // 입출고 이력 모달
+  const [selectedHistoryData, setSelectedHistoryData] = useState(null); // 선택된 이력 데이터
   
   // 모바일 스와이프 제스처 상태
   const [touchStart, setTouchStart] = useState(null); // 터치 시작 Y 좌표
@@ -224,6 +226,18 @@ function CUST0010() {
       newExpanded.add(lotNo);    // 없으면 추가
     }
     setExpandedLots(newExpanded);
+  };
+
+  /** 입출고 이력 모달 열기 */
+  const openHistoryModal = (item) => {
+    setSelectedHistoryData(item);
+    setIsHistoryModalOpen(true);
+  };
+
+  /** 입출고 이력 모달 닫기 */
+  const closeHistoryModal = () => {
+    setIsHistoryModalOpen(false);
+    setSelectedHistoryData(null);
   };
   
   /** 모바일 검색 영역 토글 */
@@ -501,42 +515,12 @@ function CUST0010() {
                   className="cust0010-inventory-history-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleLotExpansion(item.lotNo);
+                    openHistoryModal(item);
                   }}
                 >
-                  📋 입출고 이력 {item.subData.length}건 {expandedLots.has(item.lotNo) ? '접기' : '보기'}
+                  <FileText size={14} />
+                  입출고 이력 {item.subData.length}건 보기
                 </button>
-              </div>
-            )}
-            
-            {expandedLots.has(item.lotNo) && item.subData && item.subData.length > 0 && (
-              <div className="cust0010-inventory-expanded-history">
-                <div className="cust0010-inventory-history-list">
-                  {item.subData.slice(0, 3).map((detail, detailIndex) => (
-                    <div key={`${item.lotNo}-history-${detailIndex}`} className="cust0010-inventory-history-item">
-                      <div className="cust0010-inventory-history-header">
-                        <span className={`lot-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
-                          {detail.inOutDiv}
-                        </span>
-                        <span className="cust0010-inventory-history-date">{formatDate(detail.transDate)}</span>
-                      </div>
-                      <div className="cust0010-inventory-history-details">
-                        <span>{detail.transTypeNm}</span>
-                        <span className="cust0010-inventory-history-amount">{formatAmount(detail.qty)} {item.unitNm}</span>
-                      </div>
-                      {detail.remark && (
-                        <div className="cust0010-inventory-history-remark">
-                          {detail.remark}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {item.subData.length > 3 && (
-                    <div className="cust0010-inventory-history-more">
-                      외 {item.subData.length - 3}건 더...
-                    </div>
-                  )}
-                </div>
               </div>
             )}
           </div>
@@ -849,24 +833,97 @@ function CUST0010() {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     
-    // 페이지 번호 생성 로직 (예: 1 ... 4 5 6 ... 10)
+    // 페이지 번호 생성 로직 (CUST0020과 동일하게)
     const getPageNumbers = () => {
-      // ... 페이지 번호 배열 생성 ...
-      return [];
+      const pages = [];
+      const maxVisiblePages = 5;
+      
+      if (totalPages <= maxVisiblePages + 2) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (currentPage <= 3) {
+          for (let i = 1; i <= Math.min(maxVisiblePages, totalPages); i++) {
+            pages.push(i);
+          }
+          if (totalPages > maxVisiblePages) {
+            pages.push('...');
+            pages.push(totalPages);
+          }
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = totalPages - (maxVisiblePages - 1); i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          pages.push(1);
+          pages.push('...');
+          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalPages);
+        }
+      }
+      
+      return pages;
     };
 
     return (
       <div className="cust0010-pagination">
-        <button disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
-          <ChevronLeft size={16} /> 이전
+        {/* 맨 처음으로 */}
+        <button 
+          className="cust0010-page-btn"
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+        >
+          처음으로
         </button>
-        {getPageNumbers().map(page => (
-          <button key={page} className={currentPage === page ? 'active' : ''} onClick={() => handlePageChange(page)}>
-            {page}
-          </button>
+        
+        {/* 이전 */}
+        <button 
+          className="cust0010-page-btn"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft size={16} />
+          <span>이전</span>
+        </button>
+        
+        {/* 페이지 번호들 */}
+        {getPageNumbers().map((page, index) => (
+          page === '...' ? (
+            <span key={`ellipsis-${index}`} className="cust0010-page-ellipsis">...</span>
+          ) : (
+            <button
+              key={page}
+              className={`cust0010-page-number ${currentPage === page ? 'active' : ''}`}
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </button>
+          )
         ))}
-        <button disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
-          다음 <ChevronRight size={16} />
+        
+        {/* 다음 */}
+        <button 
+          className="cust0010-page-btn"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <span>다음</span>
+          <ChevronRight size={16} />
+        </button>
+        
+        {/* 맨 끝으로 */}
+        <button 
+          className="cust0010-page-btn"
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          끝으로
         </button>
       </div>
     );
@@ -962,6 +1019,95 @@ function CUST0010() {
       {loading && <MySpinner />}
       <Modal isOpen={isModalOpen} title="알림" message={modalMessage} onConfirm={() => setIsModalOpen(false)} />
       <ImageModal isOpen={isImageModalOpen} onClose={() => setIsImageModalOpen(false)} imageUrl={selectedImage.url} altText={selectedImage.alt} />
+      
+      {/* 8. 입출고 이력 모달 */}
+      {isHistoryModalOpen && selectedHistoryData && (
+        <div className="cust0010-history-modal-overlay" onClick={closeHistoryModal}>
+          <div className="cust0010-history-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cust0010-history-modal-header">
+              <div className="cust0010-history-modal-title">
+                <FileText size={20} />
+                <h3>입출고 이력 상세</h3>
+              </div>
+              <button className="cust0010-history-modal-close" onClick={closeHistoryModal}>
+                ×
+              </button>
+            </div>
+            
+            <div className="cust0010-history-modal-info">
+              <div className="cust0010-history-info-row">
+                <span className="cust0010-history-info-label">로트번호:</span>
+                <span className="cust0010-history-info-value">{selectedHistoryData.lotNo}</span>
+              </div>
+              <div className="cust0010-history-info-row">
+                <span className="cust0010-history-info-label">제품명:</span>
+                <span className="cust0010-history-info-value">{selectedHistoryData.itemNm}</span>
+              </div>
+              <div className="cust0010-history-info-row">
+                <span className="cust0010-history-info-label">현재고:</span>
+                <span className="cust0010-history-info-value" style={{ color: '#28a745', fontWeight: '600' }}>
+                  {formatAmount(selectedHistoryData.currentQty)} {selectedHistoryData.unitNm}
+                </span>
+              </div>
+            </div>
+            
+            <div className="cust0010-history-modal-body">
+              <div className="cust0010-history-table-wrapper">
+                <table className="cust0010-history-table">
+                  <thead>
+                    <tr>
+                      <th className="cust0010-desktop-only">거래일자</th>
+                      <th className="cust0010-mobile-only">일자</th>
+                      <th className="cust0010-desktop-only">거래유형</th>
+                      <th className="cust0010-mobile-only">유형</th>
+                      <th>구분</th>
+                      <th>수량</th>
+                      <th>금액</th>
+                      <th className="cust0010-desktop-only">담당자</th>
+                      <th className="cust0010-desktop-only">입고번호</th>
+                      <th className="cust0010-desktop-only">비고</th>
+                      <th className="cust0010-desktop-only">등록일시</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedHistoryData.subData.map((detail, index) => (
+                      <tr key={index}>
+                        <td className="cust0010-center cust0010-desktop-only">{formatDate(detail.transDate)}</td>
+                        <td className="cust0010-center cust0010-mobile-only">
+                          {formatDate(detail.transDate).split('-').slice(1).join('-')}
+                        </td>
+                        <td className="cust0010-center cust0010-desktop-only">{detail.transTypeNm || '-'}</td>
+                        <td className="cust0010-center cust0010-mobile-only">
+                          {detail.transTypeNm ? detail.transTypeNm.substring(0, 3) : '-'}
+                        </td>
+                        <td className="cust0010-center">
+                          <span className={`lot-badge ${getInOutBadgeClass(detail.inOutDiv)}`}>
+                            {detail.inOutDiv || '-'}
+                          </span>
+                        </td>
+                        <td className="cust0010-right">
+                          {formatAmount(detail.qty)} {selectedHistoryData.unitNm}
+                        </td>
+                        <td className="cust0010-right">{formatAmount(detail.amount)}</td>
+                        <td className="cust0010-center cust0010-desktop-only">{detail.userNm || detail.transEmp || '-'}</td>
+                        <td className="cust0010-center cust0010-desktop-only">{detail.ioTransNo || '-'}</td>
+                        <td className="cust0010-left cust0010-desktop-only">{detail.remark || '-'}</td>
+                        <td className="cust0010-center cust0010-desktop-only">{formatDate(detail.insDate)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="cust0010-history-modal-footer">
+              <button className="cust0010-history-modal-close-btn" onClick={closeHistoryModal}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
