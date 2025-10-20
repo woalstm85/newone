@@ -541,13 +541,26 @@ function CUST0010() {
   };
 
   /** 일반 재고 - 리스트 뷰(테이블) 렌더링 */
+  /**
+   * 옵션 코드 유효성 검사
+   */
+  const isValidOptionCode = (optCd) => {
+    if (!optCd || optCd.trim() === '' || optCd === 'OP0000') {
+      return false;
+    }
+    return true;
+  };
+
  // 일반 재고 테이블 렌더링
   const renderNormalInventory = () => {
+    // 합계 계산: 기초금액, 입고금액, 출고금액, 현재고금액
     const totals = currentItems.reduce((acc, item) => {
-      acc.closingQty += item.closingQty || 0;
+      acc.openingAmt += item.openingAmt || 0;
+      acc.totalInAmt += item.totalInAmt || 0;
+      acc.totalOutAmt += item.totalOutAmt || 0;
       acc.closingAmt += item.closingAmt || 0;
       return acc;
-    }, { closingQty: 0, closingAmt: 0 });
+    }, { openingAmt: 0, totalInAmt: 0, totalOutAmt: 0, closingAmt: 0 });
 
     return (
       <div className="cust0010-table-container">
@@ -603,7 +616,7 @@ function CUST0010() {
                     </div>
                   </td>
                   <td className="cust0010-left">{row.itemNm}</td>
-                  <td className="cust0010-center">{row.optValNm || '-'}</td>
+                  <td className="cust0010-center">{isValidOptionCode(row.optCd) ? (row.optValNm || '-') : '-'}</td>
                   <td className="cust0010-center">{row.unitNm || '-'}</td>
                   <td className="cust0010-right">{(row.avgPrice || 0).toLocaleString()}</td>
                   <td className="cust0010-right">{(row.openingQty || 0).toLocaleString()}</td>
@@ -634,7 +647,7 @@ function CUST0010() {
           {currentItems.length > 0 && (
             <tfoot>
               <tr className="cust0010-total-row">
-                <td colSpan={11} className="cust0010-center" style={{
+                <td colSpan={6} className="cust0010-center" style={{
                   fontWeight: 'bold',
                   backgroundColor: '#e3f2fd',
                   borderTop: '2px solid #1976d2',
@@ -652,8 +665,43 @@ function CUST0010() {
                   padding: '12px 8px',
                   fontSize: '14px'
                 }}>
-                  {totals.closingQty.toLocaleString()}
+                  {totals.openingAmt.toLocaleString()}
                 </td>
+                <td className="cust0010-center" style={{
+                  backgroundColor: '#e3f2fd',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px'
+                }}>-</td>
+                <td className="cust0010-right" style={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px',
+                  fontSize: '14px'
+                }}>
+                  {totals.totalInAmt.toLocaleString()}
+                </td>
+                <td className="cust0010-center" style={{
+                  backgroundColor: '#e3f2fd',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px'
+                }}>-</td>
+                <td className="cust0010-right" style={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px',
+                  fontSize: '14px'
+                }}>
+                  {totals.totalOutAmt.toLocaleString()}
+                </td>
+                <td className="cust0010-center" style={{
+                  backgroundColor: '#e3f2fd',
+                  borderTop: '2px solid #1976d2',
+                  padding: '12px 8px'
+                }}>-</td>
                 <td className="cust0010-right" style={{
                   fontWeight: 'bold',
                   backgroundColor: '#e3f2fd',

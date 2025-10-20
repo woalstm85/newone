@@ -399,6 +399,10 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
                 {/* 기본 정보 섹션 */}
                 <div className="quote-modal-basic-info-section">
+                  {product.itemCd && (
+                    <div className="quote-modal-product-code">{product.itemCd}</div>
+                  )}
+                  
                   <h3 className="quote-modal-product-name">{product.itemNm}</h3>
                   
                   {/* 기본 정보 */}
@@ -418,7 +422,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                     
                     {product.unitNm && (
                       <div className="quote-modal-product-row">
-                        <span className="quote-modal-product-unit-badge">{product.unitNm}</span>
+                        <span className="quote-modal-product-label">단위:</span>
+                        <span className="quote-modal-product-value">{product.unitNm}</span>
                       </div>
                     )}
                     
@@ -531,6 +536,10 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
 
               {/* 정보 섹션 */}
               <div className="quote-modal-details-section">
+                {product.itemCd && (
+                  <div className="quote-modal-product-code">{product.itemCd}</div>
+                )}
+                
                 <h3 className="quote-modal-product-name">{product.itemNm}</h3>
                 
                 {/* 기본 정보 */}
@@ -550,7 +559,8 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                   
                   {product.unitNm && (
                     <div className="quote-modal-product-row">
-                      <span className="quote-modal-product-unit-badge">{product.unitNm}</span>
+                      <span className="quote-modal-product-label">단위:</span>
+                      <span className="quote-modal-product-value">{product.unitNm}</span>
                     </div>
                   )}
                   

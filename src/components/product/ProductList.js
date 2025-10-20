@@ -338,6 +338,11 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             
             {/* 제품 정보 */}
             <div className="prd_info">
+              {/* 제품코드 */}
+              {product.itemCd && (
+                <div className="prd_code">{product.itemCd}</div>
+              )}
+              
               {/* 제품명 */}
               <h3 className="prd_name">{product.itemNm}</h3>
               
@@ -354,15 +359,8 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                   <div className="prd_company_badge">{product.compNm}</div>
                 )}
                 
-                {/* 단위와 가격 한 줄 */}
-                <div className="prd_price_row">
-                  {/* 단위 배지 */}
-                  {product.unitNm && (
-                    <span className="prd_unit_badge">{product.unitNm}</span>
-                  )}
-                
                 {/* 가격 표시 */}
-                <div className="prd_price_display">
+                <div className="prd_price_row">
                   {/* disPrice와 salePrice가 모두 있고 다른 경우 */}
                   {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && product.disPrice > 0 ? (
                     <>
@@ -377,7 +375,6 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                       {formatPrice(product.disPrice || product.salePrice)} 원
                     </span>
                   )}
-                </div>
                 </div>
               </div>
             </div>

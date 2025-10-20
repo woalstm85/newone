@@ -357,16 +357,13 @@ const ProductInfoModal = ({
 
                 {/* 기본 정보 섹션 */}
                 <div className="product-info-basic-section-mobile">
+                  {product.itemCd && (
+                    <div className="product-info-code">{product.itemCd}</div>
+                  )}
+                  
                   <h3 className="product-info-title-mobile">{product.itemNm}</h3>
                   
                   <div className="product-info-basic">
-                    {product.itemCd && (
-                      <div className="product-info-row">
-                        <span className="product-info-label">제품코드:</span>
-                        <span className="product-info-value">{product.itemCd}</span>
-                      </div>
-                    )}
-                    
                     {product.unitNm && (
                       <div className="product-info-row">
                         <span className="product-info-label">단위:</span>
@@ -491,17 +488,14 @@ const ProductInfoModal = ({
               {/* 정보 섹션 */}
               <div className="product-info-details-section">
                 <div className="product-info-details">
+                  {product.itemCd && (
+                    <div className="product-info-code">{product.itemCd}</div>
+                  )}
+                  
                   <h3 className="product-info-title">{product.itemNm}</h3>
                   
                   {/* 기본 정보 */}
                   <div className="product-info-basic">
-                    {product.itemCd && (
-                      <div className="product-info-row">
-                        <span className="product-info-label">제품코드:</span>
-                        <span className="product-info-value">{product.itemCd}</span>
-                      </div>
-                    )}
-                    
                     {product.unitNm && (
                       <div className="product-info-row">
                         <span className="product-info-label">단위:</span>

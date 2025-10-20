@@ -267,6 +267,22 @@
   min-height: 0;
 }
 
+.prd_code {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 12px;
+  margin: 0 0 8px 0;
+  text-align: left;
+  letter-spacing: 0.5px;
+  font-family: 'Courier New', monospace;
+  width: fit-content;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
 .prd_name {
   font-size: 14px;
   font-weight: 600;
@@ -283,23 +299,13 @@
 }
 
 .prd_unit_badge {
-  display: inline-block;
-  padding: 3px 8px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  color: #1976d2;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 10px;
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-  border: 1px solid #90caf9;
-  width: fit-content;
+  display: none; /* 잉여재고/행사품목에서 단위 표시 숨김 */
 }
 
 /* 단위와 가격 한 줄 */
 .prd_price_row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   width: 100%;
   gap: 8px;

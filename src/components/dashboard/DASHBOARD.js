@@ -164,15 +164,15 @@ const ProductCard = ({ product, onProductClick }) => {
         </div>
       </div>
       <div className="dash-product-info">
+        {product.itemCd && (
+          <div className="dash-product-code">{product.itemCd}</div>
+        )}
         <h3 className="dash-product-name">{product.itemNm}</h3>
         <div className="dash-price-container">
         {product.shipAvDate && (
         <span className="dash-delivery-badge">🚛 {formatShipDate(product.shipAvDate)} 출하가능</span>
         )}
         <div className="dash-price-row">
-        {product.unitNm && (
-            <span className="dash-product-unit-badge">{product.unitNm}</span>
-          )}
             <div className="dash-price-display">
             {/* disPrice와 salePrice가 모두 있고 다른 경우 */}
             {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && product.disPrice > 0 ? (
