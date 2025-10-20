@@ -1,0 +1,342 @@
+/* ===============================================
+   CUST0050 - 보관이용정산 스타일
+=============================================== */
+
+.cust0050-container {
+  width: 100%;
+  margin: 0;
+  padding: 20px 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 내부 콘텐츠 래퍼 */
+.cust0050-content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 프로그램 헤더 */
+.cust0050-program-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cust0050-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cust0050-header-left svg {
+  color: #007bff;
+}
+
+.cust0050-header-left h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 섹션 공통 스타일 */
+.cust0050-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cust0050-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.cust0050-section-header svg {
+  color: #007bff;
+}
+
+.cust0050-section-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 계약기간 */
+.cust0050-contract-period {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cust0050-period-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cust0050-period-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.cust0050-period-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.cust0050-period-divider {
+  font-size: 18px;
+  font-weight: bold;
+  color: #6c757d;
+}
+
+/* 월 계약금액 */
+.cust0050-monthly-amount {
+  padding: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.cust0050-amount-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 */
+.cust0050-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.cust0050-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.cust0050-table thead {
+  background: #f8f9fa;
+}
+
+.cust0050-table thead th {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.cust0050-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.cust0050-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.cust0050-table tbody td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+}
+
+.cust0050-table tfoot tr {
+  background: #e3f2fd;
+  border-top: 2px solid #007bff;
+}
+
+.cust0050-table tfoot td {
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #007bff;
+}
+
+/* 정렬 */
+.cust0050-center {
+  text-align: center;
+}
+
+.cust0050-left {
+  text-align: left;
+}
+
+.cust0050-right {
+  text-align: right;
+}
+
+/* 잔액 강조 */
+.cust0050-balance {
+  font-weight: 600;
+  color: #dc3545;
+}
+
+/* 합계 행 */
+.cust0050-total-row {
+  font-weight: bold;
+}
+
+/* 변경 배지 */
+.cust0050-change-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cust0050-change-badge.new {
+  background: #d4edda;
+  color: #155724;
+}
+
+.cust0050-change-badge.modify {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* 반응형 - 태블릿 */
+@media (max-width: 1024px) {
+  .cust0050-container {
+    padding: 16px 0;
+  }
+
+  .cust0050-content-wrapper {
+    padding: 0 16px;
+  }
+
+  .cust0050-program-header {
+    padding: 16px;
+  }
+
+  .cust0050-header-left h1 {
+    font-size: 20px;
+  }
+
+  .cust0050-section {
+    padding: 20px;
+  }
+
+  .cust0050-amount-value {
+    font-size: 28px;
+  }
+}
+
+/* 반응형 - 모바일 */
+@media (max-width: 768px) {
+  .cust0050-container {
+    padding: 12px 0;
+  }
+
+  .cust0050-content-wrapper {
+    padding: 0 12px;
+  }
+
+  .cust0050-program-header {
+    padding: 12px;
+  }
+
+  .cust0050-header-left h1 {
+    font-size: 18px;
+  }
+
+  .cust0050-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .cust0050-section-header h2 {
+    font-size: 16px;
+  }
+
+  .cust0050-contract-period {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .cust0050-period-divider {
+    display: none;
+  }
+
+  .cust0050-monthly-amount {
+    padding: 20px;
+  }
+
+  .cust0050-amount-value {
+    font-size: 24px;
+  }
+
+  .cust0050-table-container {
+    overflow-x: scroll;
+  }
+
+  .cust0050-table {
+    min-width: 700px;
+  }
+
+  .cust0050-table thead th,
+  .cust0050-table tbody td,
+  .cust0050-table tfoot td {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* 반응형 - 소형 모바일 */
+@media (max-width: 480px) {
+  .cust0050-header-left h1 {
+    font-size: 16px;
+  }
+
+  .cust0050-section-header h2 {
+    font-size: 14px;
+  }
+
+  .cust0050-amount-value {
+    font-size: 20px;
+  }
+
+  .cust0050-table {
+    min-width: 600px;
+  }
+
+  .cust0050-table thead th,
+  .cust0050-table tbody td,
+  .cust0050-table tfoot td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}

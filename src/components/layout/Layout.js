@@ -650,7 +650,14 @@ function Layout() {
                         )}
                         
                         {/* 푸터 - 모든 페이지에 표시 */}
-                        <Footer variant={(isDashboardActive || location.pathname === '/cart') ? 'white' : 'default'} />
+                        <Footer variant={
+                          (isDashboardActive || 
+                           location.pathname === '/cart' || 
+                           location.pathname === '/CUST0050' || 
+                           location.pathname.includes('CUST0050')) 
+                          ? 'white' 
+                          : 'default'
+                        } />
                     </div>
                 </div>
             </div>
