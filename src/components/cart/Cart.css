@@ -1,7 +1,8 @@
 /* ===== 장바구니 컨테이너 ===== */
 .cart-container {
-  min-height: 100vh;
+  min-height: 90vh;
   background: #f8f9fa;
+  padding-bottom: 60px
 }
 
 /* ===== 상단 헤더 섹션 (흰색 배경) ===== */
@@ -367,6 +368,8 @@
 .cart-summary-section {
   background: white;
   border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;  
+  
   padding: 32px 24px;
 }
 

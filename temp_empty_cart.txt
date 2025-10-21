@@ -1,0 +1,60 @@
+  /**
+   * 빈 장바구니 UI
+   */
+  if (cartItems.length === 0) {
+    return (
+      <div className="cart-container">
+        <div className="empty-cart">
+          <div className="empty-cart-icon-wrapper">
+            <ShoppingCart size={64} className="empty-icon" strokeWidth={1.5} />
+          </div>
+          <h2 className="empty-cart-title">장바구니가 비어 있습니다</h2>
+          <p className="empty-cart-subtitle">원하시는 상품을 장바구니에 담아주세요.</p>
+          
+          <div className="empty-cart-benefits">
+            <div className="benefit-item">
+              <div className="benefit-icon-circle">
+                <Package size={28} strokeWidth={2} />
+              </div>
+              <span className="benefit-text">상품 보관</span>
+            </div>
+            <div className="benefit-item">
+              <div className="benefit-icon-circle">
+                <Calculator size={28} strokeWidth={2} />
+              </div>
+              <span className="benefit-text">일괄 견적</span>
+            </div>
+            <div className="benefit-item">
+              <div className="benefit-icon-circle">
+                <ShoppingCart size={28} strokeWidth={2} />
+              </div>
+              <span className="benefit-text">편리한 구매</span>
+            </div>
+          </div>
+
+          <div className="empty-cart-divider"></div>
+
+          <div className="empty-cart-actions">
+            <button 
+              className="action-btn primary-btn"
+              onClick={() => navigate('/surplus')}
+            >
+              잉여재고 둘러보기
+            </button>
+            <button 
+              className="action-btn secondary-btn"
+              onClick={() => navigate('/event')}
+            >
+              행사품목 둘러보기
+            </button>
+          </div>
+
+          <div className="empty-cart-footer">
+            <p className="footer-text">
+              제품 상세 페이지에서 장바구니 버튼을 클릭하여 상품을 추가하실 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }

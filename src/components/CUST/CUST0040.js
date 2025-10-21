@@ -34,6 +34,7 @@ const CUST0040 = () => {
   const [viewMode, setViewMode] = useState('image');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState(''); // 상태값 검색 추가
   
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -140,11 +141,16 @@ const CUST0040 = () => {
 
     // 검색 필터링
     if (searchTerm.trim()) {
-      filteredData = quotesData.filter(item =>
+      filteredData = filteredData.filter(item =>
         (item.reqNo && item.reqNo.toLowerCase().includes(searchTerm.trim().toLowerCase())) ||
         (item.custNm && item.custNm.toLowerCase().includes(searchTerm.trim().toLowerCase())) ||
         (item.contactNm && item.contactNm.toLowerCase().includes(searchTerm.trim().toLowerCase()))
       );
+    }
+
+    // 상태값 필터링 추가
+    if (selectedStatus) {
+      filteredData = filteredData.filter(item => item.reqStatus === selectedStatus);
     }
 
     const currentItems = filteredData.slice(startIdx, endIdx);
@@ -157,7 +163,7 @@ const CUST0040 = () => {
       endIndex: Math.min(endIdx, filteredData.length),
       totalItems: filteredData.length
     };
-  }, [quotesData, currentPage, itemsPerPage, searchTerm]);
+  }, [quotesData, currentPage, itemsPerPage, searchTerm, selectedStatus]);
 
   // ==================== 이벤트 핸들러 ====================
   
@@ -339,7 +345,11 @@ const CUST0040 = () => {
                 onClick={() => handleRowClick(quote)}
                 style={{ cursor: 'pointer' }}
               >
-                <td className="cust0040-center">{formatDate(quote.reqStatus)}</td>
+                <td className="cust0040-center">
+                  <span className={`cust0040-status-badge ${getStatusBadgeClass(quote.reqStatus)}`}>
+                    {quote.reqStatus || '-'}
+                  </span>
+                </td>
                 <td className="cust0040-center" style={{ fontWeight: '600', color: '#007bff' }}>
                   {quote.reqNo}
                 </td>
@@ -396,34 +406,33 @@ const CUST0040 = () => {
                   견적번호: {quote.reqNo}
                 </div>
                 <div className={`cust0040-quote-status ${getStatusBadgeClass(quote.reqStatus)}`}>
-                  {formatDate(quote.reqStatus)}
+                  {quote.reqStatus || '-'}
                 </div>
               </div>
               
               <div className="cust0040-card-content">
                 <div className="cust0040-quote-info-row">
                   <span className="cust0040-label">요청일자:</span>
-                  <span className="cust0040-value">{formatDate(quote.reqDate)}</span>
-                </div>
-                
-                <div className="cust0040-quote-info-row">
-                  <span className="cust0040-label">담당자:</span>
-                  <span className="cust0040-value">{quote.contactNm}</span>
-                </div>
-                
-                <div className="cust0040-quote-info-row">
-                  <span className="cust0040-label">연락처:</span>
-                  <span className="cust0040-value">{quote.contactTel}</span>
-                </div>
-                
-                <div className="cust0040-quote-info-row">
-                  <span className="cust0040-label">주소:</span>
-                  <span className="cust0040-value cust0040-address">{quote.siteNm}</span>
+                  <span className="cust0040-value date-request">{formatDate(quote.reqDate)}</span>
                 </div>
                 
                 <div className="cust0040-quote-info-row">
                   <span className="cust0040-label">희망납기:</span>
-                  <span className="cust0040-value">{formatDate(quote.dueDate)}</span>
+                  <span className="cust0040-value date-due">{formatDate(quote.dueDate)}</span>
+                </div>
+                
+                <div className="cust0040-quote-info-row">
+                  <span className="cust0040-label">담당자:</span>
+                  <span className="cust0040-value">
+                    {quote.contactNm} [{quote.contactTel}]
+                  </span>
+                </div>
+                
+                <div className="cust0040-quote-info-row cust0040-address-row">
+                  <span className="cust0040-label">주소:</span>
+                  <span className="cust0040-value cust0040-address" title={quote.siteNm}>
+                    {quote.siteNm}
+                  </span>
                 </div>
                 
                 <div className="cust0040-quote-summary">
@@ -516,12 +525,25 @@ const CUST0040 = () => {
             </div>
 
             <div className="cust0040-search-field">
+              <label>진행상태</label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+              >
+                <option value="">전체</option>
+                <option value="접수">접수</option>
+                <option value="처리중">처리중</option>
+                <option value="완료">완료</option>
+              </select>
+            </div>
+
+            <div className="cust0040-search-field">
               <label>검색</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="견적번호, 고객명, 담당자명 입력"
+                placeholder="(견적번호, 담당자명 입력)"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>

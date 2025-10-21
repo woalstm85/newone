@@ -33,6 +33,23 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
   if (!isOpen || !quote) return null;
 
   /**
+   * 진행상태에 따른 배지 클래스 반환
+   */
+  const getStatusBadgeClass = (status) => {
+    if (!status) return 'status-default';
+    const statusText = status.toString().toLowerCase();
+    
+    if (statusText.includes('접수') || statusText === '접수') {
+      return 'status-received';
+    } else if (statusText.includes('처리') || statusText.includes('진행')) {
+      return 'status-processing';
+    } else if (statusText.includes('완료')) {
+      return 'status-completed';
+    }
+    return 'status-default';
+  };
+
+  /**
    * 옵션 표시 여부 확인 함수
    * optValNm이 '', 'N/A'이면 표시하지 않음
    * 
@@ -228,7 +245,14 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
           <div className="quote-detail-header-left">
             <FileText size={24} />
             <div className="quote-detail-header-info">
-              <h2>견적의뢰 상세</h2>
+              <div className="quote-detail-title-row">
+                <h2>견적의뢰 상세</h2>
+                {quote.reqStatus && (
+                  <span className={`quote-detail-status-badge ${getStatusBadgeClass(quote.reqStatus)}`}>
+                    {quote.reqStatus}
+                  </span>
+                )}
+              </div>
               <span className="quote-detail-req-no">{quote.reqNo}</span>
             </div>
           </div>

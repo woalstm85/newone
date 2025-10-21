@@ -107,7 +107,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
 
   /**
    * 제품 데이터 로드
-   * listType에 따라 다른 API 또는 데이터 소스를 사용
+   * listType과 selectedCategory에 따라 API 호출
    */
   useEffect(() => {
     const loadProducts = async () => {
@@ -118,7 +118,25 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
         // listType에 따라 API 호출
         if (listType === 'surplus') {
           // 잉여재고 제품 로드
-          const data = await productAPI.getDashItems('010');
+          // 선택된 카테고리 정보를 API 파라미터로 전달
+          const params = {
+            itemDivCd: '010'
+          };
+          
+          // 카테고리가 선택된 경우 파라미터 추가
+          if (selectedCategory && selectedCategory.catCd) {
+            // 레벨에 따라 다른 파라미터 추가
+            if (selectedCategory.level === 1) {
+              params.itemGroupLCd = selectedCategory.catCd;
+            } else if (selectedCategory.level === 2) {
+              params.itemGroupMCd = selectedCategory.catCd;
+            } else if (selectedCategory.level === 3) {
+              params.itemGroupSCd = selectedCategory.catCd;
+            }
+          }
+          
+          const data = await productAPI.getDashItems(params.itemDivCd, params.itemGroupLCd, params.itemGroupMCd, params.itemGroupSCd);
+          
           const processedData = data.map(item => ({
             ...item,
             id: item.itemCd || item.id,
@@ -130,6 +148,9 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             shipAvDate: item.shipAvDate,
             FILEPATH: item.FILEPATH,
             compNm: item.compNm,
+            itemGroupLCd: item.itemGroupLCd,
+            itemGroupMCd: item.itemGroupMCd,
+            itemGroupSCd: item.itemGroupSCd,
             category: item.category || '잉여재고',
             subcategory: item.subcategory || '기타',
             item: item.item || item.itemNm,
@@ -137,9 +158,26 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             isEvent: false
           }));
           setProducts(processedData);
+          setFilteredProducts(processedData);
         } else if (listType === 'event') {
           // 행사품목 제품 로드
-          const data = await productAPI.getDashItems('020');
+          const params = {
+            itemDivCd: '020'
+          };
+          
+          // 카테고리가 선택된 경우 파라미터 추가
+          if (selectedCategory && selectedCategory.catCd) {
+            if (selectedCategory.level === 1) {
+              params.itemGroupLCd = selectedCategory.catCd;
+            } else if (selectedCategory.level === 2) {
+              params.itemGroupMCd = selectedCategory.catCd;
+            } else if (selectedCategory.level === 3) {
+              params.itemGroupSCd = selectedCategory.catCd;
+            }
+          }
+          
+          const data = await productAPI.getDashItems(params.itemDivCd, params.itemGroupLCd, params.itemGroupMCd, params.itemGroupSCd);
+          
           const processedData = data.map(item => ({
             ...item,
             id: item.itemCd || item.id,
@@ -151,6 +189,9 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             shipAvDate: item.shipAvDate,
             FILEPATH: item.FILEPATH,
             compNm: item.compNm,
+            itemGroupLCd: item.itemGroupLCd,
+            itemGroupMCd: item.itemGroupMCd,
+            itemGroupSCd: item.itemGroupSCd,
             category: item.category || '행사품목',
             subcategory: item.subcategory || '기타',
             item: item.item || item.itemNm,
@@ -158,6 +199,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             isEvent: true
           }));
           setProducts(processedData);
+          setFilteredProducts(processedData);
         } else {
           // 기본값: products.json 파일 사용
           const response = await fetch('/data/products.json');
@@ -166,6 +208,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
           }
           const data = await response.json();
           setProducts(data.products);
+          setFilteredProducts(data.products);
         }
       } catch (error) {
         console.error('제품 데이터 로드 실패:', error);
@@ -176,33 +219,16 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     };
 
     loadProducts();
-  }, [listType]);
+  }, [listType, selectedCategory]); // selectedCategory 의존성 추가
 
   /**
-   * 제품 필터링
-   * 선택된 카테고리에 따라 제품 목록을 필터링
+   * 상품 개수를 부모 컴포넌트에 전달
    */
   useEffect(() => {
-    if (!products.length) return;
-
-    let filtered = [...products];
-
-    // 카테고리 필터링
-    if (selectedCategory) {
-      filtered = filtered.filter(product => 
-        product.category === selectedCategory.category &&
-        product.subcategory === selectedCategory.subcategory &&
-        product.item === selectedCategory.item
-      );
-    }
-
-    setFilteredProducts(filtered);
-    
-    // 상품 개수를 부모 컴포넌트에 전달
     if (onProductCountUpdate) {
-      onProductCountUpdate(filtered.length);
+      onProductCountUpdate(filteredProducts.length);
     }
-  }, [products, selectedCategory, listType, onProductCountUpdate]);
+  }, [filteredProducts, onProductCountUpdate]);
 
   /**
    * 제품 상세보기 모달 열기
@@ -273,16 +299,6 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
   // 메인 UI 렌더링
   return (
     <div className="prd_container">
-      {/* 필터 정보 표시 */}
-      {selectedCategory && (
-        <div className="prd_filter_display">
-          <Filter size={16} />
-          <span>
-            {selectedCategory.pathString || selectedCategory.catNm || selectedCategory.category}
-          </span>
-        </div>
-      )}
-
       {/* 제품 그리드 */}
       <div className="prd_grid">
         {filteredProducts.map((product) => (

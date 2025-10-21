@@ -328,42 +328,51 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e9ecef;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  border-bottom: 2px solid #1a252f;
+  background: #2c3e50;
+  color: #ecf0f1;
   border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .quote-detail-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  color: #ecf0f1;
 }
 
 .quote-detail-header-info h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.3px;
 }
 
 .quote-detail-req-no {
   font-size: 14px;
-  opacity: 0.9;
+  color: #bdc3c7;
   font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .quote-detail-close-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 8px;
   border-radius: 8px;
-  color: white;
+  color: #ecf0f1;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 .quote-detail-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  transform: scale(1.05);
 }
 
 /* 모달 바디 */
@@ -779,6 +788,50 @@
 
 .quote-detail-action-btn.primary:hover {
   background: #0056b3;
+}
+
+/* ===================================================================
+   진행상태 배지 스타일
+   =================================================================== */
+
+.quote-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote-detail-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 상태별 색상 - 접수 (파란색) */
+.quote-detail-status-badge.status-received {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+/* 상태별 색상 - 처리중 (주황색) */
+.quote-detail-status-badge.status-processing {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+/* 상태별 색상 - 완료 (녹색) */
+.quote-detail-status-badge.status-completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+/* 기본 상태 */
+.quote-detail-status-badge.status-default {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
 }
 
 /* 태블릿 반응형 */

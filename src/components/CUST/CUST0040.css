@@ -423,6 +423,9 @@
   transition: all 0.2s ease;
   cursor: pointer;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 카드 높이 일정하게 유지 */
 }
 
 .cust0040-image-card:hover {
@@ -494,6 +497,17 @@
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f1f3f4;
+  min-height: 28px; /* 최소 높이 설정 */
+}
+
+/* 주소 행은 고정 높이 설정 (밑줄 제거) */
+.cust0040-address-row {
+  min-height: 48px; /* 2줄 분량의 고정 높이 */
+  max-height: 48px;
+  align-items: flex-start;
+  border-bottom: none !important; /* 밑줄 제거 */
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .cust0040-quote-info-row:last-child {
@@ -517,9 +531,32 @@
   flex: 1;
 }
 
+/* 날짜 값 강조 */
+.cust0040-value.date-value {
+  font-weight: 600;
+}
+
+/* 요청일자 - 파란색 */
+.cust0040-value.date-request {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* 희망납기 - 주황색 */
+.cust0040-value.date-due {
+  color: #ea580c;
+  font-weight: 600;
+}
+
 .cust0040-address {
   word-break: break-all;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 2줄로 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 38px; /* line-height 1.4 * font-size 14px * 2줄 */
 }
 
 .cust0040-quote-summary {
@@ -1019,4 +1056,58 @@
   background: #3b82f6;
   color: white;
   border-color: #3b82f6;
+}
+
+/* ===================================================================
+   9. 상태 배지 스타일
+   =================================================================== */
+
+/* 리스트뷰용 상태 배지 */
+.cust0040-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+/* 이미지뷰용 상태 배지 */
+.cust0040-quote-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+/* 상태별 색상 - 접수 (파란색) */
+.status-received {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+/* 상태별 색상 - 처리중 (주황색) */
+.status-processing {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+/* 상태별 색상 - 완료 (녹색) */
+.status-completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+/* 기본 상태 */
+.status-default {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
 }

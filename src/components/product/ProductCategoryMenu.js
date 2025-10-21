@@ -52,7 +52,6 @@ const ProductCategoryMenu = ({ isOpen, onClose, onCategorySelect, menuTitle, sho
 
         // API 호출
         const data = await productAPI.getCategories();
-        console.log('Category API Response:', data);
 
         // 평면 데이터 저장 (경로 구성에 사용)
         setFlatCategories(data);

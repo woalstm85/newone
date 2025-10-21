@@ -396,6 +396,7 @@ function Layout() {
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
+        setIsProductListOpen(true);
         setIsProductCategoryMenuOpen(true);
     };
 

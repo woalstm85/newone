@@ -188,13 +188,32 @@ export const productAPI = {
    * 대시보드 아이템 조회 (잉여재고, 행사품목)
    * 
    * @param {string} itemDivCd - 아이템 구분 코드
+   * @param {string} itemGroupLCd - 대분류 코드 (선택사항)
+   * @param {string} itemGroupMCd - 중분류 코드 (선택사항)
+   * @param {string} itemGroupSCd - 소분류 코드 (선택사항)
    * @returns {Promise<Array>} 대시보드 아이템 목록
    */
-  getDashItems: async (itemDivCd) => {
+  getDashItems: async (itemDivCd, itemGroupLCd = '', itemGroupMCd = '', itemGroupSCd = '') => {
     try {
-      const response = await apiClient.get(
-        API_ENDPOINTS.PRODUCT.DASH_ITEMS(itemDivCd)
-      );
+      const params = {
+        itemDivCd: itemDivCd
+      };
+      
+      // 카테고리 파라미터가 있는 경우 추가
+      if (itemGroupLCd) {
+        params.itemGroupLCd = itemGroupLCd;
+      }
+      if (itemGroupMCd) {
+        params.itemGroupMCd = itemGroupMCd;
+      }
+      if (itemGroupSCd) {
+        params.itemGroupSCd = itemGroupSCd;
+      }
+      
+      const queryString = buildQueryString(params);
+      const endpoint = API_ENDPOINTS.PRODUCT.DASH_ITEMS_BASE() + queryString;
+      
+      const response = await apiClient.get(endpoint);
       return response;
     } catch (error) {
       throw error;

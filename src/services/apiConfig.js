@@ -56,7 +56,10 @@ export const API_ENDPOINTS = {
     // 제품 목록 조회 (CUST0020)
     PRODUCT_LIST: () => `/Comm/CUST0020`,
     
-    // 대시보드 아이템 조회 (잉여재고, 행사품목)
+    // 대시보드 아이템 조회 (잉여재고, 행사품목) - 기본 경로
+    DASH_ITEMS_BASE: () => `/Comm/DashItems`,
+    
+    // 대시보드 아이템 조회 (잉여재고, 행사품목) - 호환성을 위해 유지
     DASH_ITEMS: (itemDivCd) => `/Comm/DashItems?itemDivCd=${itemDivCd}`,
     
     // 카테고리 목록 조회
