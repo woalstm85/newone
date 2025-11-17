@@ -25,6 +25,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 }
 
 .footer-logo {
@@ -32,11 +33,19 @@
   font-weight: bold;
   color: #2c3e50;
   letter-spacing: 1px;
+  text-align: center;
+}
+
+.footer-logo-img {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
 }
 
 .footer-contact {
   font-size: 14px;
   color: #495057;
+  text-align: center;
 }
 
 /* 중앙 - 회사 정보 */
@@ -114,5 +123,9 @@
   .footer-info span:not(.footer-divider) {
     display: block;
     width: 100%;
+  }
+
+  .footer-logo-img {
+    height: 32px;
   }
 }

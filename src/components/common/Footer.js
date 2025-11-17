@@ -10,7 +10,13 @@ const Footer = ({ variant = 'default' }) => {
     <footer className={`footer-container ${variant === 'white' ? 'footer-white' : ''}`}>
       <div className="footer-content">
         <div className="footer-left">
-          <div className="footer-logo">NEWONE</div>
+          <div className="footer-logo">
+            <img 
+              src="/images/top_logo.png" 
+              alt="NEWONE" 
+              className="footer-logo-img"
+            />
+          </div>
           <div className="footer-contact">
             <span>📞 031-298-1191</span>
           </div>
@@ -23,10 +29,10 @@ const Footer = ({ variant = 'default' }) => {
             <span>사업자등록번호: 124-87-01984</span>
           </div>
           <div className="footer-info">
-            <span>본사: 경기도 수원시 권선구 서둔로 21. Tel: 031-298-1191 Fax: 031-297-4460</span>
+            <span>본사: 경기도 수원시 권선구 서둔로 21(고색동). Tel: 031-298-1191 Fax: 031-297-4460</span>
           </div>
           <div className="footer-info">
-            <span>일산지사: 경기도 고양시 일산동구 중앙로 1079 601호(백석동, 더리브스타일). Tel: 031-912-1191 Fax: 031-912-4460</span>
+            <span>안양공장: 경기도 안양시 만안구 전파로 53 B동 201호. Tel: 031-912-1191 Fax: 031-912-4460</span>
           </div>
         </div>
 
