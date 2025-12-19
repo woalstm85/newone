@@ -420,10 +420,26 @@ function Layout() {
             </div>
             <div className="top-bar-right">
                 {!isMobile && (
-                    <button className="login-btn" onClick={handleLoginClick}>
-                        <LogIn size={18} />
-                        로그인
-                    </button>
+                    <>
+                        <a 
+                            href="https://pf.kakao.com/_jRuxmn" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="desktop-kakao-channel-btn"
+                            title="카카오톡 채널 1:1 문의"
+                        >
+                            <div className="desktop-kakao-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 3C6.5 3 2 6.58 2 11c0 2.9 1.9 5.43 4.75 6.85-.1.72-.65 3.78-.75 4.26-.12.58.22.57.46.41.18-.12 2.94-2.03 4.09-2.82.48.07.98.11 1.45.11 5.5 0 10-3.58 10-8S17.5 3 12 3z"/>
+                                </svg>
+                            </div>
+                            <span className="desktop-kakao-text">카카오톡채널 - (주)뉴원</span>
+                        </a>
+                        <button className="login-btn" onClick={handleLoginClick}>
+                            <LogIn size={18} />
+                            로그인
+                        </button>
+                    </>
                 )}
             </div>
         </div>
@@ -451,9 +467,25 @@ function Layout() {
                 <UserInfo />
                 <div className="separator"></div>
                 {!isMobile && (
-                    <button className="logout-btn" onClick={handleLogoutClick}>
-                        <img src="/images/icon_logout.png" alt="로그아웃" />
-                    </button>
+                    <>
+                        <a 
+                            href="https://pf.kakao.com/_jRuxmn" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="desktop-kakao-channel-btn"
+                            title="카카오톡 채널 1:1 문의"
+                        >
+                            <div className="desktop-kakao-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 3C6.5 3 2 6.58 2 11c0 2.9 1.9 5.43 4.75 6.85-.1.72-.65 3.78-.75 4.26-.12.58.22.57.46.41.18-.12 2.94-2.03 4.09-2.82.48.07.98.11 1.45.11 5.5 0 10-3.58 10-8S17.5 3 12 3z"/>
+                                </svg>
+                            </div>
+                            <span className="desktop-kakao-text">카카오톡채널 - (주)뉴원</span>
+                        </a>
+                        <button className="logout-btn" onClick={handleLogoutClick}>
+                            <img src="/images/icon_logout.png" alt="로그아웃" />
+                        </button>
+                    </>
                 )}
             </div>
         </div>
@@ -502,6 +534,21 @@ function Layout() {
                         </div>
                         
                         <div className="mobile-menu-footer">
+                            <a 
+                                href="https://pf.kakao.com/_jRuxmn" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="mobile-kakao-btn"
+                                title="카카오톡 채널 1:1 문의"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <div className="mobile-kakao-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 3C6.5 3 2 6.58 2 11c0 2.9 1.9 5.43 4.75 6.85-.1.72-.65 3.78-.75 4.26-.12.58.22.57.46.41.18-.12 2.94-2.03 4.09-2.82.48.07.98.11 1.45.11 5.5 0 10-3.58 10-8S17.5 3 12 3z"/>
+                                    </svg>
+                                </div>
+                                <span className="mobile-kakao-text">카카오톡채널 - (주)뉴원</span>
+                            </a>
                             <button className="mobile-menu-logout-btn" onClick={() => {
                                 setIsMobileMenuOpen(false);
                                 handleLogoutClick();
@@ -553,6 +600,21 @@ function Layout() {
                         </div>
                         
                         <div className="mobile-menu-footer">
+                            <a 
+                                href="https://pf.kakao.com/_jRuxmn" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="mobile-kakao-btn"
+                                title="카카오톡 채널 1:1 문의"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <div className="mobile-kakao-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 3C6.5 3 2 6.58 2 11c0 2.9 1.9 5.43 4.75 6.85-.1.72-.65 3.78-.75 4.26-.12.58.22.57.46.41.18-.12 2.94-2.03 4.09-2.82.48.07.98.11 1.45.11 5.5 0 10-3.58 10-8S17.5 3 12 3z"/>
+                                    </svg>
+                                </div>
+                                <span className="mobile-kakao-text">카카오톡채널 - (주)뉴원</span>
+                            </a>
                             <button className="mobile-menu-login-btn" onClick={() => {
                                 setIsMobileMenuOpen(false);
                                 handleLoginClick();
