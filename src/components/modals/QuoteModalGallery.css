@@ -1,0 +1,198 @@
+/* ========== QuoteModal 갤러리 전용 스타일 (qm- 접두어) ========== */
+
+/* 이미지 섹션 오버라이드 */
+.qm-image-section-override {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  background: #f8f9fa !important;
+  min-height: 380px !important;
+}
+
+/* 갤러리 전체 래퍼 - 세로 배치 */
+.qm-gallery-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 350px !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+/* 메인 이미지 컨테이너 */
+.qm-gallery-main-container {
+  position: relative !important;
+  width: 100% !important;
+  height: 300px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f8f9fa !important;
+}
+
+.qm-gallery-main-container img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* 좌우 네비게이션 버튼 - 이미지 끝에 겹치게 (기본 숨김) */
+.qm-gallery-nav-btn {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+  z-index: 30 !important;
+  color: #333 !important;
+  opacity: 0 !important;
+}
+
+/* 메인 이미지에 마우스 올리면 화살표 표시 */
+.qm-gallery-main-container:hover .qm-gallery-nav-btn {
+  opacity: 1 !important;
+}
+
+.qm-gallery-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.qm-gallery-nav-prev {
+  left: 10px !important;
+}
+
+.qm-gallery-nav-next {
+  right: 10px !important;
+}
+
+/* 썸네일 래퍼 - 가로 1줄 배치 */
+.qm-gallery-thumbnail-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 5px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 4px 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #dee2e6 transparent !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+}
+
+.qm-gallery-thumbnail-wrapper::-webkit-scrollbar {
+  height: 4px !important;
+}
+
+.qm-gallery-thumbnail-wrapper::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.qm-gallery-thumbnail-wrapper::-webkit-scrollbar-thumb {
+  background: #dee2e6 !important;
+  border-radius: 2px !important;
+}
+
+/* 썸네일 아이템 */
+.qm-gallery-thumbnail-item {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  border: 2px solid #e9ecef !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  background: white !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.qm-gallery-thumbnail-item:hover {
+  border-color: #007bff !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3) !important;
+}
+
+.qm-gallery-thumbnail-active {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25) !important;
+}
+
+.qm-gallery-thumbnail-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .qm-image-section-override {
+    padding: 16px !important;
+    min-height: 250px !important;
+  }
+  
+  .qm-gallery-wrapper {
+    max-width: 100% !important;
+  }
+  
+  .qm-gallery-main-container {
+    height: 200px !important;
+  }
+  
+  .qm-gallery-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  .qm-gallery-nav-prev {
+    left: 8px !important;
+  }
+  
+  .qm-gallery-nav-next {
+    right: 8px !important;
+  }
+  
+  .qm-gallery-thumbnail-item {
+    width: 45px !important;
+    height: 45px !important;
+    min-width: 45px !important;
+    min-height: 45px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .qm-gallery-main-container {
+    height: 160px !important;
+  }
+  
+  .qm-gallery-nav-btn {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  .qm-gallery-thumbnail-item {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+}

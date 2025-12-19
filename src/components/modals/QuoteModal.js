@@ -12,12 +12,13 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Plus, Minus, ShoppingCart, Calculator } from 'lucide-react';
+import { X, Plus, Minus, ShoppingCart, Calculator, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { commonAPI } from '../../services/api';
 import './QuoteModal.css';
+import './QuoteModalGallery.css';
 import ImageWithFallback from '../common/ImageWithFallback';
 import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
@@ -62,6 +63,10 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   const [selectedOptionValue, setSelectedOptionValue] = useState(''); // 선택된 옵션
   const [loadingOptions, setLoadingOptions] = useState(false); // 옵션 로딩 상태
   const [showQuoteRequestModal, setShowQuoteRequestModal] = useState(false); // 견적의뢰 모달 표시 여부
+  
+  // 이미지 갤러리 상태
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 현재 선택된 이미지 인덱스
+  const [images, setImages] = useState([]); // 이미지 목록
   
   // 전역 상태 및 네비게이션
   const { globalState } = useAuth();
@@ -135,6 +140,20 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       setShowLoginModal(false);
       setSelectedOptionValue('');
       setLoadingOptions(false);
+      setCurrentImageIndex(0);
+      
+      // 이미지 목록 초기화
+      if (product.fileData && Array.isArray(product.fileData) && product.fileData.length > 0) {
+        // fileData가 있으면 fileData 사용
+        const imageList = product.fileData.map(file => file.filePath).filter(Boolean);
+        setImages(imageList);
+      } else if (product.FILEPATH && product.FILEPATH !== 'no_image.png' && product.FILEPATH !== '') {
+        // fileData가 없고 FILEPATH가 유효한 이미지면 단일 이미지
+        setImages([product.FILEPATH]);
+      } else {
+        // 이미지가 없음
+        setImages([]);
+      }
       
       // 옵션 처리
       const currentOptCd = product.optCd || null;
@@ -169,8 +188,31 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
       loadedOptCdRef.current = null;
       isLoadingRef.current = false;
       setLoadingOptions(false);
+      setCurrentImageIndex(0);
+      setImages([]);
     }
   }, [isOpen, product?.itemCd, loadOptionValues]);
+
+  /**
+   * 이전 이미지로 이동
+   */
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  /**
+   * 다음 이미지로 이동
+   */
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  /**
+   * 썸네일 클릭 핸들러
+   */
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
 
   // 로그인 상태 확인
   const isLoggedIn = !!globalState.G_USER_ID;
@@ -376,22 +418,68 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
               <div className="quote-modal-top-section">
                 {/* 이미지 섹션 */}
                 <div className="quote-modal-image-section">
-                  <div className="quote-modal-image-container">
-                    {product.FILEPATH ? (
-                      <ImageWithFallback
-                        src={product.FILEPATH}
-                        alt={product.itemNm}
-                        className="quote-modal-product-image"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain'
-                        }}
-                      />
-                    ) : (
-                      <div className="quote-modal-no-image">
-                        <CiImageOff size={48} color="#ccc" />
-                        <span>이미지 없음</span>
+                  <div className="qm-gallery-wrapper">
+                    <div className="qm-gallery-main-container">
+                      {images.length > 0 ? (
+                        <>
+                          {/* 메인 이미지 */}
+                          <ImageWithFallback
+                            src={images[currentImageIndex]}
+                            alt={product.itemNm}
+                            className="quote-modal-product-image"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain'
+                            }}
+                          />
+                          
+                          {/* 좌우 화살표 버튼 - 이미지가 2개 이상일 때만 표시 */}
+                          {images.length > 1 && (
+                            <>
+                              <button 
+                                className="qm-gallery-nav-btn qm-gallery-nav-prev"
+                                onClick={handlePrevImage}
+                                aria-label="이전 이미지"
+                              >
+                                <ChevronLeft size={20} />
+                              </button>
+                              <button 
+                                className="qm-gallery-nav-btn qm-gallery-nav-next"
+                                onClick={handleNextImage}
+                                aria-label="다음 이미지"
+                              >
+                                <ChevronRight size={20} />
+                              </button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div className="quote-modal-no-image">
+                          <CiImageOff size={48} color="#ccc" />
+                          <span>이미지 없음</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* 썸네일 목록 - 이미지가 2개 이상일 때만 표시 */}
+                    {images.length > 1 && (
+                      <div className="qm-gallery-thumbnail-wrapper">
+                        {images.map((image, index) => (
+                          <div
+                            key={index}
+                            className={`qm-gallery-thumbnail-item ${
+                              index === currentImageIndex ? 'qm-gallery-thumbnail-active' : ''
+                            }`}
+                            onClick={() => handleThumbnailClick(index)}
+                          >
+                            <ImageWithFallback
+                              src={image}
+                              alt={`${product.itemNm} ${index + 1}`}
+                              className="qm-gallery-thumbnail-img"
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -513,22 +601,68 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
             <div className="quote-modal-scrollable-content">
               {/* 이미지 섹션 */}
               <div className="quote-modal-image-section">
-                <div className="quote-modal-image-container">
-                  {product.FILEPATH ? (
-                    <ImageWithFallback
-                      src={product.FILEPATH}
-                      alt={product.itemNm}
-                      className="quote-modal-product-image"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  ) : (
-                    <div className="quote-modal-no-image">
-                      <CiImageOff size={64} color="#ccc" />
-                      <span>이미지 없음</span>
+                <div className="qm-gallery-wrapper">
+                  <div className="qm-gallery-main-container">
+                    {images.length > 0 ? (
+                      <>
+                        {/* 메인 이미지 */}
+                        <ImageWithFallback
+                          src={images[currentImageIndex]}
+                          alt={product.itemNm}
+                          className="quote-modal-product-image"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        
+                        {/* 좌우 화살표 버튼 - 이미지가 2개 이상일 때만 표시 */}
+                        {images.length > 1 && (
+                          <>
+                            <button 
+                              className="qm-gallery-nav-btn qm-gallery-nav-prev"
+                              onClick={handlePrevImage}
+                              aria-label="이전 이미지"
+                            >
+                              <ChevronLeft size={24} />
+                            </button>
+                            <button 
+                              className="qm-gallery-nav-btn qm-gallery-nav-next"
+                              onClick={handleNextImage}
+                              aria-label="다음 이미지"
+                            >
+                              <ChevronRight size={24} />
+                            </button>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="quote-modal-no-image">
+                        <CiImageOff size={64} color="#ccc" />
+                        <span>이미지 없음</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 썸네일 목록 - 이미지가 2개 이상일 때만 표시 */}
+                  {images.length > 1 && (
+                    <div className="qm-gallery-thumbnail-wrapper">
+                      {images.map((image, index) => (
+                        <div
+                          key={index}
+                          className={`qm-gallery-thumbnail-item ${
+                            index === currentImageIndex ? 'qm-gallery-thumbnail-active' : ''
+                          }`}
+                          onClick={() => handleThumbnailClick(index)}
+                        >
+                          <ImageWithFallback
+                            src={image}
+                            alt={`${product.itemNm} ${index + 1}`}
+                            className="qm-gallery-thumbnail-img"
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
