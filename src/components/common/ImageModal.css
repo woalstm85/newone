@@ -47,6 +47,21 @@
   overflow-wrap: break-word;
 }
 
+.image-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-modal-counter {
+  font-size: 14px;
+  color: #6c757d;
+  background: #e9ecef;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
 .image-modal-close-btn {
   display: flex;
   align-items: center;
@@ -134,6 +149,44 @@
   min-height: 400px;
   max-height: calc(95vh - 200px);
   overflow: hidden;
+}
+
+/* 이미지 네비게이션 버튼 */
+.image-modal-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-modal-nav-btn:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.image-modal-nav-btn:active {
+  transform: translateY(-50%) scale(1);
+}
+
+.image-modal-nav-btn.prev {
+  left: 16px;
+}
+
+.image-modal-nav-btn.next {
+  right: 16px;
 }
 
 .image-modal-image-container {
@@ -274,6 +327,11 @@
     font-size: 16px;
   }
 
+  .image-modal-counter {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
   .image-modal-close-btn {
     width: 36px;
     height: 36px;
@@ -303,6 +361,19 @@
   .image-modal-content {
     min-height: 300px;
     max-height: calc(100vh - 180px);
+  }
+
+  .image-modal-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .image-modal-nav-btn.prev {
+    left: 8px;
+  }
+
+  .image-modal-nav-btn.next {
+    right: 8px;
   }
 
   .image-modal-image-container {

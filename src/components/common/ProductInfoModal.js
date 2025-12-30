@@ -8,13 +8,14 @@
  * 4. 총 금액 자동 계산
  * 5. 장바구니 담기 기능 (거래처별 분리)
  * 6. 견적의뢰 기능
- * 7. 이미지 확대 보기 (ImageModal 연동)
- * 8. 로그인 체크 (미로그인 시 로그인 모달 표시)
- * 9. 반응형 디자인 (모바일/데스크톱 레이아웃 분리)
+ * 7. 이미지 갤러리 (fileData 배열 기반, 썸네일 클릭 시 메인 이미지 변경)
+ * 8. 이미지 확대 보기 (ImageModal 연동)
+ * 9. 로그인 체크 (미로그인 시 로그인 모달 표시)
+ * 10. 반응형 디자인 (모바일/데스크톱 레이아웃 분리)
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ShoppingCart, Eye, Plus, Minus, Calculator } from 'lucide-react';
+import { X, ShoppingCart, Eye, Plus, Minus, Calculator, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import ImageModal from './ImageModal';
 import { commonAPI } from '../../services/api';
@@ -56,9 +57,14 @@ const ProductInfoModal = ({
   // 상태 관리
   const [quantity, setQuantity] = useState(1);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' });
+  const [selectedImage, setSelectedImage] = useState({ images: [], initialIndex: 0, title: '' });
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showQuoteRequestModal, setShowQuoteRequestModal] = useState(false);
+  
+  // 이미지 갤러리 상태
+  const [imageList, setImageList] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const thumbnailContainerRef = useRef(null);
   
   // 옵션값 관련 상태
   const [optionValues, setOptionValues] = useState([]);
@@ -76,11 +82,55 @@ const ProductInfoModal = ({
   const isLoggedIn = !!globalState.G_USER_ID;
 
   /**
+   * 이미지 리스트 생성
+   * fileData 배열이 있으면 사용, 없으면 filePath나 thFilePath 사용
+   */
+  const buildImageList = useCallback((productData) => {
+    if (!productData) return [];
+    
+    const images = [];
+    
+    // fileData 배열이 있으면 사용 (상세 이미지들)
+    if (productData.fileData && Array.isArray(productData.fileData) && productData.fileData.length > 0) {
+      productData.fileData.forEach((file, index) => {
+        if (file.filePath) {
+          images.push({
+            url: file.filePath,
+            fileNo: file.fileNo,
+            realNm: file.realNm || `이미지 ${index + 1}`,
+            isMain: index === 0
+          });
+        }
+      });
+    }
+    
+    // fileData가 없으면 기존 방식 (filePath 또는 thFilePath)
+    if (images.length === 0) {
+      if (productData.filePath) {
+        images.push({
+          url: productData.filePath,
+          fileNo: 'main',
+          realNm: '메인 이미지',
+          isMain: true
+        });
+      } else if (productData.thFilePath) {
+        images.push({
+          url: productData.thFilePath,
+          fileNo: 'thumb',
+          realNm: '썸네일 이미지',
+          isMain: true
+        });
+      }
+    }
+    
+    return images;
+  }, []);
+
+  /**
    * 옵션 코드 유효성 검사
    * optCd가 없거나 'OP0000'일 경우 false 반환
    */
   const isValidOptionCode = (optCd) => {
-    // optCd가 없거나, 빈 문자열이거나, 'OP0000'이면 false
     if (!optCd || optCd.trim() === '' || optCd === 'OP0000') {
       return false;
     }
@@ -92,7 +142,6 @@ const ProductInfoModal = ({
    * 동일한 optCd에 대한 중복 로딩 방지
    */
   const loadOptionValues = useCallback(async (optCd) => {
-    // optCd가 없거나 OP0000이면 로드하지 않음
     if (!isValidOptionCode(optCd) || isLoadingRef.current || loadedOptCdRef.current === optCd) {
       return;
     }
@@ -139,9 +188,13 @@ const ProductInfoModal = ({
       setSelectedOptionValue('');
       setLoadingOptions(false);
       
+      // 이미지 리스트 생성 및 초기화
+      const images = buildImageList(product);
+      setImageList(images);
+      setCurrentImageIndex(0);
+      
       const currentOptCd = product.optCd || null;
       
-      // 유효한 옵션 코드가 있을 때만 로드
       if (isValidOptionCode(currentOptCd) && loadedOptCdRef.current !== currentOptCd) {
         setOptionValues([]);
         loadOptionValues(currentOptCd);
@@ -166,8 +219,41 @@ const ProductInfoModal = ({
       loadedOptCdRef.current = null;
       isLoadingRef.current = false;
       setLoadingOptions(false);
+      setImageList([]);
+      setCurrentImageIndex(0);
     }
-  }, [isOpen, product?.itemCd, loadOptionValues]);
+  }, [isOpen, product?.itemCd, loadOptionValues, buildImageList]);
+
+  /**
+   * 썸네일 클릭 시 메인 이미지 변경
+   */
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  /**
+   * 이전 이미지
+   */
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : imageList.length - 1));
+  };
+
+  /**
+   * 다음 이미지
+   */
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev < imageList.length - 1 ? prev + 1 : 0));
+  };
+
+  /**
+   * 현재 이미지 URL 가져오기
+   */
+  const getCurrentImageUrl = () => {
+    if (imageList.length > 0 && imageList[currentImageIndex]) {
+      return imageList[currentImageIndex].url;
+    }
+    return product?.filePath || product?.thFilePath || '';
+  };
 
   /**
    * 수량 변경 (최소 1개)
@@ -186,14 +272,19 @@ const ProductInfoModal = ({
   };
 
   /**
-   * 이미지 클릭 핸들러
+   * 이미지 클릭 핸들러 (확대 보기)
+   * 이미지 배열과 현재 인덱스를 ImageModal에 전달
    */
   const handleImageClick = () => {
-    if (product?.filePath || product?.thFilePath) {
+    if (imageList.length > 0) {
       setSelectedImage({
-        url: product.filePath || product.thFilePath,
-        title: product.itemNm || '상품 이미지',
-        alt: `${product.itemCd || ''} ${product.itemNm || ''} 상품 이미지`
+        images: imageList.map(img => ({
+          url: img.url,
+          alt: img.realNm || product.itemNm || '상품 이미지',
+          title: product.itemNm || '상품 이미지'
+        })),
+        initialIndex: currentImageIndex,
+        title: product.itemNm || '상품 이미지'
       });
       setIsImageModalOpen(true);
     }
@@ -208,7 +299,6 @@ const ProductInfoModal = ({
       return;
     }
 
-    // 유효한 옵션 코드가 있고 옵션 값이 로드되었을 때만 선택 체크
     if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
@@ -227,7 +317,6 @@ const ProductInfoModal = ({
       return;
     }
 
-    // 유효한 옵션 코드가 있고 옵션 값이 로드되었을 때만 선택 체크
     if (isValidOptionCode(product.optCd) && optionValues.length > 0 && !selectedOptionValue) {
       toast.error('옵션을 선택해주세요.');
       return;
@@ -236,7 +325,6 @@ const ProductInfoModal = ({
     const selectedOption = optionValues.find(opt => opt.optValCd === selectedOptionValue);
     const custCd = globalState.G_CUST_CD || '';
     
-    // source 결정: isSurplus, isEvent 플래그 또는 source 필드 기반
     let source = 'general';
     if (product.source) {
       source = product.source;
@@ -246,7 +334,6 @@ const ProductInfoModal = ({
       source = 'event';
     }
     
-    // cartUtils를 사용하여 거래처별 장바구니에 추가
     const success = addToCart(custCd, {
       itemCd: product.itemCd,
       itemNm: product.itemNm,
@@ -266,7 +353,6 @@ const ProductInfoModal = ({
     if (success) {
       toast.success('장바구니에 추가되었습니다.');
       
-      // onAddToCart 콜백이 있으면 호출 (하위 호환성)
       if (onAddToCart) {
         onAddToCart({
           ...product,
@@ -287,6 +373,8 @@ const ProductInfoModal = ({
     setQuantity(1);
     setSelectedOptionValue('');
     setOptionValues([]);
+    setImageList([]);
+    setCurrentImageIndex(0);
     onClose();
   };
 
@@ -299,6 +387,89 @@ const ProductInfoModal = ({
     if (e.target === e.currentTarget) {
       handleClose();
     }
+  };
+
+  /**
+   * 이미지 갤러리 렌더링 (공통)
+   */
+  const renderImageGallery = (isMobileLayout = false) => {
+    const currentImageUrl = getCurrentImageUrl();
+    const hasMultipleImages = imageList.length > 1;
+    
+    return (
+      <div className={`product-info-gallery ${isMobileLayout ? 'mobile' : 'desktop'}`}>
+        {/* 메인 이미지 */}
+        <div className={`product-info-main-image-wrapper ${isMobileLayout ? 'mobile' : ''}`}>
+          {currentImageUrl ? (
+            <>
+              <img 
+                src={currentImageUrl}
+                alt={product.itemNm}
+                className="product-info-main-image"
+              />
+              <div className="product-info-image-overlay">
+                <button 
+                  className="product-info-zoom-btn"
+                  onClick={handleImageClick}
+                >
+                  <Eye size={16} />
+                  확대보기
+                </button>
+              </div>
+              
+              {/* 이미지 네비게이션 화살표 (여러 이미지일 때만, 호버 시 표시) */}
+              {hasMultipleImages && (
+                <>
+                  <button 
+                    className="product-info-nav-btn prev"
+                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button 
+                    className="product-info-nav-btn next"
+                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                  
+                  {/* 이미지 카운터 */}
+                  <div className="product-info-image-counter">
+                    {currentImageIndex + 1} / {imageList.length}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className={`product-info-no-image ${isMobileLayout ? 'mobile' : ''}`}>
+              <CiImageOff size={isMobileLayout ? 48 : 64} color="#ccc" />
+              {!isMobileLayout && <span>이미지 없음</span>}
+            </div>
+          )}
+        </div>
+        
+        {/* 썸네일 리스트 (여러 이미지일 때만) */}
+        {hasMultipleImages && (
+          <div className="product-info-thumbnail-container" ref={thumbnailContainerRef}>
+            <div className="product-info-thumbnail-list">
+              {imageList.map((img, index) => (
+                <div 
+                  key={img.fileNo || index}
+                  className={`product-info-thumbnail-item ${currentImageIndex === index ? 'active' : ''}`}
+                  onClick={() => handleThumbnailClick(index)}
+                >
+                  <img 
+                    src={img.url}
+                    alt={img.realNm || `이미지 ${index + 1}`}
+                    className="product-info-thumbnail-image"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -327,32 +498,9 @@ const ProductInfoModal = ({
               {/* 상단 영역 */}
               <div className="product-info-mobile-top-section">
                 
-                {/* 이미지 섹션 */}
+                {/* 이미지 갤러리 섹션 */}
                 <div className="product-info-image-section-mobile">
-                  <div className="product-info-image-container-mobile">
-                    {product.filePath || product.thFilePath ? (
-                      <>
-                        <img 
-                          src={product.filePath || product.thFilePath}
-                          alt={product.itemNm}
-                          className="product-info-image"
-                        />
-                        <div className="product-info-image-overlay">
-                          <button 
-                            className="product-info-zoom-btn"
-                            onClick={handleImageClick}
-                          >
-                            <Eye size={16} />
-                            확대보기
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="product-info-no-image-mobile">
-                        <CiImageOff size={48} color="#ccc" />
-                      </div>
-                    )}
-                  </div>
+                  {renderImageGallery(true)}
                 </div>
 
                 {/* 기본 정보 섹션 */}
@@ -393,7 +541,7 @@ const ProductInfoModal = ({
               {/* 하단 영역 */}
               <div className="product-info-mobile-bottom-section">
                 
-                {/* 옵션값 선택 - 유효한 옵션 코드일 때만 표시 */}
+                {/* 옵션값 선택 */}
                 {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                   <div className="product-info-option">
                     <span className="product-info-option-label">옵션:</span>
@@ -456,33 +604,9 @@ const ProductInfoModal = ({
           ) : (
             // 데스크톱 레이아웃
             <div className="product-info-modal-content">
-              {/* 이미지 섹션 */}
+              {/* 이미지 갤러리 섹션 */}
               <div className="product-info-image-section">
-                <div className="product-info-image-container">
-                  {product.filePath || product.thFilePath ? (
-                    <>
-                      <img 
-                        src={product.filePath || product.thFilePath}
-                        alt={product.itemNm}
-                        className="product-info-image"
-                      />
-                      <div className="product-info-image-overlay">
-                        <button 
-                          className="product-info-zoom-btn"
-                          onClick={handleImageClick}
-                        >
-                          <Eye size={16} />
-                          확대보기
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="product-info-no-image">
-                      <CiImageOff size={64} color="#ccc" />
-                      <span>이미지 없음</span>
-                    </div>
-                  )}
-                </div>
+                {renderImageGallery(false)}
               </div>
 
               {/* 정보 섹션 */}
@@ -520,7 +644,7 @@ const ProductInfoModal = ({
                     )}
                   </div>
 
-                  {/* 옵션값 선택 - 유효한 옵션 코드일 때만 표시 */}
+                  {/* 옵션값 선택 */}
                   {isValidOptionCode(product.optCd) && optionValues.length > 0 && (
                     <div className="product-info-option">
                       <span className="product-info-option-label">옵션:</span>
@@ -647,11 +771,10 @@ const ProductInfoModal = ({
           e && e.stopPropagation && e.stopPropagation();
           setIsImageModalOpen(false);
         }}
-        imageUrl={selectedImage.url}
+        images={selectedImage.images || []}
+        initialIndex={selectedImage.initialIndex || 0}
         title={selectedImage.title}
-        altText={selectedImage.alt}
         showControls={true}
-        showDownload={true}
       />
     </>
   );

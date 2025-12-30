@@ -22,6 +22,7 @@ import { CiImageOff } from 'react-icons/ci';
 // 공통 컴포넌트
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
+import LazyImage from '../common/LazyImage';
 import MySpinner from '../common/MySpinner';
 
 // 컨텍스트 및 API
@@ -50,7 +51,7 @@ function CUST0010() {
   
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);   // 현재 페이지 번호
-  const [itemsPerPage, setItemsPerPage] = useState(50); // 페이지당 표시할 아이템 수
+  const [itemsPerPage, setItemsPerPage] = useState(30); // 페이지당 표시할 아이템 수 (50 -> 30으로 변경, 성능 최적화)
   
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);         // 일반 알림 모달
@@ -201,7 +202,11 @@ function CUST0010() {
   const handleViewModeChange = (mode) => setViewMode(mode);
 
   /** 페이지 번호 변경 핸들러 */
-  const handlePageChange = (page) => setCurrentPage(page);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // 페이지 변경 시 스크롤 맨 위로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   /** 페이지당 아이템 수 변경 핸들러 */
   const handleItemsPerPageChange = (e) => {
@@ -327,7 +332,7 @@ function CUST0010() {
             <div className="cust0010-inventory-image-placeholder">
               {item.thFilePath ? (
                 <>
-                  <img
+                  <LazyImage
                     src={item.thFilePath}
                     alt={item.itemNm}
                     className="cust0010-inventory-image"
@@ -431,10 +436,10 @@ function CUST0010() {
         <div className="cust0010-inventory-image-content">
           <div className="cust0010-inventory-image-section">
             <div className="cust0010-inventory-image-placeholder">
-              {item.filePath || item.thFilePath ? (
+              {item.thFilePath || item.filePath ? (
                 <>
-                  <img
-                    src={item.filePath || item.thFilePath}
+                  <LazyImage
+                    src={item.thFilePath || item.filePath}
                     alt={item.itemNm}
                     className="cust0010-inventory-image"
                   />
@@ -594,7 +599,7 @@ function CUST0010() {
                     <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       {row.thFilePath ? (
                         <div className="cust0010-table-image-container">
-                          <img
+                          <LazyImage
                             src={row.thFilePath}
                             alt={row.itemNm}
                             className="cust0010-table-image-item"
@@ -781,10 +786,10 @@ function CUST0010() {
                     </td>
                     <td className="cust0010-center">
                       <div className="cust0010-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        {row.filePath || row.thFilePath ? (
+                        {row.thFilePath || row.filePath ? (
                           <div className="cust0010-table-image-container">
-                            <img
-                              src={row.filePath || row.thFilePath}
+                            <LazyImage
+                              src={row.thFilePath || row.filePath}
                               alt={row.itemNm}
                               className="cust0010-table-image-item"
                             />

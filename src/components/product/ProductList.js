@@ -15,6 +15,7 @@ import { Eye, Package, Filter } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import './ProductList.css';
 import ImageWithFallback from '../common/ImageWithFallback';
+import '../common/ImageWithFallback.css';
 import QuoteModal from '../modals/QuoteModal';
 import { productAPI } from '../../services/api';
 

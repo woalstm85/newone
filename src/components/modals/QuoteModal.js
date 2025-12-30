@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Plus, Minus, ShoppingCart, Calculator, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Plus, Minus, ShoppingCart, Calculator, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ import { commonAPI } from '../../services/api';
 import './QuoteModal.css';
 import './QuoteModalGallery.css';
 import ImageWithFallback from '../common/ImageWithFallback';
+import ImageModal from '../common/ImageModal';
 import Modal from '../common/Modal';
 import ProductQuoteModal from './ProductQuoteModal';
 import { toast } from 'react-toastify';
@@ -67,6 +68,7 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
   // 이미지 갤러리 상태
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 현재 선택된 이미지 인덱스
   const [images, setImages] = useState([]); // 이미지 목록
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false); // 이미지 확대 모달
   
   // 전역 상태 및 네비게이션
   const { globalState } = useAuth();
@@ -212,6 +214,16 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
    */
   const handleThumbnailClick = (index) => {
     setCurrentImageIndex(index);
+  };
+
+  /**
+   * 이미지 클릭 핸들러 (확대 보기)
+   * 이미지 배열과 현재 인덱스를 ImageModal에 전달
+   */
+  const handleImageClick = () => {
+    if (images.length > 0) {
+      setIsImageModalOpen(true);
+    }
   };
 
   // 로그인 상태 확인
@@ -434,6 +446,17 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                             }}
                           />
                           
+                          {/* 확대보기 오버레이 */}
+                          <div className="qm-gallery-image-overlay">
+                            <button 
+                              className="qm-gallery-zoom-btn"
+                              onClick={handleImageClick}
+                            >
+                              <Eye size={16} />
+                              확대보기
+                            </button>
+                          </div>
+                          
                           {/* 좌우 화살표 버튼 - 이미지가 2개 이상일 때만 표시 */}
                           {images.length > 1 && (
                             <>
@@ -616,6 +639,17 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
                             objectFit: 'contain'
                           }}
                         />
+                        
+                        {/* 확대보기 오버레이 */}
+                        <div className="qm-gallery-image-overlay">
+                          <button 
+                            className="qm-gallery-zoom-btn"
+                            onClick={handleImageClick}
+                          >
+                            <Eye size={16} />
+                            확대보기
+                          </button>
+                        </div>
                         
                         {/* 좌우 화살표 버튼 - 이미지가 2개 이상일 때만 표시 */}
                         {images.length > 1 && (
@@ -827,6 +861,23 @@ const QuoteModal = ({ product, isOpen, onClose }) => {
           }]}
         />
       )}
+
+      {/* 이미지 확대 모달 */}
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={(e) => {
+          e && e.stopPropagation && e.stopPropagation();
+          setIsImageModalOpen(false);
+        }}
+        images={images.map((url, index) => ({
+          url: url,
+          alt: `${product.itemNm} ${index + 1}`,
+          title: product.itemNm
+        }))}
+        initialIndex={currentImageIndex}
+        title={product.itemNm}
+        showControls={true}
+      />
     </>
   );
 };

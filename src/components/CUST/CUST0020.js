@@ -24,6 +24,7 @@ import { toast } from 'react-toastify';
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
 import ProductInfoModal from '../common/ProductInfoModal';
+import LazyImage from '../common/LazyImage';
 import MySpinner from '../common/MySpinner';
 import './CUST0020.css';
 
@@ -65,7 +66,7 @@ function CUST0020() {
   
   // 페이지네이션
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(30);  // 50 -> 30으로 변경 (성능 최적화)
   
   // Context
   const { currentMenuTitle } = useMenu();
@@ -271,6 +272,8 @@ function CUST0020() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    // 페이지 변경 시 스크롤 맨 위로 이동
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleItemsPerPageChange = (newItemsPerPage) => {
@@ -391,10 +394,10 @@ function CUST0020() {
               <tr key={row.itemCd || index}>
                 <td className="cust0020-center-column">
                   <div className="cust0020-table-image-container">
-                    {row.filePath || row.thFilePath ? (
+                    {row.thFilePath || row.filePath ? (
                       <>
-                        <img 
-                          src={row.filePath || row.thFilePath} 
+                        <LazyImage
+                          src={row.thFilePath || row.filePath}
                           alt={row.itemNm || '제품 이미지'}
                           className="cust0020-table-image-item"
                         />
@@ -454,10 +457,10 @@ function CUST0020() {
         <div className="cust0020-inventory-image-content">
           <div className="cust0020-inventory-image-section">
             <div className="cust0020-inventory-image-placeholder">
-              {item.filePath || item.thFilePath ? (
+              {item.thFilePath || item.filePath ? (
                 <>
-                  <img
-                    src={item.filePath || item.thFilePath}
+                  <LazyImage
+                    src={item.thFilePath || item.filePath}
                     alt={item.itemNm}
                     className="cust0020-inventory-image"
                   />

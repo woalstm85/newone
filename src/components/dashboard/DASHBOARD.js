@@ -4,6 +4,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './DASHBOARD.css';
 import QuoteModal from '../modals/QuoteModal';
 import ImageWithFallback from '../common/ImageWithFallback';
+import '../common/ImageWithFallback.css';
 import { CiImageOff } from 'react-icons/ci';
 import { Eye } from 'lucide-react';
 import { inventoryAPI, productAPI } from '../../services/api';

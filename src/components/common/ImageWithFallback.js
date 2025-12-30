@@ -1,11 +1,12 @@
 /**
- * ImageWithFallback.js - 이미지 로드 실패 시 대체 이미지 표시
+ * ImageWithFallback.js - 지연 로딩 + 에러 처리 이미지 컴포넌트
  * 
  * 주요 기능:
- * 1. 이미지 로드 실패 시 자동으로 대체 이미지 표시
- * 2. 로딩 중 상태 표시
- * 3. SVG 기반 "이미지 없음" 플레이스홀더 생성
- * 4. API URL 자동 처리
+ * 1. Intersection Observer를 사용한 지연 로딩 (Lazy Loading)
+ * 2. 이미지 로드 실패 시 자동으로 대체 이미지 표시
+ * 3. 로딩 중 스피너 표시
+ * 4. 부드러운 페이드인 애니메이션
+ * 5. API URL 자동 처리
  * 
  * Props:
  * - src: 이미지 URL
@@ -14,40 +15,14 @@
  * - width: 너비
  * - height: 높이
  * - style: 추가 스타일
- * 
- * 사용 예:
- * <ImageWithFallback 
- *   src="/images/product.jpg"
- *   alt="상품 이미지"
- *   width={120}
- *   height={120}
- * />
+ * - threshold: 이미지 로드 시작 기준 (기본값: 0.1)
+ * - rootMargin: 미리 로드 시작 거리 (기본값: '100px')
+ * - disableLazy: 지연 로딩 비활성화 (기본값: false)
  */
 
-import React, { useState } from 'react';
-
-/**
- * "이미지 없음" SVG 생성
- * 
- * @param {number} width - SVG 너비
- * @param {number} height - SVG 높이
- * @returns {string} Base64 인코딩된 SVG 데이터 URL
- */
-const createNoImageSvg = (width = 120, height = 120) => {
-  const svg = `
-    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
-      <g transform="translate(${width/2}, ${height/2})">
-        <circle r="20" fill="#6c757d" opacity="0.3"/>
-        <path d="M-8,-8 L8,8 M8,-8 L-8,8" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
-      </g>
-      <text x="50%" y="85%" text-anchor="middle" fill="#6c757d" font-size="12" font-family="Arial, sans-serif">
-        이미지 없음
-      </text>
-    </svg>
-  `;
-  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
-};
+import React, { useState, useRef, useEffect } from 'react';
+import { CiImageOff } from 'react-icons/ci';
+import './ImageWithFallback.css';
 
 const ImageWithFallback = ({ 
   src, 
@@ -56,32 +31,70 @@ const ImageWithFallback = ({
   width = 120, 
   height = 120,
   style = {},
+  threshold = 0.1,
+  rootMargin = '100px',
+  disableLazy = false,
   ...props 
 }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(disableLazy); // disableLazy가 true면 바로 로드
   const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const imgRef = useRef(null);
+
+  /**
+   * Intersection Observer로 뷰포트 진입 감지
+   */
+  useEffect(() => {
+    if (disableLazy) {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold,
+        rootMargin
+      }
+    );
+
+    const currentRef = imgRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [threshold, rootMargin, disableLazy]);
+
+  /**
+   * 이미지 로드 완료 핸들러
+   */
+  const handleLoad = () => {
+    setIsLoaded(true);
+    setHasError(false);
+  };
 
   /**
    * 이미지 로드 에러 핸들러
    */
   const handleError = () => {
     setHasError(true);
-    setIsLoading(false);
-  };
-
-  /**
-   * 이미지 로드 완료 핸들러
-   */
-  const handleLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
+    setIsLoaded(true);
   };
 
   /**
    * 이미지 경로 정리 및 API URL 추가
-   * 
-   * @param {string} imageSrc - 원본 이미지 경로
-   * @returns {string|null} 처리된 이미지 URL
    */
   const getCleanImageSrc = (imageSrc) => {
     if (!imageSrc) return null;
@@ -100,56 +113,47 @@ const ImageWithFallback = ({
   };
 
   const cleanSrc = getCleanImageSrc(src);
-  
-  // 이미지가 없거나 에러가 발생한 경우 fallback 이미지 표시
+
+  // 이미지가 없거나 에러인 경우
   if (!cleanSrc || hasError) {
     return (
-      <img
-        src={createNoImageSvg(width, height)}
-        alt={alt}
-        className={className}
+      <div 
+        ref={imgRef}
+        className={`lazy-image-fallback ${className}`}
         style={{ width, height, ...style }}
         {...props}
-      />
+      >
+        <CiImageOff size={Math.min(width, height) * 0.3} color="#ccc" />
+      </div>
     );
   }
 
   return (
-    <>
-      {/* 로딩 중 표시 */}
-      {isLoading && (
-        <div 
-          className={className}
-          style={{ 
-            width, 
-            height, 
-            backgroundColor: '#f8f9fa',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            ...style 
-          }}
-        >
-          <div style={{ color: '#6c757d', fontSize: '12px' }}>로딩중...</div>
+    <div 
+      ref={imgRef}
+      className={`lazy-image-container ${className}`}
+      style={{ width, height, ...style }}
+      {...props}
+    >
+      {/* 로딩 플레이스홀더 */}
+      {!isLoaded && (
+        <div className="lazy-image-loading">
+          <div className="lazy-image-spinner-small"></div>
         </div>
       )}
       
-      {/* 실제 이미지 */}
-      <img
-        src={cleanSrc}
-        alt={alt}
-        className={className}
-        style={{ 
-          width, 
-          height, 
-          display: isLoading ? 'none' : 'block',
-          ...style 
-        }}
-        onError={handleError}
-        onLoad={handleLoad}
-        {...props}
-      />
-    </>
+      {/* 실제 이미지 - 뷰포트에 들어왔을 때만 로드 */}
+      {isInView && (
+        <img
+          src={cleanSrc}
+          alt={alt}
+          className={`lazy-image-img ${isLoaded ? 'loaded' : ''}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          loading="lazy"
+        />
+      )}
+    </div>
   );
 };
 
