@@ -1,6 +1,6 @@
 /**
  * ProductList.js
- * 제품 목록 표시 컴포넌트
+ * 제품 목록 표시 컴포넌트 (React Query 적용 + 페이징)
  * 
  * 주요 기능:
  * - 제품 목록을 그리드 형태로 표시
@@ -8,16 +8,26 @@
  * - 할인율 계산 및 표시
  * - 제품 상세보기 모달
  * - 다양한 리스트 타입 지원 (전체/잉여재고/행사품목)
+ * - React Query를 통한 데이터 캐싱 (메뉴 이동 시 재로딩 방지)
+ * - 페이지네이션 기능
  */
 
-import React, { useState, useEffect } from 'react';
-import { Eye, Package, Filter } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Eye, Package, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CiImageOff } from 'react-icons/ci';
 import './ProductList.css';
-import ImageWithFallback from '../common/ImageWithFallback';
-import '../common/ImageWithFallback.css';
+import OptimizedImage, { preloadImages } from '../common/OptimizedImage';
+import '../common/OptimizedImage.css';
 import QuoteModal from '../modals/QuoteModal';
 import { productAPI } from '../../services/api';
+
+// 쿼리 키 상수
+const QUERY_KEYS = {
+  SURPLUS_PRODUCTS: 'surplusProducts',
+  EVENT_PRODUCTS: 'eventProducts',
+  ALL_PRODUCTS: 'allProducts',
+};
 
 /**
  * ProductList 컴포넌트
@@ -28,21 +38,195 @@ import { productAPI } from '../../services/api';
  * @param {Function} onProductCountUpdate - 제품 개수 업데이트 콜백 함수
  */
 const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCountUpdate }) => {
-  // 상태 관리
-  const [products, setProducts] = useState([]); // 전체 제품 목록
-  const [filteredProducts, setFilteredProducts] = useState([]); // 필터링된 제품 목록
-  const [selectedProduct, setSelectedProduct] = useState(null); // 선택된 제품
-  const [showQuoteModal, setShowQuoteModal] = useState(false); // 견적 모달 표시 여부
-  const [loading, setLoading] = useState(true); // 로딩 상태
-  const [error, setError] = useState(null); // 에러 상태
+  // 모달 상태 관리
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  
+  // 페이징 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(30);
+
+  /**
+   * 쿼리 키 생성 - listType과 카테고리 정보 포함
+   */
+  const queryKey = useMemo(() => {
+    const baseKey = listType === 'surplus' 
+      ? QUERY_KEYS.SURPLUS_PRODUCTS 
+      : listType === 'event' 
+        ? QUERY_KEYS.EVENT_PRODUCTS 
+        : QUERY_KEYS.ALL_PRODUCTS;
+    
+    // 카테고리가 있으면 키에 포함
+    if (selectedCategory?.catCd) {
+      return [baseKey, selectedCategory.catCd, selectedCategory.level];
+    }
+    return [baseKey];
+  }, [listType, selectedCategory]);
+
+  /**
+   * 카테고리 변경 시 페이지 초기화
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, listType]);
+
+  /**
+   * API 호출 함수
+   */
+  const fetchProducts = async () => {
+    if (listType === 'surplus') {
+      // 잉여재고 제품 로드
+      const params = { itemDivCd: '010' };
+      
+      if (selectedCategory?.catCd) {
+        if (selectedCategory.level === 1) params.itemGroupLCd = selectedCategory.catCd;
+        else if (selectedCategory.level === 2) params.itemGroupMCd = selectedCategory.catCd;
+        else if (selectedCategory.level === 3) params.itemGroupSCd = selectedCategory.catCd;
+      }
+      
+      const data = await productAPI.getDashItems(
+        params.itemDivCd, 
+        params.itemGroupLCd, 
+        params.itemGroupMCd, 
+        params.itemGroupSCd
+      );
+      
+      return data.map(item => ({
+        ...item,
+        id: item.itemCd || item.id,
+        name: item.itemNm,
+        isSurplus: true,
+        isEvent: false
+      }));
+      
+    } else if (listType === 'event') {
+      // 행사품목 제품 로드
+      const params = { itemDivCd: '020' };
+      
+      if (selectedCategory?.catCd) {
+        if (selectedCategory.level === 1) params.itemGroupLCd = selectedCategory.catCd;
+        else if (selectedCategory.level === 2) params.itemGroupMCd = selectedCategory.catCd;
+        else if (selectedCategory.level === 3) params.itemGroupSCd = selectedCategory.catCd;
+      }
+      
+      const data = await productAPI.getDashItems(
+        params.itemDivCd, 
+        params.itemGroupLCd, 
+        params.itemGroupMCd, 
+        params.itemGroupSCd
+      );
+      
+      return data.map(item => ({
+        ...item,
+        id: item.itemCd || item.id,
+        name: item.itemNm,
+        isSurplus: false,
+        isEvent: true
+      }));
+      
+    } else {
+      // 기본값: products.json 파일 사용
+      const response = await fetch('/data/products.json');
+      if (!response.ok) throw new Error('제품 데이터를 불러올 수 없습니다.');
+      const data = await response.json();
+      return data.products;
+    }
+  };
+
+  /**
+   * React Query - 데이터 조회
+   */
+  const { 
+    data: products = [], 
+    isLoading, 
+    isError, 
+    error,
+    refetch,
+    isFetching 
+  } = useQuery({
+    queryKey: queryKey,
+    queryFn: fetchProducts,
+    staleTime: 3 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  /**
+   * 페이지네이션 계산
+   */
+  const { currentItems, totalPages, startIndex, endIndex } = useMemo(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    return {
+      currentItems: products.slice(startIdx, endIdx),
+      totalPages: Math.ceil(products.length / itemsPerPage),
+      startIndex: startIdx,
+      endIndex: Math.min(endIdx, products.length)
+    };
+  }, [products, currentPage, itemsPerPage]);
+
+  /**
+   * 다음 페이지 이미지 프리로드 - 현재 페이지 로드 후 백그라운드에서 실행
+   */
+  useEffect(() => {
+    if (currentPage < totalPages && products.length > 0) {
+      const nextStartIdx = currentPage * itemsPerPage;
+      const nextEndIdx = nextStartIdx + itemsPerPage;
+      const nextItems = products.slice(nextStartIdx, nextEndIdx);
+      const nextImageUrls = nextItems
+        .map(p => p.FILEPATH || p.thFilePath || p.filePath)
+        .filter(Boolean);
+      
+      // 비동기로 프리로드 (성능 영향 최소화)
+      if (nextImageUrls.length > 0) {
+        const timer = setTimeout(() => {
+          preloadImages(nextImageUrls);
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentPage, totalPages, itemsPerPage, products]);
+
+  /**
+   * 페이지 번호 배열 생성 (CUST0020 동일)
+   */
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
+
+  /**
+   * 페이지 변경 핸들러
+   */
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /**
+   * 페이지당 아이템 수 변경
+   */
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
   /**
    * 날짜를 보기 좋은 형식으로 변환
-   * 입력: "2024-03-15" 또는 "20240315" 등 다양한 형식
-   * 출력: "3.15 (금)" 형식
-   * 
-   * @param {string} dateString - 날짜 문자열
-   * @returns {string} 포맷된 날짜 문자열
    */
   const formatShipDate = (dateString) => {
     if (!dateString) return '';
@@ -50,38 +234,25 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
     try {
       let date;
       
-      // 여러 가지 날짜 형식 처리
       if (typeof dateString === 'string') {
-        // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm:ss 형식
         if (dateString.includes('-')) {
           date = new Date(dateString);
-        } 
-        // MM/DD/YYYY 또는 DD/MM/YYYY 형식
-        else if (dateString.includes('/')) {
+        } else if (dateString.includes('/')) {
           date = new Date(dateString);
-        } 
-        // YYYYMMDD 형식 (8자리)
-        else if (dateString.length === 8) {
+        } else if (dateString.length === 8) {
           const year = dateString.substring(0, 4);
           const month = dateString.substring(4, 6);
           const day = dateString.substring(6, 8);
           date = new Date(`${year}-${month}-${day}`);
-        } 
-        // 기타 형식
-        else {
+        } else {
           date = new Date(dateString);
         }
       } else {
         date = new Date(dateString);
       }
       
-      // 날짜 유효성 검사
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid date:', dateString);
-        return dateString; // 원본 문자열 반환
-      }
+      if (isNaN(date.getTime())) return dateString;
       
-      // 날짜 포맷팅
       const month = date.getMonth() + 1;
       const day = date.getDate();
       const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
@@ -89,17 +260,12 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
       
       return `${month}.${day} (${weekday})`;
     } catch (error) {
-      console.warn('Date formatting error:', error, 'for date:', dateString);
-      return dateString; // 에러 시 원본 문자열 반환
+      return dateString;
     }
   };
 
   /**
    * 할인율 계산
-   * 
-   * @param {number} salePrice - 판매가
-   * @param {number} disPrice - 할인가
-   * @returns {number} 할인율 (0-100 사이의 정수)
    */
   const calculateDiscountPercent = (salePrice, disPrice) => {
     if (!salePrice || !disPrice || salePrice <= disPrice) return 0;
@@ -107,134 +273,16 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
   };
 
   /**
-   * 제품 데이터 로드
-   * listType과 selectedCategory에 따라 API 호출
-   */
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // listType에 따라 API 호출
-        if (listType === 'surplus') {
-          // 잉여재고 제품 로드
-          // 선택된 카테고리 정보를 API 파라미터로 전달
-          const params = {
-            itemDivCd: '010'
-          };
-          
-          // 카테고리가 선택된 경우 파라미터 추가
-          if (selectedCategory && selectedCategory.catCd) {
-            // 레벨에 따라 다른 파라미터 추가
-            if (selectedCategory.level === 1) {
-              params.itemGroupLCd = selectedCategory.catCd;
-            } else if (selectedCategory.level === 2) {
-              params.itemGroupMCd = selectedCategory.catCd;
-            } else if (selectedCategory.level === 3) {
-              params.itemGroupSCd = selectedCategory.catCd;
-            }
-          }
-          
-          const data = await productAPI.getDashItems(params.itemDivCd, params.itemGroupLCd, params.itemGroupMCd, params.itemGroupSCd);
-          
-          const processedData = data.map(item => ({
-            ...item,
-            id: item.itemCd || item.id,
-            name: item.itemNm,
-            itemNm: item.itemNm,
-            unitNm: item.unitNm,
-            disPrice: item.disPrice,
-            salePrice: item.salePrice,
-            shipAvDate: item.shipAvDate,
-            FILEPATH: item.FILEPATH,
-            compNm: item.compNm,
-            itemGroupLCd: item.itemGroupLCd,
-            itemGroupMCd: item.itemGroupMCd,
-            itemGroupSCd: item.itemGroupSCd,
-            category: item.category || '잉여재고',
-            subcategory: item.subcategory || '기타',
-            item: item.item || item.itemNm,
-            isSurplus: true,
-            isEvent: false
-          }));
-          setProducts(processedData);
-          setFilteredProducts(processedData);
-        } else if (listType === 'event') {
-          // 행사품목 제품 로드
-          const params = {
-            itemDivCd: '020'
-          };
-          
-          // 카테고리가 선택된 경우 파라미터 추가
-          if (selectedCategory && selectedCategory.catCd) {
-            if (selectedCategory.level === 1) {
-              params.itemGroupLCd = selectedCategory.catCd;
-            } else if (selectedCategory.level === 2) {
-              params.itemGroupMCd = selectedCategory.catCd;
-            } else if (selectedCategory.level === 3) {
-              params.itemGroupSCd = selectedCategory.catCd;
-            }
-          }
-          
-          const data = await productAPI.getDashItems(params.itemDivCd, params.itemGroupLCd, params.itemGroupMCd, params.itemGroupSCd);
-          
-          const processedData = data.map(item => ({
-            ...item,
-            id: item.itemCd || item.id,
-            name: item.itemNm,
-            itemNm: item.itemNm,
-            unitNm: item.unitNm,
-            disPrice: item.disPrice,
-            salePrice: item.salePrice,
-            shipAvDate: item.shipAvDate,
-            FILEPATH: item.FILEPATH,
-            compNm: item.compNm,
-            itemGroupLCd: item.itemGroupLCd,
-            itemGroupMCd: item.itemGroupMCd,
-            itemGroupSCd: item.itemGroupSCd,
-            category: item.category || '행사품목',
-            subcategory: item.subcategory || '기타',
-            item: item.item || item.itemNm,
-            isSurplus: false,
-            isEvent: true
-          }));
-          setProducts(processedData);
-          setFilteredProducts(processedData);
-        } else {
-          // 기본값: products.json 파일 사용
-          const response = await fetch('/data/products.json');
-          if (!response.ok) {
-            throw new Error('제품 데이터를 불러올 수 없습니다.');
-          }
-          const data = await response.json();
-          setProducts(data.products);
-          setFilteredProducts(data.products);
-        }
-      } catch (error) {
-        console.error('제품 데이터 로드 실패:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, [listType, selectedCategory]); // selectedCategory 의존성 추가
-
-  /**
    * 상품 개수를 부모 컴포넌트에 전달
    */
   useEffect(() => {
     if (onProductCountUpdate) {
-      onProductCountUpdate(filteredProducts.length);
+      onProductCountUpdate(products.length);
     }
-  }, [filteredProducts, onProductCountUpdate]);
+  }, [products.length, onProductCountUpdate]);
 
   /**
    * 제품 상세보기 모달 열기
-   * 
-   * @param {Object} product - 선택된 제품 정보
    */
   const handleProductView = (product) => {
     setSelectedProduct(product);
@@ -250,17 +298,14 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
   };
 
   /**
-   * 가격을 천단위 구분 형식으로 변환
-   * 
-   * @param {number} price - 가격
-   * @returns {string} 포맷된 가격 문자열
+   * 가격 포맷
    */
   const formatPrice = (price) => {
     return Number(price || 0).toLocaleString('ko-KR');
   };
 
   // 로딩 중 UI
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="prd_loading">
         <div className="prd_loading_spinner"></div>
@@ -270,19 +315,19 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
   }
 
   // 에러 발생 UI
-  if (error) {
+  if (isError) {
     return (
       <div className="prd_error">
         <Package size={48} />
         <h3>데이터를 불러올 수 없습니다</h3>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()}>다시 시도</button>
+        <p>{error?.message || '알 수 없는 오류가 발생했습니다.'}</p>
+        <button onClick={() => refetch()}>다시 시도</button>
       </div>
     );
   }
 
   // 제품이 없는 경우 UI
-  if (filteredProducts.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="prd_empty">
         <Package size={48} />
@@ -300,11 +345,40 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
   // 메인 UI 렌더링
   return (
     <div className="prd_container">
+      {/* 상단 정보 바 - CUST0020 동일 */}
+      <div className="prd_info_bar">
+        <div className="prd_count_info">
+          전체 {products.length.toLocaleString()}건 중 {products.length > 0 ? (startIndex + 1).toLocaleString() : 0}-{endIndex.toLocaleString()}건 표시
+        </div>
+        <div className="prd_page_size">
+          <label htmlFor="prd_items_per_page">페이지당 표시:</label>
+          <select 
+            id="prd_items_per_page"
+            value={itemsPerPage} 
+            onChange={handleItemsPerPageChange}
+          >
+            <option value={10}>10개</option>
+            <option value={30}>30개</option>
+            <option value={50}>50개</option>
+            <option value={80}>80개</option>
+            <option value={100}>100개</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* 백그라운드 fetching 표시 */}
+      {isFetching && !isLoading && (
+        <div className="prd_fetching_indicator">
+          <RefreshCw size={16} className="prd_spinning" />
+          <span>업데이트 중...</span>
+        </div>
+      )}
+      
       {/* 제품 그리드 */}
       <div className="prd_grid">
-        {filteredProducts.map((product) => (
+        {currentItems.map((product) => (
           <div 
-            key={product.id} 
+            key={product.id || product.itemCd} 
             className="prd_card"
             onClick={() => handleProductView(product)}
           >
@@ -323,16 +397,17 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             {/* 제품 이미지 */}
             <div className="prd_image_wrapper">
               {product.FILEPATH ? (
-                // 이미지가 있는 경우
-                <ImageWithFallback
+                <OptimizedImage
                   src={product.FILEPATH}
+                  thumbnailSrc={product.THFILEPATH || product.thFilePath}
                   alt={product.itemNm}
                   className="prd_image"
                   width={200}
                   height={200}
+                  objectFit="contain"
+                  rootMargin="200px"
                 />
               ) : (
-                // 이미지가 없는 경우 기본 아이콘 표시
                 <div className="prd_image prd_no_image">
                   <CiImageOff size={48} color="#ccc" />
                 </div>
@@ -343,7 +418,7 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                 <button 
                   className="prd_overlay_view_btn"
                   onClick={(e) => {
-                    e.stopPropagation(); // 부모 요소 클릭 이벤트 방지
+                    e.stopPropagation();
                     handleProductView(product);
                   }}
                 >
@@ -355,30 +430,24 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
             
             {/* 제품 정보 */}
             <div className="prd_info">
-              {/* 제품코드 */}
               {product.itemCd && (
                 <div className="prd_code">{product.itemCd}</div>
               )}
               
-              {/* 제품명 */}
               <h3 className="prd_name">{product.itemNm}</h3>
               
               <div className="prd_price_container">
-                {/* 출하일 정보 */}
                 {product.shipAvDate && (
                   <div className="prd_delivery_badge">
                     🚛 {formatShipDate(product.shipAvDate)} 출하가능
                   </div>
                 )}
                 
-                {/* 회사명 */}
                 {product.compNm && (
                   <div className="prd_company_badge">{product.compNm}</div>
                 )}
                 
-                {/* 가격 표시 */}
                 <div className="prd_price_row">
-                  {/* disPrice와 salePrice가 모두 있고 다른 경우 */}
                   {product.disPrice && product.salePrice && product.disPrice !== product.salePrice && product.disPrice > 0 ? (
                     <>
                       <span className="prd_current_price">
@@ -387,7 +456,6 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
                       <span className="prd_original_price">{formatPrice(product.salePrice)} 원</span>
                     </>
                   ) : (
-                    /* disPrice만 있거나, salePrice만 있거나, 둘이 같은 경우 */
                     <span className="prd_current_price">
                       {formatPrice(product.disPrice || product.salePrice)} 원
                     </span>
@@ -398,6 +466,60 @@ const ProductList = ({ selectedCategory, listType = 'all', onClose, onProductCou
           </div>
         ))}
       </div>
+
+      {/* 페이지네이션 - CUST0020 동일 */}
+      {totalPages > 1 && (
+        <div className="prd_pagination">
+          {/* 맨 처음으로 */}
+          <button 
+            className="prd_page_btn prd_page_nav"
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            <span>처음으로</span>
+          </button>
+          
+          {/* 이전 */}
+          <button 
+            className="prd_page_btn prd_page_nav"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={16} />
+            <span>이전</span>
+          </button>
+          
+          {/* 페이지 번호들 */}
+          {getPageNumbers().map(page => (
+            <button
+              key={page}
+              className={`prd_page_btn ${currentPage === page ? 'prd_page_active' : ''}`}
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
+          
+          {/* 다음 */}
+          <button 
+            className="prd_page_btn prd_page_nav"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <span>다음</span>
+            <ChevronRight size={16} />
+          </button>
+          
+          {/* 맨 끝으로 */}
+          <button 
+            className="prd_page_btn prd_page_nav"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            <span>끝으로</span>
+          </button>
+        </div>
+      )}
 
       {/* 견적 요청 모달 */}
       <QuoteModal 

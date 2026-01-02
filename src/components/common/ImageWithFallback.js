@@ -7,6 +7,7 @@
  * 3. 로딩 중 스피너 표시
  * 4. 부드러운 페이드인 애니메이션
  * 5. API URL 자동 처리
+ * 6. 전역 이미지 캐시 - 이미 로드된 이미지는 즉시 표시
  * 
  * Props:
  * - src: 이미지 URL
@@ -24,6 +25,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CiImageOff } from 'react-icons/ci';
 import './ImageWithFallback.css';
 
+// 전역 이미지 캐시 - 이미 로드된 이미지 URL 저장
+const loadedImageCache = new Set();
+
 const ImageWithFallback = ({ 
   src, 
   alt = "상품 이미지", 
@@ -36,8 +40,32 @@ const ImageWithFallback = ({
   disableLazy = false,
   ...props 
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(disableLazy); // disableLazy가 true면 바로 로드
+  /**
+   * 이미지 경로 정리 및 API URL 추가
+   */
+  const getCleanImageSrc = (imageSrc) => {
+    if (!imageSrc) return null;
+    
+    // 이미 완전한 URL인 경우
+    if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
+      return imageSrc;
+    }
+    
+    // 상대 경로인 경우 API 서버 기본 URL 추가
+    if (imageSrc.startsWith('/')) {
+      return `${process.env.REACT_APP_API_URL}${imageSrc}`;
+    }
+    
+    return `${process.env.REACT_APP_API_URL}/${imageSrc}`;
+  };
+
+  const cleanSrc = getCleanImageSrc(src);
+  
+  // 이미 캐시에 있는 이미지인지 확인
+  const isAlreadyCached = cleanSrc && loadedImageCache.has(cleanSrc);
+  
+  const [isLoaded, setIsLoaded] = useState(isAlreadyCached);
+  const [isInView, setIsInView] = useState(disableLazy || isAlreadyCached);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef(null);
 
@@ -45,7 +73,8 @@ const ImageWithFallback = ({
    * Intersection Observer로 뷰포트 진입 감지
    */
   useEffect(() => {
-    if (disableLazy) {
+    // 이미 캐시된 이미지면 Observer 불필요
+    if (disableLazy || isAlreadyCached) {
       setIsInView(true);
       return;
     }
@@ -75,7 +104,7 @@ const ImageWithFallback = ({
         observer.unobserve(currentRef);
       }
     };
-  }, [threshold, rootMargin, disableLazy]);
+  }, [threshold, rootMargin, disableLazy, isAlreadyCached]);
 
   /**
    * 이미지 로드 완료 핸들러
@@ -83,6 +112,10 @@ const ImageWithFallback = ({
   const handleLoad = () => {
     setIsLoaded(true);
     setHasError(false);
+    // 캐시에 추가
+    if (cleanSrc) {
+      loadedImageCache.add(cleanSrc);
+    }
   };
 
   /**
@@ -92,27 +125,6 @@ const ImageWithFallback = ({
     setHasError(true);
     setIsLoaded(true);
   };
-
-  /**
-   * 이미지 경로 정리 및 API URL 추가
-   */
-  const getCleanImageSrc = (imageSrc) => {
-    if (!imageSrc) return null;
-    
-    // 이미 완전한 URL인 경우
-    if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
-      return imageSrc;
-    }
-    
-    // 상대 경로인 경우 API 서버 기본 URL 추가
-    if (imageSrc.startsWith('/')) {
-      return `${process.env.REACT_APP_API_URL}${imageSrc}`;
-    }
-    
-    return `${process.env.REACT_APP_API_URL}/${imageSrc}`;
-  };
-
-  const cleanSrc = getCleanImageSrc(src);
 
   // 이미지가 없거나 에러인 경우
   if (!cleanSrc || hasError) {
@@ -135,8 +147,8 @@ const ImageWithFallback = ({
       style={{ width, height, ...style }}
       {...props}
     >
-      {/* 로딩 플레이스홀더 */}
-      {!isLoaded && (
+      {/* 로딩 플레이스홀더 - 캐시된 이미지는 표시 안함 */}
+      {!isLoaded && !isAlreadyCached && (
         <div className="lazy-image-loading">
           <div className="lazy-image-spinner-small"></div>
         </div>
@@ -147,7 +159,7 @@ const ImageWithFallback = ({
         <img
           src={cleanSrc}
           alt={alt}
-          className={`lazy-image-img ${isLoaded ? 'loaded' : ''}`}
+          className={`lazy-image-img ${isLoaded || isAlreadyCached ? 'loaded' : ''}`}
           onLoad={handleLoad}
           onError={handleError}
           loading="lazy"

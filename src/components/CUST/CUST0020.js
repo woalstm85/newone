@@ -24,7 +24,7 @@ import { toast } from 'react-toastify';
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
 import ProductInfoModal from '../common/ProductInfoModal';
-import LazyImage from '../common/LazyImage';
+import LazyImage, { preloadImage } from '../common/LazyImage';
 import MySpinner from '../common/MySpinner';
 import './CUST0020.css';
 
@@ -269,6 +269,29 @@ function CUST0020() {
       endIndex: Math.min(endIdx, gridData.length)
     };
   }, [gridData, currentPage, itemsPerPage]);
+
+  /**
+   * 다음 페이지 이미지 프리로드 - 페이지 전환 속도 최적화
+   */
+  useEffect(() => {
+    if (currentPage < totalPages && gridData.length > 0) {
+      const nextStartIdx = currentPage * itemsPerPage;
+      const nextEndIdx = nextStartIdx + itemsPerPage;
+      const nextItems = gridData.slice(nextStartIdx, nextEndIdx);
+      
+      // 다음 페이지 이미지 백그라운드 프리로드
+      const timer = setTimeout(() => {
+        nextItems.forEach(item => {
+          const imgSrc = item.thFilePath || item.filePath;
+          if (imgSrc) {
+            preloadImage(imgSrc);
+          }
+        });
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, totalPages, itemsPerPage, gridData]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);

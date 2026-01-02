@@ -1,18 +1,66 @@
 /**
- * LazyImage.js - 지연 로딩 이미지 컴포넌트
+ * LazyImage.js - 지연 로딩 이미지 컴포넌트 (최적화 버전)
  * 
  * 주요 기능:
  * 1. Intersection Observer를 사용한 지연 로딩
- * 2. 로딩 중 플레이스홀더 표시
- * 3. 이미지 로드 실패 시 에러 처리
- * 4. 부드러운 페이드인 애니메이션
+ * 2. 전역 이미지 캐시 - 이미 로드된 이미지 즉시 표시
+ * 3. 로딩 중 플레이스홀더 표시
+ * 4. 이미지 로드 실패 시 에러 처리
+ * 5. 부드러운 페이드인 애니메이션
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { CiImageOff } from 'react-icons/ci';
 import './LazyImage.css';
 
-const LazyImage = ({ 
+// 전역 이미지 캐시 (다른 컴포넌트와 공유)
+const imageCache = new Set();
+
+/**
+ * 이미지 URL 정리 및 API URL 추가
+ */
+const getCleanImageSrc = (imageSrc) => {
+  if (!imageSrc) return null;
+  
+  if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
+    return imageSrc;
+  }
+  
+  const baseUrl = process.env.REACT_APP_API_URL || '';
+  if (imageSrc.startsWith('/')) {
+    return `${baseUrl}${imageSrc}`;
+  }
+  
+  return `${baseUrl}/${imageSrc}`;
+};
+
+/**
+ * 캐시 상태 확인 (외부 사용)
+ */
+export const isImageCached = (src) => {
+  const cleanSrc = getCleanImageSrc(src);
+  return cleanSrc && imageCache.has(cleanSrc);
+};
+
+/**
+ * 이미지 프리로드 (외부 사용)
+ */
+export const preloadImage = (src) => {
+  const cleanSrc = getCleanImageSrc(src);
+  if (!cleanSrc || imageCache.has(cleanSrc)) return Promise.resolve();
+  
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.add(cleanSrc);
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = cleanSrc;
+  });
+};
+
+const LazyImage = memo(({ 
   src, 
   alt = '', 
   className = '', 
@@ -20,15 +68,24 @@ const LazyImage = ({
   errorClassName = '',
   onClick,
   style = {},
-  threshold = 0.1,  // 이미지가 10% 보이면 로드 시작
-  rootMargin = '100px'  // 뷰포트 100px 전에 미리 로드
+  threshold = 0.1,
+  rootMargin = '150px'  // 더 일찍 로드
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
+  const cleanSrc = getCleanImageSrc(src);
+  const isCached = cleanSrc && imageCache.has(cleanSrc);
+  
+  const [isLoaded, setIsLoaded] = useState(isCached);
+  const [isInView, setIsInView] = useState(isCached);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef(null);
 
   useEffect(() => {
+    if (isCached) {
+      setIsInView(true);
+      setIsLoaded(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -38,10 +95,7 @@ const LazyImage = ({
           }
         });
       },
-      {
-        threshold,
-        rootMargin
-      }
+      { threshold, rootMargin }
     );
 
     const currentRef = imgRef.current;
@@ -54,11 +108,14 @@ const LazyImage = ({
         observer.unobserve(currentRef);
       }
     };
-  }, [threshold, rootMargin]);
+  }, [threshold, rootMargin, isCached]);
 
   const handleLoad = () => {
     setIsLoaded(true);
     setHasError(false);
+    if (cleanSrc) {
+      imageCache.add(cleanSrc);
+    }
   };
 
   const handleError = () => {
@@ -67,7 +124,7 @@ const LazyImage = ({
   };
 
   // 이미지가 없거나 에러인 경우
-  if (!src || hasError) {
+  if (!cleanSrc || hasError) {
     return (
       <div 
         ref={imgRef}
@@ -86,26 +143,29 @@ const LazyImage = ({
       style={style}
       onClick={onClick}
     >
-      {/* 로딩 플레이스홀더 */}
-      {!isLoaded && (
+      {/* 로딩 플레이스홀더 - 캐시된 이미지는 표시 안함 */}
+      {!isLoaded && !isCached && (
         <div className={`lazy-image-placeholder ${placeholderClassName}`}>
           <div className="lazy-image-spinner"></div>
         </div>
       )}
       
-      {/* 실제 이미지 - 뷰포트에 들어왔을 때만 로드 */}
+      {/* 실제 이미지 */}
       {isInView && (
         <img
-          src={src}
+          src={cleanSrc}
           alt={alt}
-          className={`lazy-image ${isLoaded ? 'loaded' : ''}`}
+          className={`lazy-image ${isLoaded || isCached ? 'loaded' : ''}`}
           onLoad={handleLoad}
           onError={handleError}
           loading="lazy"
+          decoding="async"
         />
       )}
     </div>
   );
-};
+});
+
+LazyImage.displayName = 'LazyImage';
 
 export default LazyImage;

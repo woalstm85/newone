@@ -3,13 +3,16 @@
  * 
  * 주요 기능:
  * 1. 전역 상태 관리 Provider 설정 (Auth, Menu, TabState)
- * 2. 라우팅 설정 (React Router v6)
- * 3. 동적 컴포넌트 로딩 (Code Splitting)
- * 4. 전역 알림 설정 (React Toastify)
+ * 2. React Query Provider 설정 (데이터 캐싱)
+ * 3. 라우팅 설정 (React Router v6)
+ * 4. 동적 컴포넌트 로딩 (Code Splitting)
+ * 5. 전역 알림 설정 (React Toastify)
  */
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './context/AuthContext';
 import { MenuProvider } from './context/MenuContext';
 import { TabStateProvider } from './context/TabStateContext';
@@ -166,6 +169,7 @@ const DynamicRouteComponent = () => {
  * App - 루트 애플리케이션 컴포넌트
  * 
  * 전역 Provider 및 라우팅 구조:
+ * - QueryClientProvider: React Query 데이터 캐싱
  * - AuthProvider: 사용자 인증 상태 관리
  * - MenuProvider: 메뉴 상태 관리
  * - TabStateProvider: 탭 상태 관리
@@ -174,50 +178,52 @@ const DynamicRouteComponent = () => {
  */
 function App() {
   return (
-    <AuthProvider>
-      <MenuProvider>
-        <TabStateProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* 로그인 페이지 */}
-              <Route path="/login" element={<Login />} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <MenuProvider>
+          <TabStateProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* 로그인 페이지 */}
+                <Route path="/login" element={<Login />} />
+                
+                {/* 루트 경로는 대시보드로 리다이렉트 */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                
+                {/* 레이아웃이 적용되는 모든 경로 */}
+                <Route path="/*" element={<Layout />}>
+                  <Route path="*" element={
+                    <Suspense fallback={<div>로딩중...</div>}>
+                      <DynamicRouteComponent />
+                    </Suspense>
+                  } />
+                </Route>
+              </Routes>
               
-              {/* 루트 경로는 대시보드로 리다이렉트 */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              
-              {/* 레이아웃이 적용되는 모든 경로 */}
-              <Route path="/*" element={<Layout />}>
-                <Route path="*" element={
-                  <Suspense fallback={<div>로딩중...</div>}>
-                    <DynamicRouteComponent />
-                  </Suspense>
-                } />
-              </Route>
-            </Routes>
-            
-            {/* 전역 Toast 알림 설정 */}
-            <ToastContainer 
-              position="top-center"
-              autoClose={1500}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              toastStyle={{
-                fontSize: '16px',
-                minWidth: '350px',
-                padding: '16px',
-                fontWeight: '500'
-              }}
-            />
-          </BrowserRouter>
-        </TabStateProvider>
-      </MenuProvider>
-    </AuthProvider>
+              {/* 전역 Toast 알림 설정 */}
+              <ToastContainer 
+                position="top-center"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                toastStyle={{
+                  fontSize: '16px',
+                  minWidth: '350px',
+                  padding: '16px',
+                  fontWeight: '500'
+                }}
+              />
+            </BrowserRouter>
+          </TabStateProvider>
+        </MenuProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

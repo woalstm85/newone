@@ -22,7 +22,7 @@ import { CiImageOff } from 'react-icons/ci';
 // 공통 컴포넌트
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
-import LazyImage from '../common/LazyImage';
+import LazyImage, { preloadImage } from '../common/LazyImage';
 import MySpinner from '../common/MySpinner';
 
 // 컨텍스트 및 API
@@ -57,7 +57,8 @@ function CUST0010() {
   const [isModalOpen, setIsModalOpen] = useState(false);         // 일반 알림 모달
   const [modalMessage, setModalMessage] = useState('');          // 알림 모달 메시지
   const [isImageModalOpen, setIsImageModalOpen] = useState(false); // 이미지 확대 보기 모달
-  const [selectedImage, setSelectedImage] = useState({ url: '', title: '', alt: '' }); // 확대할 이미지 정보
+  const [selectedImages, setSelectedImages] = useState([]);      // 확대할 이미지 배열 (갤러리용)
+  const [selectedImageTitle, setSelectedImageTitle] = useState(''); // 이미지 모달 제목
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false); // 입출고 이력 모달
   const [selectedHistoryData, setSelectedHistoryData] = useState(null); // 선택된 이력 데이터
   
@@ -214,10 +215,50 @@ function CUST0010() {
     setCurrentPage(1);
   };
   
-  /** 이미지 클릭 시 확대 모달 열기 */
-  const handleImageClick = (imageUrl, itemName) => {
-    if (imageUrl) {
-      setSelectedImage({ url: imageUrl, alt: `${itemName || ''} 이미지` });
+  /** 
+   * 이미지 클릭 시 확대 모달 열기
+   * - 목록: thFilePath (썸네일) 표시
+   * - 확대: FilePath (원본) + fileData 배열이 있으면 갤러리로 표시
+   */
+  const handleImageClick = (item) => {
+    // 이미지 배열 구성
+    const images = [];
+    
+    // 1. 메인 이미지 (FilePath - 대문자 F 주의)
+    if (item.FilePath) {
+      images.push({
+        url: item.FilePath,
+        alt: `${item.itemNm || ''} 대표 이미지`,
+        title: item.itemNm || ''
+      });
+    }
+    
+    // 2. fileData 배열의 이미지들 추가
+    if (item.fileData && Array.isArray(item.fileData) && item.fileData.length > 0) {
+      item.fileData.forEach((file, index) => {
+        // FilePath와 중복되지 않는 경우만 추가
+        if (file.filePath && file.filePath !== item.FilePath) {
+          images.push({
+            url: file.filePath,
+            alt: `${item.itemNm || ''} 이미지 ${index + 1}`,
+            title: file.realNm || `이미지 ${index + 1}`
+          });
+        }
+      });
+    }
+    
+    // 3. 이미지가 하나도 없으면 thFilePath로 대체
+    if (images.length === 0 && item.thFilePath) {
+      images.push({
+        url: item.thFilePath,
+        alt: `${item.itemNm || ''} 이미지`,
+        title: item.itemNm || ''
+      });
+    }
+    
+    if (images.length > 0) {
+      setSelectedImages(images);
+      setSelectedImageTitle(item.itemNm || '');
       setIsImageModalOpen(true);
     }
   };
@@ -305,6 +346,29 @@ function CUST0010() {
     };
   }, [gridData, currentPage, itemsPerPage]);
 
+  /**
+   * 다음 페이지 이미지 프리로드 - 페이지 전환 속도 최적화
+   */
+  useEffect(() => {
+    if (currentPage < totalPages && gridData.length > 0) {
+      const nextStartIdx = currentPage * itemsPerPage;
+      const nextEndIdx = nextStartIdx + itemsPerPage;
+      const nextItems = gridData.slice(nextStartIdx, nextEndIdx);
+      
+      // 다음 페이지 이미지 백그라운드 프리로드
+      const timer = setTimeout(() => {
+        nextItems.forEach(item => {
+          const imgSrc = item.thFilePath;
+          if (imgSrc) {
+            preloadImage(imgSrc);
+          }
+        });
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, totalPages, itemsPerPage, gridData]);
+
   // ===================================================================
   // 8. 렌더링 함수
   // ===================================================================
@@ -342,11 +406,11 @@ function CUST0010() {
                       className="cust0010-overlay-view-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleImageClick(item.thFilePath, item.itemNm, item.itemCd);
+                        handleImageClick(item);
                       }}
                     >
                       <Eye size={14} />
-                      확대
+                      확대{item.fileData && item.fileData.length > 0 ? ` (${item.fileData.length + (item.FilePath ? 1 : 0)})` : ''}
                     </button>
                   </div>
                 </>
@@ -448,11 +512,11 @@ function CUST0010() {
                       className="cust0010-overlay-view-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleImageClick(item.filePath || item.thFilePath, item.itemNm, item.itemCd);
+                        handleImageClick(item);
                       }}
                     >
                       <Eye size={14} />
-                      확대
+                      확대{item.fileData && item.fileData.length > 0 ? ` (${item.fileData.length + (item.FilePath ? 1 : 0)})` : ''}
                     </button>
                   </div>
                 </>
@@ -609,8 +673,9 @@ function CUST0010() {
                               className="cust0010-table-overlay-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleImageClick(row.thFilePath, row.itemNm, row.itemCd);
+                                handleImageClick(row);
                               }}
+                              title={row.fileData && row.fileData.length > 0 ? `이미지 ${row.fileData.length + (row.FilePath ? 1 : 0)}개` : '확대 보기'}
                             >
                               <Eye size={12} />
                             </button>
@@ -798,8 +863,9 @@ function CUST0010() {
                                 className="cust0010-table-overlay-btn"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleImageClick(row.filePath || row.thFilePath, row.itemNm, row.itemCd);
+                                  handleImageClick(row);
                                 }}
+                                title={row.fileData && row.fileData.length > 0 ? `이미지 ${row.fileData.length + (row.FilePath ? 1 : 0)}개` : '확대 보기'}
                               >
                                 <Eye size={12} />
                               </button>
@@ -1118,7 +1184,12 @@ function CUST0010() {
       {/* 7. 로딩 및 모달 컴포넌트 */}
       {loading && <MySpinner />}
       <Modal isOpen={isModalOpen} title="알림" message={modalMessage} onConfirm={() => setIsModalOpen(false)} />
-      <ImageModal isOpen={isImageModalOpen} onClose={() => setIsImageModalOpen(false)} imageUrl={selectedImage.url} altText={selectedImage.alt} />
+      <ImageModal 
+        isOpen={isImageModalOpen} 
+        onClose={() => setIsImageModalOpen(false)} 
+        images={selectedImages}
+        title={selectedImageTitle}
+      />
       
       {/* 8. 입출고 이력 모달 */}
       {isHistoryModalOpen && selectedHistoryData && (
