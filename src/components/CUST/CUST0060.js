@@ -3,6 +3,7 @@ import { Package, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronDown, Che
 import { CiImageOff } from 'react-icons/ci';
 import Modal from '../common/Modal';
 import ImageModal from '../common/ImageModal';
+import LazyImage from '../common/LazyImage';
 import { useMenu } from '../../context/MenuContext';
 import { useAuth } from '../../context/AuthContext';
 import './CUST0060.css';
@@ -21,13 +22,10 @@ function CUST0060() {
   const [itemName, setItemName] = useState(''); // 추가 검색 옵션
   const [inOutDiv, setInOutDiv] = useState(''); // 입/출고구분
 
-  // 이미지 모달 상태
+  // 이미지 모달 상태 - 갤러리 지원
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState({
-    url: '',
-    title: '',
-    alt: ''
-  });
+  const [selectedImages, setSelectedImages] = useState([]);      // 확대할 이미지 배열 (갤러리용)
+  const [selectedImageTitle, setSelectedImageTitle] = useState(''); // 이미지 모달 제목
 
   // 스와이프 제스처용 ref와 상태
   const searchToggleRef = useRef(null);
@@ -50,14 +48,50 @@ function CUST0060() {
     setSelectedMonth(currentYM);
   }, []);
 
-  // 이미지 클릭 핸들러
-  const handleImageClick = (imageUrl, itemName, itemCd) => {
-    if (imageUrl) {
-      setSelectedImage({
-        url: imageUrl,
-        title: itemName || '품목 이미지',
-        alt: `${itemCd || ''} ${itemName || ''} 품목 이미지`
+  /** 
+   * 이미지 클릭 시 확대 모달 열기
+   * - 목록: thFilePath (썸네일) 표시
+   * - 확대: filePath (원본) + fileData 배열이 있으면 갤러리로 표시
+   */
+  const handleImageClick = (item) => {
+    // 이미지 배열 구성
+    const images = [];
+    
+    // 1. 메인 이미지 (filePath)
+    if (item.filePath) {
+      images.push({
+        url: item.filePath,
+        alt: `${item.itemNm || ''} 대표 이미지`,
+        title: item.itemNm || ''
       });
+    }
+    
+    // 2. fileData 배열의 이미지들 추가
+    if (item.fileData && Array.isArray(item.fileData) && item.fileData.length > 0) {
+      item.fileData.forEach((file, index) => {
+        // filePath와 중복되지 않는 경우만 추가
+        if (file.filePath && file.filePath !== item.filePath) {
+          images.push({
+            url: file.filePath,
+            alt: `${item.itemNm || ''} 이미지 ${index + 1}`,
+            title: file.realNm || `이미지 ${index + 1}`
+          });
+        }
+      });
+    }
+    
+    // 3. 이미지가 하나도 없으면 thFilePath로 대체
+    if (images.length === 0 && item.thFilePath) {
+      images.push({
+        url: item.thFilePath,
+        alt: `${item.itemNm || ''} 이미지`,
+        title: item.itemNm || ''
+      });
+    }
+    
+    if (images.length > 0) {
+      setSelectedImages(images);
+      setSelectedImageTitle(item.itemNm || '');
       setIsImageModalOpen(true);
     }
   };
@@ -294,10 +328,10 @@ function CUST0060() {
             <tr key={`${row.hisId}-${index}`} onClick={() => handleRowClick(row)}>
               <td className="cust0060-center">
                 <div className="cust0060-table-image" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  {row.filePath || row.thFilePath ? (
+                  {row.thFilePath || row.filePath ? (
                     <div className="cust0060-table-image-container">
-                      <img
-                        src={row.filePath || row.thFilePath}
+                      <LazyImage
+                        src={row.thFilePath || row.filePath}
                         alt={row.itemNm}
                         className="cust0060-table-image-item"
                       />
@@ -306,8 +340,9 @@ function CUST0060() {
                           className="cust0060-table-overlay-btn"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleImageClick(row.filePath || row.thFilePath, row.itemNm, row.itemCd);
+                            handleImageClick(row);
                           }}
+                          title={row.fileData && row.fileData.length > 0 ? `이미지 ${row.fileData.length}개` : '확대 보기'}
                         >
                           <Eye size={12} />
                         </button>
@@ -534,18 +569,12 @@ function CUST0060() {
         onConfirm={() => setIsModalOpen(false)}
       />
 
-      {/* 이미지 모달 */}
-      <ImageModal
-        isOpen={isImageModalOpen}
-        onClose={(e) => {
-          e && e.stopPropagation && e.stopPropagation();
-          setIsImageModalOpen(false);
-        }}
-        imageUrl={selectedImage.url}
-        title={selectedImage.title}
-        altText={selectedImage.alt}
-        showControls={true}
-        showDownload={true}
+      {/* 이미지 모달 - 갤러리 지원 */}
+      <ImageModal 
+        isOpen={isImageModalOpen} 
+        onClose={() => setIsImageModalOpen(false)} 
+        images={selectedImages}
+        title={selectedImageTitle}
       />
     </div>
   );
